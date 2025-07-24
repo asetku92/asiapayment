@@ -1,0 +1,408 @@
+buatkan halaman login dan daftar ambil data logo, background, dan image background, jika image background kosong gunakan warna background, ambil juga alamat server dan lalu cocokan saja tampilannya, ada tombol syarat dan persetujuan aplikasi dan ada customer servicenya, login textboxt dgn Id Agen dan Nomor Hp. data id agen dan nomor hp dikirim ke kodular app inventor webstring. ambil dari firebase ini:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASIAPAYMENT Application Settings</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .settings-section {
+            margin-bottom: 30px;
+        }
+        .settings-section h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        input[type="text"], input[type="color"], input[type="url"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .save-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .save-btn:hover {
+            background-color: #27ae60;
+        }
+        .preview-area {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .logo-preview {
+            max-width: 200px;
+            max-height: 100px;
+            margin-bottom: 10px;
+        }
+        .bg-preview {
+            max-width: 100%;
+            max-height: 150px;
+            margin-bottom: 10px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .color-preview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ddd;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        
+        /* Customer Service Section */
+        .customer-service-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .cs-table {
+            margin-top: 15px;
+        }
+        .cs-table th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ASIAPAYMENT Application Settings</h1>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="settings-section">
+            <h2>General Application Settings</h2>
+            <table id="appSettingsTable">
+                <thead>
+                    <tr>
+                        <th width="25%">Setting</th>
+                        <th width="55%">Value</th>
+                        <th width="20%">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="appSettingsBody">
+                    <!-- Table content will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="preview-area">
+            <h3>Application Preview</h3>
+            <div id="logoPreviewContainer">
+                <img id="logoPreview" class="logo-preview" src="" alt="Logo Preview">
+            </div>
+            <div id="bgPreviewContainer" style="display: none;">
+                <img id="bgPreview" class="bg-preview" src="" alt="Background Preview">
+            </div>
+            <div id="appInfoPreview">
+                <h2 id="appNamePreview">Application Name</h2>
+                <p id="appTaglinePreview">Tagline will appear here</p>
+            </div>
+        </div>
+        
+        <!-- Customer Service Settings Section -->
+        <div class="settings-section customer-service-section">
+            <h2>Customer Service Settings</h2>
+            <table class="cs-table">
+                <thead>
+                    <tr>
+                        <th width="25%">Setting</th>
+                        <th width="55%">Value</th>
+                        <th width="20%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>WhatsApp Number</td>
+                        <td>
+                            <input type="text" id="whatsappNumber" placeholder="6281234567890">
+                        </td>
+                        <td>
+                            <button class="save-btn" onclick="saveCustomerServiceSettings()">Save</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Customer Service Email</td>
+                        <td>
+                            <input type="text" id="customerServiceEmail" placeholder="support@asiapayment.com">
+                        </td>
+                        <td>
+                            <button class="save-btn" onclick="saveCustomerServiceSettings()">Save</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const settingsRef = database.ref('ASIAPAYMENT/setting/Lain2');
+        const csSettingsRef = database.ref('ASIAPAYMENT/setting/CustomerService');
+
+        // Application settings keys
+        const appSettingKeys = [
+            "NamaAplikasi",
+            "LogoAplikasi",
+            "TagLine",
+            "WarnaBackground",
+            "ImageBackground",
+            "AlamatServer"
+        ];
+
+        // Function to show status message
+        function showStatus(message, isSuccess) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = isSuccess ? 'status success' : 'status error';
+            
+            // Hide status after 3 seconds
+            setTimeout(() => {
+                statusDiv.className = 'status';
+            }, 3000);
+        }
+
+        // Function to update a setting in Firebase
+        function updateSetting(key, value) {
+            const updates = {};
+            updates[key] = value;
+            
+            settingsRef.update(updates)
+                .then(() => {
+                    showStatus(`Successfully updated ${key}`, true);
+                    updatePreview();
+                })
+                .catch((error) => {
+                    showStatus(`Error updating ${key}: ${error.message}`, false);
+                });
+        }
+
+        // Function to save customer service settings
+        function saveCustomerServiceSettings() {
+            const whatsappNumber = document.getElementById('whatsappNumber').value;
+            const customerServiceEmail = document.getElementById('customerServiceEmail').value;
+            
+            const updates = {
+                whatsappNumber: whatsappNumber,
+                email: customerServiceEmail
+            };
+            
+            csSettingsRef.update(updates)
+                .then(() => {
+                    showStatus('Customer service settings saved successfully', true);
+                })
+                .catch((error) => {
+                    showStatus(`Error saving customer service settings: ${error.message}`, false);
+                });
+        }
+
+        // Function to update the preview section
+        function updatePreview() {
+            settingsRef.once('value').then((snapshot) => {
+                const settings = snapshot.val();
+                
+                // Update logo preview
+                if (settings.LogoAplikasi) {
+                    document.getElementById('logoPreview').src = settings.LogoAplikasi;
+                    document.getElementById('logoPreviewContainer').style.display = 'block';
+                } else {
+                    document.getElementById('logoPreviewContainer').style.display = 'none';
+                }
+                
+                // Update background preview
+                if (settings.ImageBackground) {
+                    document.getElementById('bgPreview').src = settings.ImageBackground;
+                    document.getElementById('bgPreviewContainer').style.display = 'block';
+                } else {
+                    document.getElementById('bgPreviewContainer').style.display = 'none';
+                }
+                
+                // Update app name and tagline
+                if (settings.NamaAplikasi) {
+                    document.getElementById('appNamePreview').textContent = settings.NamaAplikasi;
+                }
+                if (settings.TagLine) {
+                    document.getElementById('appTaglinePreview').textContent = settings.TagLine;
+                }
+                
+                // Update background color
+                if (settings.WarnaBackground) {
+                    document.body.style.backgroundColor = settings.WarnaBackground;
+                }
+            });
+        }
+
+        // Function to create input field based on setting type
+        function createInputField(key, value) {
+            const container = document.createElement('div');
+            
+            if (key === 'WarnaBackground') {
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.id = `input_${key}`;
+                colorInput.value = value || '#ffffff';
+                container.appendChild(colorInput);
+                
+                const colorPreview = document.createElement('span');
+                colorPreview.className = 'color-preview';
+                colorPreview.style.backgroundColor = value || '#ffffff';
+                container.appendChild(colorPreview);
+                
+                // Update preview when color changes
+                colorInput.addEventListener('input', () => {
+                    colorPreview.style.backgroundColor = colorInput.value;
+                });
+            } 
+            else if (key === 'LogoAplikasi' || key === 'ImageBackground') {
+                const urlInput = document.createElement('input');
+                urlInput.type = 'url';
+                urlInput.id = `input_${key}`;
+                urlInput.value = value || '';
+                urlInput.placeholder = 'Enter image URL';
+                container.appendChild(urlInput);
+            }
+            else {
+                const textInput = document.createElement('input');
+                textInput.type = 'text';
+                textInput.id = `input_${key}`;
+                textInput.value = value || '';
+                container.appendChild(textInput);
+            }
+            
+            return container;
+        }
+
+        // Function to create the settings table
+        function createSettingsTable() {
+            const tableBody = document.getElementById('appSettingsBody');
+            
+            settingsRef.once('value').then((snapshot) => {
+                const settings = snapshot.val() || {};
+                
+                appSettingKeys.forEach(key => {
+                    const row = document.createElement('tr');
+                    
+                    // Setting name cell
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = key;
+                    row.appendChild(nameCell);
+                    
+                    // Value input cell
+                    const valueCell = document.createElement('td');
+                    const inputContainer = createInputField(key, settings[key]);
+                    valueCell.appendChild(inputContainer);
+                    row.appendChild(valueCell);
+                    
+                    // Save button cell
+                    const actionCell = document.createElement('td');
+                    const saveButton = document.createElement('button');
+                    saveButton.className = 'save-btn';
+                    saveButton.textContent = 'Save';
+                    saveButton.onclick = () => {
+                        const newValue = document.getElementById(`input_${key}`).value;
+                        updateSetting(key, newValue);
+                    };
+                    actionCell.appendChild(saveButton);
+                    row.appendChild(actionCell);
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Update preview with initial values
+                updatePreview();
+            }).catch((error) => {
+                showStatus(`Error loading settings: ${error.message}`, false);
+            });
+        }
+
+        // Load customer service settings
+        function loadCustomerServiceSettings() {
+            csSettingsRef.once('value').then((snapshot) => {
+                const csSettings = snapshot.val() || {};
+                document.getElementById('whatsappNumber').value = csSettings.whatsappNumber || '';
+                document.getElementById('customerServiceEmail').value = csSettings.email || '';
+            });
+        }
+
+        // Initialize the page when loaded
+        window.onload = function() {
+            createSettingsTable();
+            loadCustomerServiceSettings();
+        };
+    </script>
+</body>
+</html>
