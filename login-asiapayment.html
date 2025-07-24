@@ -356,26 +356,36 @@
             });
         }
         
-        // Function to handle WebView communication for Kodular
-        function sendToKodular(action, data) {
+        // Function to send data to Kodular WebString
+        function sendToWebString(data) {
             try {
-                // For Android WebView
-                if (window.Android) {
-                    window.Android.postMessage(JSON.stringify({action, data}));
-                } 
-                // For iOS WebView
-                else if (window.webkit && window.webkit.messageHandlers) {
-                    window.webkit.messageHandlers.iosListener.postMessage({action, data});
+                // Create a form element
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = webServiceUrl;
+                
+                // Add data as hidden inputs
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = data[key];
+                        form.appendChild(input);
+                    }
                 }
-                // Fallback for testing in browser
-                else {
-                    console.log("Kodular action:", action, data);
-                    return Promise.resolve({success: true, message: "Test mode - action processed"});
-                }
-                return Promise.resolve();
+                
+                // Append form to body and submit
+                document.body.appendChild(form);
+                form.submit();
+                
+                // Clean up
+                setTimeout(() => document.body.removeChild(form), 1000);
+                
+                return true;
             } catch (error) {
-                console.error("Error sending to Kodular:", error);
-                return Promise.reject(error);
+                console.error("Error sending to WebString:", error);
+                return false;
             }
         }
         
@@ -392,18 +402,16 @@
             showStatus('Memproses login...', true);
             
             const loginData = {
+                action: 'login',
                 agentId: agentId,
                 phoneNumber: phoneNumber
             };
             
-            sendToKodular('login', loginData)
-                .then(() => {
-                    // Response will be handled by Kodular WebView
-                })
-                .catch(error => {
-                    showStatus('Terjadi kesalahan saat login', false);
-                    console.error("Login error:", error);
-                });
+            if (sendToWebString(loginData)) {
+                // Success message will be shown after redirect
+            } else {
+                showStatus('Gagal mengirim data login', false);
+            }
         }
         
         // Register function
@@ -421,20 +429,18 @@
             showStatus('Memproses pendaftaran...', true);
             
             const registerData = {
+                action: 'register',
                 name: name,
                 address: address,
                 phoneNumber: phoneNumber,
-                referral: referral || null
+                referral: referral || ''
             };
             
-            sendToKodular('register', registerData)
-                .then(() => {
-                    // Response will be handled by Kodular WebView
-                })
-                .catch(error => {
-                    showStatus('Terjadi kesalahan saat pendaftaran', false);
-                    console.error("Register error:", error);
-                });
+            if (sendToWebString(registerData)) {
+                // Success message will be shown after redirect
+            } else {
+                showStatus('Gagal mengirim data pendaftaran', false);
+            }
         }
         
         // Initialize the page when loaded
