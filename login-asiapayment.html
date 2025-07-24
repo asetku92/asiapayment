@@ -40,6 +40,9 @@
             padding: 20px;
             text-align: center;
             background-color: rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .logo {
@@ -52,7 +55,7 @@
             font-size: 1.5rem;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 5px;
+            margin-top: 10px;
         }
         
         .form-container {
@@ -321,12 +324,15 @@
                 
             }).catch((error) => {
                 console.error("Error loading settings:", error);
+                showStatus('Gagal memuat pengaturan aplikasi', false);
             });
             
             // Load terms and conditions URL
             csSettingsRef.child('termsConditionsUrl').once('value').then((snapshot) => {
                 termsConditionsUrl = snapshot.val() || "#";
                 document.getElementById('termsLink').href = termsConditionsUrl;
+            }).catch((error) => {
+                console.error("Error loading terms URL:", error);
             });
         }
         
@@ -342,32 +348,35 @@
                 } else if (email) {
                     window.location.href = `mailto:${email}`;
                 } else {
-                    showStatus('Customer service information not available', false);
+                    showStatus('Informasi customer service tidak tersedia', false);
                 }
+            }).catch((error) => {
+                console.error("Error contacting CS:", error);
+                showStatus('Gagal menghubungi customer service', false);
             });
         }
         
-        // Function to send data to Kodular App Inventor web service
-        function sendToKodular(endpoint, data) {
-            if (!webServiceUrl) {
-                showStatus('Server address not configured', false);
-                return Promise.reject('Server address not configured');
+        // Function to handle WebView communication for Kodular
+        function sendToKodular(action, data) {
+            try {
+                // For Android WebView
+                if (window.Android) {
+                    window.Android.postMessage(JSON.stringify({action, data}));
+                } 
+                // For iOS WebView
+                else if (window.webkit && window.webkit.messageHandlers) {
+                    window.webkit.messageHandlers.iosListener.postMessage({action, data});
+                }
+                // Fallback for testing in browser
+                else {
+                    console.log("Kodular action:", action, data);
+                    return Promise.resolve({success: true, message: "Test mode - action processed"});
+                }
+                return Promise.resolve();
+            } catch (error) {
+                console.error("Error sending to Kodular:", error);
+                return Promise.reject(error);
             }
-            
-            const url = `${webServiceUrl}/${endpoint}`;
-            
-            return fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .catch(error => {
-                console.error('Error:', error);
-                throw error;
-            });
         }
         
         // Login function
@@ -380,22 +389,20 @@
                 return;
             }
             
+            showStatus('Memproses login...', true);
+            
             const loginData = {
                 agentId: agentId,
                 phoneNumber: phoneNumber
             };
             
             sendToKodular('login', loginData)
-                .then(response => {
-                    if (response.success) {
-                        showStatus('Login berhasil!', true);
-                        // Redirect or do something after successful login
-                    } else {
-                        showStatus(response.message || 'Login gagal', false);
-                    }
+                .then(() => {
+                    // Response will be handled by Kodular WebView
                 })
                 .catch(error => {
                     showStatus('Terjadi kesalahan saat login', false);
+                    console.error("Login error:", error);
                 });
         }
         
@@ -411,6 +418,8 @@
                 return;
             }
             
+            showStatus('Memproses pendaftaran...', true);
+            
             const registerData = {
                 name: name,
                 address: address,
@@ -419,21 +428,12 @@
             };
             
             sendToKodular('register', registerData)
-                .then(response => {
-                    if (response.success) {
-                        showStatus('Pendaftaran berhasil!', true);
-                        switchTab('login');
-                        // Clear form
-                        document.getElementById('regName').value = '';
-                        document.getElementById('regAddress').value = '';
-                        document.getElementById('regPhoneNumber').value = '';
-                        document.getElementById('regReferral').value = '';
-                    } else {
-                        showStatus(response.message || 'Pendaftaran gagal', false);
-                    }
+                .then(() => {
+                    // Response will be handled by Kodular WebView
                 })
                 .catch(error => {
                     showStatus('Terjadi kesalahan saat pendaftaran', false);
+                    console.error("Register error:", error);
                 });
         }
         
@@ -446,6 +446,9 @@
                 if (termsConditionsUrl === "#") {
                     e.preventDefault();
                     showStatus('URL Syarat dan Ketentuan belum tersedia', false);
+                } else {
+                    // Open in new tab for WebView
+                    window.open(termsConditionsUrl, '_blank');
                 }
             });
         };
