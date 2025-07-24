@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASIAPAYMENT - Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-color 0.5s;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin: 20px;
+        }
+        
+        .logo-container {
+            padding: 20px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .logo {
+            max-width: 150px;
+            max-height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        .app-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .form-container {
+            padding: 20px 30px;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #7f8c8d;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .form {
+            display: none;
+        }
+        
+        .form.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .footer {
+            padding: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .cs-button {
+            margin-top: 15px;
+            background-color: #2ecc71;
+        }
+        
+        .cs-button:hover {
+            background-color: #27ae60;
+        }
+        
+        .status-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        
+        .optional {
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img id="appLogo" class="logo" src="" alt="App Logo">
+            <div id="appName" class="app-name">ASIAPAYMENT</div>
+        </div>
+        
+        <div class="form-container">
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('login')">Login</div>
+                <div class="tab" onclick="switchTab('register')">Daftar</div>
+            </div>
+            
+            <div id="status" class="status-message"></div>
+            
+            <form id="loginForm" class="form active">
+                <div class="input-group">
+                    <label for="agentId">ID Agen</label>
+                    <input type="text" id="agentId" placeholder="Masukkan ID Agen Anda">
+                </div>
+                <div class="input-group">
+                    <label for="phoneNumber">Nomor HP</label>
+                    <input type="text" id="phoneNumber" placeholder="Masukkan Nomor HP Anda">
+                </div>
+                <button type="button" class="btn" onclick="login()">Login</button>
+                <button type="button" class="btn cs-button" onclick="contactCustomerService()">
+                    <i class="fas fa-headset"></i> Customer Service
+                </button>
+            </form>
+            
+            <form id="registerForm" class="form">
+                <div class="input-group">
+                    <label for="regName">Nama Lengkap</label>
+                    <input type="text" id="regName" placeholder="Masukkan Nama Lengkap Anda">
+                </div>
+                <div class="input-group">
+                    <label for="regAddress">Alamat</label>
+                    <input type="text" id="regAddress" placeholder="Masukkan Alamat Anda">
+                </div>
+                <div class="input-group">
+                    <label for="regPhoneNumber">Nomor HP</label>
+                    <input type="text" id="regPhoneNumber" placeholder="Masukkan Nomor HP Anda">
+                </div>
+                <div class="input-group">
+                    <label for="regReferral">Kode Referral <span class="optional">(opsional)</span></label>
+                    <input type="text" id="regReferral" placeholder="Masukkan Kode Referral (jika ada)">
+                </div>
+                <button type="button" class="btn" onclick="register()">Daftar</button>
+                <button type="button" class="btn cs-button" onclick="contactCustomerService()">
+                    <i class="fas fa-headset"></i> Customer Service
+                </button>
+            </form>
+        </div>
+        
+        <div class="footer">
+            Dengan melanjutkan, Anda menyetujui <a href="#" id="termsLink">Syarat dan Ketentuan</a> kami
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const settingsRef = database.ref('ASIAPAYMENT/setting/Lain2');
+        const csSettingsRef = database.ref('ASIAPAYMENT/setting/CustomerService');
+        
+        // Web service URL for Kodular App Inventor
+        let webServiceUrl = "";
+        let termsConditionsUrl = "";
+        
+        // Function to show status message
+        function showStatus(message, isSuccess) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = isSuccess ? 'status-message success' : 'status-message error';
+            
+            // Hide status after 3 seconds
+            if (isSuccess) {
+                setTimeout(() => {
+                    statusDiv.className = 'status-message';
+                }, 3000);
+            }
+        }
+        
+        // Function to switch between login and register tabs
+        function switchTab(tabName) {
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('registerForm').classList.remove('active');
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            
+            if (tabName === 'login') {
+                document.getElementById('loginForm').classList.add('active');
+                document.querySelectorAll('.tab')[0].classList.add('active');
+            } else {
+                document.getElementById('registerForm').classList.add('active');
+                document.querySelectorAll('.tab')[1].classList.add('active');
+            }
+        }
+        
+        // Function to load application settings from Firebase
+        function loadAppSettings() {
+            settingsRef.once('value').then((snapshot) => {
+                const settings = snapshot.val() || {};
+                
+                // Update logo
+                if (settings.LogoAplikasi) {
+                    document.getElementById('appLogo').src = settings.LogoAplikasi;
+                    document.getElementById('appLogo').style.display = 'block';
+                } else {
+                    document.getElementById('appLogo').style.display = 'none';
+                }
+                
+                // Update app name (tagline dihilangkan sesuai permintaan)
+                if (settings.NamaAplikasi) {
+                    document.getElementById('appName').textContent = settings.NamaAplikasi;
+                }
+                
+                // Update background
+                if (settings.ImageBackground) {
+                    document.body.style.backgroundImage = `url('${settings.ImageBackground}')`;
+                    document.body.style.backgroundColor = 'transparent';
+                } else if (settings.WarnaBackground) {
+                    document.body.style.backgroundColor = settings.WarnaBackground;
+                    document.body.style.backgroundImage = 'none';
+                }
+                
+                // Save web service URL
+                if (settings.AlamatServer) {
+                    webServiceUrl = settings.AlamatServer;
+                }
+                
+            }).catch((error) => {
+                console.error("Error loading settings:", error);
+            });
+            
+            // Load terms and conditions URL
+            csSettingsRef.child('termsConditionsUrl').once('value').then((snapshot) => {
+                termsConditionsUrl = snapshot.val() || "#";
+                document.getElementById('termsLink').href = termsConditionsUrl;
+            });
+        }
+        
+        // Function to contact customer service
+        function contactCustomerService() {
+            csSettingsRef.once('value').then((snapshot) => {
+                const csSettings = snapshot.val() || {};
+                const whatsappNumber = csSettings.whatsappNumber || '';
+                const email = csSettings.email || '';
+                
+                if (whatsappNumber) {
+                    window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+                } else if (email) {
+                    window.location.href = `mailto:${email}`;
+                } else {
+                    showStatus('Customer service information not available', false);
+                }
+            });
+        }
+        
+        // Function to send data to Kodular App Inventor web service
+        function sendToKodular(endpoint, data) {
+            if (!webServiceUrl) {
+                showStatus('Server address not configured', false);
+                return Promise.reject('Server address not configured');
+            }
+            
+            const url = `${webServiceUrl}/${endpoint}`;
+            
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .catch(error => {
+                console.error('Error:', error);
+                throw error;
+            });
+        }
+        
+        // Login function
+        function login() {
+            const agentId = document.getElementById('agentId').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            
+            if (!agentId || !phoneNumber) {
+                showStatus('ID Agen dan Nomor HP harus diisi', false);
+                return;
+            }
+            
+            const loginData = {
+                agentId: agentId,
+                phoneNumber: phoneNumber
+            };
+            
+            sendToKodular('login', loginData)
+                .then(response => {
+                    if (response.success) {
+                        showStatus('Login berhasil!', true);
+                        // Redirect or do something after successful login
+                    } else {
+                        showStatus(response.message || 'Login gagal', false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('Terjadi kesalahan saat login', false);
+                });
+        }
+        
+        // Register function
+        function register() {
+            const name = document.getElementById('regName').value.trim();
+            const address = document.getElementById('regAddress').value.trim();
+            const phoneNumber = document.getElementById('regPhoneNumber').value.trim();
+            const referral = document.getElementById('regReferral').value.trim();
+            
+            if (!name || !address || !phoneNumber) {
+                showStatus('Nama, Alamat dan Nomor HP harus diisi', false);
+                return;
+            }
+            
+            const registerData = {
+                name: name,
+                address: address,
+                phoneNumber: phoneNumber,
+                referral: referral || null
+            };
+            
+            sendToKodular('register', registerData)
+                .then(response => {
+                    if (response.success) {
+                        showStatus('Pendaftaran berhasil!', true);
+                        switchTab('login');
+                        // Clear form
+                        document.getElementById('regName').value = '';
+                        document.getElementById('regAddress').value = '';
+                        document.getElementById('regPhoneNumber').value = '';
+                        document.getElementById('regReferral').value = '';
+                    } else {
+                        showStatus(response.message || 'Pendaftaran gagal', false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('Terjadi kesalahan saat pendaftaran', false);
+                });
+        }
+        
+        // Initialize the page when loaded
+        window.onload = function() {
+            loadAppSettings();
+            
+            // Set terms and conditions link behavior
+            document.getElementById('termsLink').addEventListener('click', function(e) {
+                if (termsConditionsUrl === "#") {
+                    e.preventDefault();
+                    showStatus('URL Syarat dan Ketentuan belum tersedia', false);
+                }
+            });
+        };
+    </script>
+</body>
+</html>
