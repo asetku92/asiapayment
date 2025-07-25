@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASIA PAYMENT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --button-color: #2ecc71;
+            --secondary-button: #95a5a6;
+            --tagline-color: #7f8c8d;
+            --text-color: #333333;
+            --gradient-color-1: #3498db;
+            --gradient-color-2: #9b59b6;
+            --gradient-color-3: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, 
+                          var(--gradient-color-1), 
+                          var(--gradient-color-2), 
+                          var(--gradient-color-3));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .saldo {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            margin: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .saldo h2 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--tagline-color);
+        }
+
+        .saldo p {
+            margin: 5px 0 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .topup-btn {
+            display: block;
+            background: var(--button-color);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            margin: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            width: calc(100% - 30px);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .topup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0,0,0,0.3);
+        }
+
+        .menu-section {
+            padding: 15px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            text-align: center;
+            padding: 15px 5px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            background: white;
+        }
+
+        .menu-item i {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .menu-item img {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .menu-item span {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .banner-container {
+            height: 150px;
+            background: rgba(255,255,255,0.8);
+            margin: 15px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .banner-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .banner-slide.active {
+            opacity: 1;
+        }
+
+        .banner-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .banner-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .banner-indicator.active {
+            background: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background: white;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .footer-item {
+            text-align: center;
+            color: var(--tagline-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .footer-item.active {
+            color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+
+        .footer-item i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        .footer-item span {
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--tagline-color);
+        }
+
+        .category-title {
+            padding: 0 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .category-title i {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header" id="appHeader">
+            ASIA PAYMENT
+        </div>
+        
+        <div class="saldo">
+            <h2>Total Saldo</h2>
+            <p id="saldoAmount">Rp0</p>
+        </div>
+        
+        <button class="topup-btn" id="topupButton" onclick="handleAction('topup')">
+            <i class="fas fa-plus-circle"></i> TOPUP
+        </button>
+        
+        <!-- Banner Slideshow -->
+        <div class="banner-container" id="bannerContainer">
+            <div class="loading">Memuat banner...</div>
+        </div>
+        
+        <div class="banner-indicators" id="bannerIndicators"></div>
+        
+        <!-- Menu Section -->
+        <div class="menu-section">
+            <div id="dynamicMenuContainer">
+                <div class="loading">Memuat menu...</div>
+            </div>
+        </div>
+        
+        <!-- Footer Navigation -->
+        <div class="footer-nav">
+            <div class="footer-item active" onclick="handleAction('home')">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="footer-item" onclick="handleAction('emoney')">
+                <i class="fas fa-wallet"></i>
+                <span>E-Money</span>
+            </div>
+            <div class="footer-item" onclick="handleAction('user')">
+                <i class="fas fa-user"></i>
+                <span>User</span>
+            </div>
+            <div class="footer-item" onclick="handleAction('driver')">
+                <i class="fas fa-motorcycle"></i>
+                <span>Driver</span>
+            </div>
+            <div class="footer-item" onclick="handleAction('games')">
+                <i class="fas fa-gamepad"></i>
+                <span>Games</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com/"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const menuDinamisRef = database.ref('ASIAPAYMENT/setting/MenuDinamis');
+        const colorsRef = database.ref('ASIAPAYMENT/setting/Colors');
+        
+        // Variabel untuk banner slideshow
+        let currentSlide = 0;
+        let slideInterval;
+        let banners = [];
+        
+        // Fungsi untuk mengkonversi integer 32-bit ke hex color (6 digit)
+        function intToHexColor(colorInt) {
+            if (colorInt === undefined || colorInt === null) return null;
+            
+            // Handle nilai negatif
+            let normalizedInt = colorInt;
+            if (colorInt < 0) {
+                normalizedInt = colorInt + 4294967296; // Tambahkan 2^32 untuk nilai negatif
+            }
+            
+            // Konversi ke hex dan ambil 6 digit terakhir (RRGGBB)
+            let hex = normalizedInt.toString(16).toUpperCase();
+            hex = hex.slice(-6); // Ambil 6 digit terakhir
+            
+            // Pastikan panjangnya 6 digit
+            while (hex.length < 6) {
+                hex = '0' + hex;
+            }
+            
+            return '#' + hex;
+        }
+
+        // Fungsi untuk menerapkan warna ke elemen HTML
+        function applyColors(colors) {
+            // Konversi semua warna integer ke hex
+            const primaryColor = intToHexColor(colors.appNameColor) || '#3498db';
+            const buttonColor = intToHexColor(colors.buttonColor) || '#2ecc71';
+            const secondaryButton = intToHexColor(colors.secondaryButton) || '#95a5a6';
+            const taglineColor = intToHexColor(colors.taglineColor) || '#7f8c8d';
+            const textColor = intToHexColor(colors.textColor) || '#333333';
+            
+            // Warna gradient (gunakan warna yang ada atau default)
+            const gradientColor1 = intToHexColor(colors.gradientColor1) || '#3498db';
+            const gradientColor2 = intToHexColor(colors.gradientColor2) || '#9b59b6';
+            const gradientColor3 = intToHexColor(colors.gradientColor3) || '#e74c3c';
+
+            // Update CSS variables
+            document.documentElement.style.setProperty('--primary-color', primaryColor);
+            document.documentElement.style.setProperty('--button-color', buttonColor);
+            document.documentElement.style.setProperty('--secondary-button', secondaryButton);
+            document.documentElement.style.setProperty('--tagline-color', taglineColor);
+            document.documentElement.style.setProperty('--text-color', textColor);
+            document.documentElement.style.setProperty('--gradient-color-1', gradientColor1);
+            document.documentElement.style.setProperty('--gradient-color-2', gradientColor2);
+            document.documentElement.style.setProperty('--gradient-color-3', gradientColor3);
+
+            // Log untuk debugging
+            console.log('Warna yang diterapkan:', {
+                primaryColor,
+                buttonColor,
+                secondaryButton,
+                taglineColor,
+                textColor,
+                gradientColor1,
+                gradientColor2,
+                gradientColor3,
+                colorsFromFirebase: colors
+            });
+        }
+
+        // Fungsi untuk mengirim data ke App Inventor
+        function handleAction(action, data = {}) {
+            const payload = {
+                action: action,
+                data: data
+            };
+            
+            if (typeof window.appinventor !== 'undefined' && 
+                typeof window.appinventor.webstring !== 'undefined') {
+                window.appinventor.webstring.receiveString(JSON.stringify(payload));
+            } else {
+                console.log("App Inventor bridge not available. Action:", payload);
+                alert(`Action: ${action}\nData: ${JSON.stringify(data)}`);
+            }
+        }
+        
+        // Inisialisasi banner slideshow
+        function initSlideshow() {
+            const container = document.getElementById('bannerContainer');
+            const indicators = document.getElementById('bannerIndicators');
+            
+            // Kosongkan container dan indicators
+            container.innerHTML = '';
+            indicators.innerHTML = '';
+            
+            if (!banners || banners.length === 0) {
+                container.innerHTML = '<div class="loading">Tidak ada banner yang tersedia</div>';
+                return;
+            }
+            
+            // Buat slide untuk setiap banner
+            banners.forEach((banner, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'banner-slide';
+                if (index === 0) slide.classList.add('active');
+                
+                const img = document.createElement('img');
+                img.src = banner.imageUrl;
+                img.onerror = () => {
+                    img.src = 'https://via.placeholder.com/500x150?text=Banner+Error';
+                };
+                
+                // Jika ada target URL, buat bisa diklik
+                if (banner.targetUrl) {
+                    slide.style.cursor = 'pointer';
+                    slide.onclick = () => {
+                        handleAction('banner_click', {
+                            url: banner.targetUrl,
+                            index: index
+                        });
+                    };
+                }
+                
+                slide.appendChild(img);
+                container.appendChild(slide);
+                
+                // Buat indicator
+                const indicator = document.createElement('div');
+                indicator.className = 'banner-indicator';
+                if (index === 0) indicator.classList.add('active');
+                indicator.onclick = () => {
+                    goToSlide(index);
+                };
+                indicators.appendChild(indicator);
+            });
+            
+            // Mulai slideshow
+            startSlideshow();
+        }
+        
+        // Mulai slideshow dengan interval
+        function startSlideshow() {
+            clearInterval(slideInterval);
+            
+            // Gunakan interval default 5 detik
+            const interval = 5000;
+            
+            slideInterval = setInterval(() => {
+                nextSlide();
+            }, interval);
+        }
+        
+        // Slide berikutnya
+        function nextSlide() {
+            const slides = document.querySelectorAll('.banner-slide');
+            const indicators = document.querySelectorAll('.banner-indicator');
+            
+            if (!slides || slides.length === 0) return;
+            
+            slides[currentSlide].classList.remove('active');
+            indicators[currentSlide].classList.remove('active');
+            
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            slides[currentSlide].classList.add('active');
+            indicators[currentSlide].classList.add('active');
+        }
+        
+        // Pergi ke slide tertentu
+        function goToSlide(index) {
+            const slides = document.querySelectorAll('.banner-slide');
+            const indicators = document.querySelectorAll('.banner-indicator');
+            
+            if (!slides || slides.length === 0 || index < 0 || index >= slides.length) return;
+            
+            slides[currentSlide].classList.remove('active');
+            indicators[currentSlide].classList.remove('active');
+            
+            currentSlide = index;
+            
+            slides[currentSlide].classList.add('active');
+            indicators[currentSlide].classList.add('active');
+            
+            // Reset interval
+            startSlideshow();
+        }
+        
+        // Render menu dinamis dari Firebase
+        function renderDynamicMenu(categories, menuItems) {
+            const container = document.getElementById('dynamicMenuContainer');
+            container.innerHTML = '';
+            
+            if (!categories || Object.keys(categories).length === 0) {
+                container.innerHTML = '<div class="loading">Tidak ada menu yang tersedia</div>';
+                return;
+            }
+            
+            // Render setiap kategori
+            Object.keys(categories).forEach(category => {
+                const categoryIcon = categories[category] || 'fa-folder';
+                const items = menuItems[category] || {};
+                
+                // Buat container untuk kategori
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'menu-category';
+                
+                // Buat judul kategori
+                const categoryTitle = document.createElement('h3');
+                categoryTitle.className = 'category-title';
+                
+                // Tentukan apakah icon berupa Font Awesome atau gambar
+                if (categoryIcon.startsWith('http')) {
+                    categoryTitle.innerHTML = `
+                        <img src="${categoryIcon}" style="width:20px;height:20px;object-fit:contain;" 
+                             onerror="this.replaceWith('<i class=\"fas fa-folder\"></i>')">
+                        ${category}
+                    `;
+                } else {
+                    categoryTitle.innerHTML = `
+                        <i class="fas ${categoryIcon}"></i>
+                        ${category}
+                    `;
+                }
+                
+                categoryDiv.appendChild(categoryTitle);
+                
+                // Buat grid untuk menu items
+                const menuGrid = document.createElement('div');
+                menuGrid.className = 'menu-grid';
+                
+                // Tambahkan item-menu jika ada
+                if (Object.keys(items).length > 0) {
+                    Object.keys(items).forEach(itemName => {
+                        const itemIcon = items[itemName];
+                        const menuItem = document.createElement('button');
+                        menuItem.className = 'menu-item';
+                        menuItem.onclick = () => {
+                            handleAction('menu_click', {
+                                category: category,
+                                item: itemName
+                                // Tidak mengirim URL icon, hanya nama produk
+                            });
+                        };
+                        
+                        // Tentukan apakah icon berupa Font Awesome atau gambar
+                        if (itemIcon.startsWith('http')) {
+                            menuItem.innerHTML = `
+                                <img src="${itemIcon}" onerror="this.replaceWith('<i class=\"fas fa-link\"></i>')">
+                                <span>${itemName}</span>
+                            `;
+                        } else if (itemIcon.startsWith('fa-')) {
+                            menuItem.innerHTML = `
+                                <i class="fas ${itemIcon}"></i>
+                                <span>${itemName}</span>
+                            `;
+                        } else {
+                            menuItem.innerHTML = `
+                                <i class="fas fa-link"></i>
+                                <span>${itemName}</span>
+                            `;
+                        }
+                        
+                        menuGrid.appendChild(menuItem);
+                    });
+                } else {
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.style.gridColumn = '1/-1';
+                    emptyMessage.style.textAlign = 'center';
+                    emptyMessage.style.color = 'var(--tagline-color)';
+                    emptyMessage.textContent = 'Belum ada item menu';
+                    menuGrid.appendChild(emptyMessage);
+                }
+                
+                categoryDiv.appendChild(menuGrid);
+                container.appendChild(categoryDiv);
+            });
+        }
+        
+        // Load data dari Firebase saat halaman dimuat
+        window.onload = function() {
+            // Load warna terlebih dahulu
+            colorsRef.once('value')
+                .then((snapshot) => {
+                    const colors = snapshot.val() || {};
+                    console.log('Warna dari Firebase:', colors);
+                    applyColors(colors);
+                })
+                .catch((error) => {
+                    console.error("Error loading colors:", error);
+                });
+            
+            // Load banner settings
+            menuDinamisRef.child('banners').once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data && data.banners) {
+                        banners = data.banners;
+                        initSlideshow();
+                    } else {
+                        document.getElementById('bannerContainer').innerHTML = 
+                            '<div class="loading">Tidak ada banner yang tersedia</div>';
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error loading banners:", error);
+                    document.getElementById('bannerContainer').innerHTML = 
+                        '<div class="loading">Gagal memuat banner</div>';
+                });
+            
+            // Load menu dinamis
+            menuDinamisRef.once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val() || {};
+                    
+                    // Ambil data kategori dan menu
+                    const categories = data.categories || {};
+                    const menuItems = data.menu || {};
+                    
+                    renderDynamicMenu(categories, menuItems);
+                })
+                .catch((error) => {
+                    console.error("Error loading menu:", error);
+                    document.getElementById('dynamicMenuContainer').innerHTML = 
+                        '<div class="loading">Gagal memuat menu</div>';
+                });
+        };
+    </script>
+</body>
+</html>
