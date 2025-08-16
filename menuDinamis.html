@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASIA PAYMENT - Console Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #0055ff;
+            --secondary: #00aaff;
+            --accent: #ff5500;
+            --light: #ffffff;
+            --dark: #212121;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border: #dee2e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(30deg);
+            animation: shine 4s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo img {
+            height: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .auth-info button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .auth-info button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 700px;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--light-gray);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: var(--dark);
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+            color: var(--gray);
+        }
+        
+        .nav-item:hover {
+            background: rgba(0, 85, 255, 0.05);
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .nav-item.active i {
+            color: var(--primary);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 30px;
+            background: white;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section-title h2 {
+            font-size: 22px;
+            color: var(--dark);
+            font-weight: 700;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0044cc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #bd2130;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th {
+            background: var(--light-gray);
+            text-align: left;
+            padding: 15px;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: rgba(0, 85, 255, 0.03);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-provider {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success);
+        }
+        
+        .badge-static {
+            background: rgba(0, 85, 255, 0.15);
+            color: var(--primary);
+        }
+        
+        .badge-postpaid {
+            background: rgba(255, 133, 0, 0.15);
+            color: #ff8500;
+        }
+        
+        .badge-dynamic {
+            background: rgba(108, 117, 125, 0.15);
+            color: var(--gray);
+        }
+        
+        .badge-voucher {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--danger);
+        }
+        
+        .badge-url {
+            background: rgba(128, 0, 128, 0.15);
+            color: purple;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        
+        .btn-edit {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .btn-edit:hover {
+            background: rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(220, 53, 69, 0.2);
+        }
+        
+        .login-container {
+            max-width: 500px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-logo img {
+            height: 70px;
+            margin-bottom: 15px;
+        }
+        
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .login-form input {
+            margin-bottom: 20px;
+        }
+        
+        .login-form button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--gray);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            background: var(--light-gray);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 85, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .type-info {
+            background: rgba(0, 85, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .type-info i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+        
+        .firebase-info {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection" class="login-container">
+            <div class="login-logo">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="ASIA PAYMENT">
+                <div class="login-title">ASIA PAYMENT Console</div>
+                <div class="login-subtitle">Administrator Dashboard</div>
+            </div>
+            
+            <div id="loginAlert" class="alert alert-danger hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="alertMessage">Username atau password salah</span>
+            </div>
+            
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Masukkan username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Masukkan password">
+                </div>
+                
+                <button class="btn btn-primary" onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Masuk
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Application (hidden until login) -->
+        <div id="appSection" class="hidden">
+            <header>
+                <div class="logo">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo">
+                    <h1>ASIA PAYMENT Console</h1>
+                </div>
+                
+                <div class="auth-info">
+                    <span id="userName">Administrator</span>
+                    <button onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+            
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="nav-item active" onclick="showSection('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="showSection('categories')">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Kategori Menu</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="showSection('menus')">
+                        <i class="fas fa-list"></i>
+                        <span>Menu Dinamis</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="showSection('settings')">
+                        <i class="fas fa-cog"></i>
+                        <span>Pengaturan</span>
+                    </div>
+                </div>
+                
+                <div class="content">
+                    <!-- Dashboard Section -->
+                    <div id="dashboardSection" class="section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                            <button class="btn btn-primary" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Selamat datang di Console Admin</h3>
+                            <p>Gunakan panel ini untuk mengelola menu dinamis aplikasi ASIA PAYMENT.</p>
+                            
+                            <div class="firebase-info">
+                                <i class="fas fa-database"></i>
+                                <strong>Firebase Realtime Database</strong><br>
+                                URL: <span id="firebaseUrl">https://steady-fin-368617-default-rtdb.firebaseio.com/</span>
+                            </div>
+                            
+                            <div class="stats-container">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="card">
+                                            <h4><i class="fas fa-layer-group"></i> Kategori Menu</h4>
+                                            <p id="categoryCount">Memuat...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-col">
+                                        <div class="card">
+                                            <h4><i class="fas fa-list"></i> Total Menu</h4>
+                                            <p id="menuCount">Memuat...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Panduan Penggunaan</h3>
+                            <ul style="padding-left: 25px; margin-top: 15px;">
+                                <li>Gunakan menu <strong>Kategori Menu</strong> untuk menambahkan atau mengelola kategori</li>
+                                <li>Di menu <strong>Menu Dinamis</strong> Anda dapat menambahkan berbagai jenis menu</li>
+                                <li>Setiap menu memiliki urutan untuk mengatur tampilan di aplikasi</li>
+                                <li>Semua perubahan akan langsung disimpan ke Firebase Realtime Database</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Categories Section -->
+                    <div id="categoriesSection" class="section hidden">
+                        <div class="section-title">
+                            <h2><i class="fas fa-layer-group"></i> Kategori Menu</h2>
+                            <button class="btn btn-primary" onclick="openCategoryForm()">
+                                <i class="fas fa-plus"></i> Tambah Kategori
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="table-container">
+                                <table id="categoriesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Kategori</th>
+                                            <th>Urutan</th>
+                                            <th>Jumlah Menu</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="categoriesTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Menus Section -->
+                    <div id="menusSection" class="section hidden">
+                        <div class="section-title">
+                            <h2><i class="fas fa-list"></i> Menu Dinamis</h2>
+                            <button class="btn btn-primary" onclick="openMenuForm()">
+                                <i class="fas fa-plus"></i> Tambah Menu
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="form-group">
+                                <label>Pilih Kategori</label>
+                                <select id="categoryFilter" class="form-control" onchange="filterMenus()">
+                                    <option value="">Semua Kategori</option>
+                                    <!-- Options will be populated -->
+                                </select>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table id="menusTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Menu</th>
+                                            <th>Kategori</th>
+                                            <th>Tipe</th>
+                                            <th>Urutan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="menusTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Section -->
+                    <div id="settingsSection" class="section hidden">
+                        <div class="section-title">
+                            <h2><i class="fas fa-cog"></i> Pengaturan</h2>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Akun Admin</h3>
+                            
+                            <div class="form-group">
+                                <label for="adminUsername">Username</label>
+                                <input type="text" id="adminUsername" class="form-control" value="admin">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="adminPassword">Password</label>
+                                <input type="password" id="adminPassword" class="form-control" placeholder="Masukkan password baru">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="adminPasswordConfirm">Konfirmasi Password</label>
+                                <input type="password" id="adminPasswordConfirm" class="form-control" placeholder="Konfirmasi password baru">
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="updateAdminAccount()">
+                                <i class="fas fa-save"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div id="loadingIndicator" class="loading hidden">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>
+                <p>© 2023 ASIA PAYMENT - Console Admin. Hak Cipta Dilindungi.</p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- Category Form Modal -->
+    <div id="categoryModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">Tambah Kategori Baru</h3>
+                <button class="close" onclick="closeCategoryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="categoryName">Nama Kategori</label>
+                    <input type="text" id="categoryName" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="categoryOrder">Urutan</label>
+                    <input type="number" id="categoryOrder" class="form-control" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeCategoryModal()">Batal</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menu Form Modal -->
+    <div id="menuModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="menuModalTitle">Tambah Menu Baru</h3>
+                <button class="close" onclick="closeMenuModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="menuCategory">Kategori</label>
+                            <select id="menuCategory" class="form-control">
+                                <!-- Options will be populated -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="menuName">Nama Menu</label>
+                            <input type="text" id="menuName" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuIconUrl">URL Icon Menu</label>
+                    <input type="text" id="menuIconUrl" class="form-control" placeholder="https://example.com/icon.png">
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuOrder">Urutan Menu</label>
+                    <input type="number" id="menuOrder" class="form-control" min="1" value="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuType">Tipe Menu</label>
+                    <select id="menuType" class="form-control">
+                        <option value="PROVIDER_BASED">PROVIDER_BASED (Pulsa Reguler)</option>
+                        <option value="STATIC_PRODUCT">STATIC_PRODUCT (Token PLN)</option>
+                        <option value="POSTPAID_BILL">POSTPAID_BILL (Tagihan PLN)</option>
+                        <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER (Digipos)</option>
+                        <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION (Voucher)</option>
+                        <option value="URL">URL (Tautan Eksternal)</option>
+                    </select>
+                    <div class="type-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="typeDescription">PROVIDER_BASED: Menu dengan pilihan provider dan nominal</span>
+                    </div>
+                </div>
+                
+                <!-- Form khusus untuk URL -->
+                <div id="urlForm" class="hidden">
+                    <div class="form-group">
+                        <label for="urlTarget">URL Tujuan</label>
+                        <input type="text" id="urlTarget" class="form-control" placeholder="https://example.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeMenuModal()">Batal</button>
+                <button class="btn btn-primary" onclick="saveMenu()">Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfLp7f8kqjI6jYp1y1XJkY7Z1bLd8l4hQ",
+            authDomain: "steady-fin-368617.firebaseapp.com",
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+            projectId: "steady-fin-368617",
+            storageBucket: "steady-fin-368617.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdefghijklmnopqrstuv"
+        };
+        
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const dbRef = database.ref('AsiaPayment/MenuDinamis');
+        
+        // Data structure
+        let appData = {
+            categories: {},
+            menus: {},
+            admin: {
+                username: "admin",
+                password: "password123" // In a real app, this should be hashed
+            }
+        };
+        
+        // Type descriptions
+        const typeDescriptions = {
+            PROVIDER_BASED: "Menu dengan pilihan provider dan nominal (contoh: Pulsa Reguler)",
+            STATIC_PRODUCT: "Menu produk statis tanpa input (contoh: Token PLN)",
+            POSTPAID_BILL: "Menu untuk pembayaran tagihan (contoh: Tagihan PLN)",
+            DYNAMIC_PRODUCT_BASED_ON_NUMBER: "Menu produk dinamis berdasarkan nomor (contoh: Digipos)",
+            VOUCHER_AKTIVATION: "Menu aktivasi voucher (contoh: Voucher Kosong)",
+            URL: "Menu yang mengarahkan ke URL eksternal"
+        };
+        
+        // Current state
+        let currentCategory = null;
+        let currentMenu = null;
+        let editingMode = false;
+        
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const appSection = document.getElementById('appSection');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const alertMessage = document.getElementById('alertMessage');
+        const loginAlert = document.getElementById('loginAlert');
+        const typeDescription = document.getElementById('typeDescription');
+        const urlForm = document.getElementById('urlForm');
+        const menuTypeSelect = document.getElementById('menuType');
+        const firebaseUrl = document.getElementById('firebaseUrl');
+        
+        // Initialize application
+        function initApp() {
+            firebaseUrl.textContent = firebaseConfig.databaseURL;
+            
+            // Try to load from localStorage
+            const savedData = localStorage.getItem('appData');
+            if (savedData) {
+                appData = JSON.parse(savedData);
+            }
+            
+            // Setup event listeners
+            menuTypeSelect.addEventListener('change', updateTypeDescription);
+        }
+        
+        // Update type description
+        function updateTypeDescription() {
+            const selectedType = menuTypeSelect.value;
+            typeDescription.textContent = typeDescriptions[selectedType];
+            
+            // Show/hide URL form
+            if (selectedType === "URL") {
+                urlForm.classList.remove('hidden');
+            } else {
+                urlForm.classList.add('hidden');
+            }
+        }
+        
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === appData.admin.username && password === appData.admin.password) {
+                // Successful login
+                loginSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                document.getElementById('userName').textContent = username;
+                loadData();
+            } else {
+                // Failed login
+                alertMessage.textContent = "Username atau password salah";
+                loginAlert.classList.remove('hidden');
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            appSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            loginAlert.classList.add('hidden');
+        }
+        
+        // Show loading indicator
+        function showLoading() {
+            loadingIndicator.classList.remove('hidden');
+        }
+        
+        // Hide loading indicator
+        function hideLoading() {
+            loadingIndicator.classList.add('hidden');
+        }
+        
+        // Load data from Firebase
+        function loadData() {
+            showLoading();
+            
+            // Load categories from Firebase
+            dbRef.child('category').once('value').then(snapshot => {
+                appData.categories = snapshot.val() || {};
+                
+                // Load menus from Firebase
+                dbRef.child('Menu').once('value').then(snapshot => {
+                    appData.menus = snapshot.val() || {};
+                    
+                    // Update UI
+                    updateDashboardStats();
+                    renderCategories();
+                    renderMenus();
+                    hideLoading();
+                }).catch(error => {
+                    console.error("Error loading menus:", error);
+                    hideLoading();
+                });
+            }).catch(error => {
+                console.error("Error loading categories:", error);
+                hideLoading();
+            });
+        }
+        
+        // Refresh data
+        function refreshData() {
+            showLoading();
+            loadData();
+        }
+        
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            const categoryCount = Object.keys(appData.categories).length;
+            let menuCount = 0;
+            
+            for (const category in appData.menus) {
+                menuCount += Object.keys(appData.menus[category]).length;
+            }
+            
+            document.getElementById('categoryCount').textContent = `${categoryCount} Kategori`;
+            document.getElementById('menuCount').textContent = `${menuCount} Menu`;
+        }
+        
+        // Show section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section and mark nav item as active
+            document.getElementById(`${sectionId}Section`).classList.remove('hidden');
+            document.querySelector(`.nav-item[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        }
+        
+        // Render categories table
+        function renderCategories() {
+            const tbody = document.getElementById('categoriesTableBody');
+            tbody.innerHTML = '';
+            
+            // Populate category filter in menus section
+            const categoryFilter = document.getElementById('categoryFilter');
+            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>';
+            
+            // Populate category select in menu form
+            const menuCategory = document.getElementById('menuCategory');
+            menuCategory.innerHTML = '';
+            
+            for (const categoryName in appData.categories) {
+                const category = appData.categories[categoryName];
+                const menuCount = appData.menus[categoryName] ? Object.keys(appData.menus[categoryName]).length : 0;
+                
+                // Add to table
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${categoryName}</td>
+                    <td>${category.Urutan || 1}</td>
+                    <td>${menuCount}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-edit btn-sm" onclick="editCategory('${categoryName}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-delete btn-sm" onclick="deleteCategory('${categoryName}')">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+                
+                // Add to filter dropdown
+                const filterOption = document.createElement('option');
+                filterOption.value = categoryName;
+                filterOption.textContent = categoryName;
+                categoryFilter.appendChild(filterOption.cloneNode(true));
+                
+                // Add to menu form dropdown
+                const formOption = document.createElement('option');
+                formOption.value = categoryName;
+                formOption.textContent = categoryName;
+                menuCategory.appendChild(formOption);
+            }
+        }
+        
+        // Open category form
+        function openCategoryForm(categoryName = null) {
+            const modalTitle = document.getElementById('categoryModalTitle');
+            const modal = document.getElementById('categoryModal');
+            
+            if (categoryName) {
+                // Edit mode
+                modalTitle.textContent = "Edit Kategori";
+                const category = appData.categories[categoryName];
+                document.getElementById('categoryName').value = categoryName;
+                document.getElementById('categoryOrder').value = category.Urutan || 1;
+                currentCategory = categoryName;
+                editingMode = true;
+            } else {
+                // Add mode
+                modalTitle.textContent = "Tambah Kategori Baru";
+                document.getElementById('categoryName').value = "";
+                document.getElementById('categoryOrder').value = "";
+                currentCategory = null;
+                editingMode = false;
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        // Close category modal
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.add('hidden');
+        }
+        
+        // Save category to Firebase
+        function saveCategory() {
+            const name = document.getElementById('categoryName').value;
+            const order = parseInt(document.getElementById('categoryOrder').value) || 1;
+            
+            if (!name) {
+                alert("Nama kategori harus diisi!");
+                return;
+            }
+            
+            showLoading();
+            
+            if (editingMode) {
+                // If name changed, update references
+                if (name !== currentCategory) {
+                    // Update category name in all places
+                    if (appData.categories[currentCategory]) {
+                        appData.categories[name] = {...appData.categories[currentCategory]};
+                        delete appData.categories[currentCategory];
+                    }
+                    
+                    // Update menus
+                    if (appData.menus[currentCategory]) {
+                        appData.menus[name] = {...appData.menus[currentCategory]};
+                        delete appData.menus[currentCategory];
+                    }
+                }
+                
+                // Update order
+                appData.categories[name].Urutan = order;
+            } else {
+                // Add new category
+                appData.categories[name] = { Urutan: order };
+                
+                // Initialize empty menu object for this category
+                if (!appData.menus[name]) {
+                    appData.menus[name] = {};
+                }
+            }
+            
+            // Save to Firebase
+            dbRef.child('category').set(appData.categories)
+                .then(() => {
+                    return dbRef.child('Menu').set(appData.menus);
+                })
+                .then(() => {
+                    // Save and refresh
+                    saveAppData();
+                    renderCategories();
+                    closeCategoryModal();
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error("Error saving category:", error);
+                    alert("Gagal menyimpan kategori ke Firebase");
+                    hideLoading();
+                });
+        }
+        
+        // Edit category
+        function editCategory(categoryName) {
+            openCategoryForm(categoryName);
+        }
+        
+        // Delete category from Firebase
+        function deleteCategory(categoryName) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus kategori "${categoryName}"? Semua menu dalam kategori ini juga akan dihapus.`)) {
+                return;
+            }
+            
+            showLoading();
+            
+            delete appData.categories[categoryName];
+            delete appData.menus[categoryName];
+            
+            // Save to Firebase
+            dbRef.child('category').set(appData.categories)
+                .then(() => {
+                    return dbRef.child('Menu').set(appData.menus);
+                })
+                .then(() => {
+                    saveAppData();
+                    renderCategories();
+                    renderMenus();
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error("Error deleting category:", error);
+                    alert("Gagal menghapus kategori dari Firebase");
+                    hideLoading();
+                });
+        }
+        
+        // Render menus table
+        function renderMenus() {
+            const tbody = document.getElementById('menusTableBody');
+            tbody.innerHTML = '';
+            
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            for (const categoryName in appData.menus) {
+                if (categoryFilter && categoryFilter !== categoryName) continue;
+                
+                const menus = appData.menus[categoryName];
+                
+                for (const menuName in menus) {
+                    const menu = menus[menuName];
+                    
+                    // Get badge class based on type
+                    let badgeClass = '';
+                    switch(menu.type) {
+                        case 'PROVIDER_BASED': badgeClass = 'badge-provider'; break;
+                        case 'STATIC_PRODUCT': badgeClass = 'badge-static'; break;
+                        case 'POSTPAID_BILL': badgeClass = 'badge-postpaid'; break;
+                        case 'DYNAMIC_PRODUCT_BASED_ON_NUMBER': badgeClass = 'badge-dynamic'; break;
+                        case 'VOUCHER_AKTIVATION': badgeClass = 'badge-voucher'; break;
+                        case 'URL': badgeClass = 'badge-url'; break;
+                        default: badgeClass = 'badge';
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${menuName}</td>
+                        <td>${categoryName}</td>
+                        <td><span class="badge ${badgeClass}">${menu.type}</span></td>
+                        <td>${menu.order || 1}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-edit btn-sm" onclick="editMenu('${categoryName}', '${menuName}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-delete btn-sm" onclick="deleteMenu('${categoryName}', '${menuName}')">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            }
+        }
+        
+        // Filter menus by category
+        function filterMenus() {
+            renderMenus();
+        }
+        
+        // Open menu form
+        function openMenuForm(categoryName = null, menuName = null) {
+            const modalTitle = document.getElementById('menuModalTitle');
+            const modal = document.getElementById('menuModal');
+            
+            // Reset form
+            document.getElementById('menuName').value = "";
+            document.getElementById('menuIconUrl').value = "";
+            document.getElementById('menuOrder').value = "1";
+            document.getElementById('urlTarget').value = "";
+            urlForm.classList.add('hidden');
+            
+            if (categoryName && menuName) {
+                // Edit mode
+                modalTitle.textContent = "Edit Menu";
+                const menu = appData.menus[categoryName][menuName];
+                
+                document.getElementById('menuCategory').value = categoryName;
+                document.getElementById('menuName').value = menuName;
+                document.getElementById('menuIconUrl').value = menu.iconUrl || "";
+                document.getElementById('menuOrder').value = menu.order || 1;
+                document.getElementById('menuType').value = menu.type;
+                
+                // Populate URL if type is URL
+                if (menu.type === "URL") {
+                    document.getElementById('urlTarget').value = menu.url || "";
+                    urlForm.classList.remove('hidden');
+                }
+                
+                currentCategory = categoryName;
+                currentMenu = menuName;
+                editingMode = true;
+            } else {
+                // Add mode
+                modalTitle.textContent = "Tambah Menu Baru";
+                document.getElementById('menuCategory').value = "";
+                document.getElementById('menuType').value = "PROVIDER_BASED";
+                currentCategory = null;
+                currentMenu = null;
+                editingMode = false;
+            }
+            
+            // Update type description
+            updateTypeDescription();
+            modal.classList.remove('hidden');
+        }
+        
+        // Close menu modal
+        function closeMenuModal() {
+            document.getElementById('menuModal').classList.add('hidden');
+        }
+        
+        // Save menu to Firebase
+        function saveMenu() {
+            const category = document.getElementById('menuCategory').value;
+            const name = document.getElementById('menuName').value;
+            const iconUrl = document.getElementById('menuIconUrl').value;
+            const type = document.getElementById('menuType').value;
+            const order = parseInt(document.getElementById('menuOrder').value) || 1;
+            
+            if (!category || !name || !type) {
+                alert("Kategori, nama menu, dan tipe harus diisi!");
+                return;
+            }
+            
+            // Create menu object
+            const menu = {
+                type: type,
+                iconUrl: iconUrl,
+                order: order
+            };
+            
+            // Add URL if type is URL
+            if (type === "URL") {
+                const url = document.getElementById('urlTarget').value;
+                if (!url) {
+                    alert("URL Tujuan harus diisi untuk tipe URL!");
+                    return;
+                }
+                menu.url = url;
+            }
+            
+            showLoading();
+            
+            // Ensure category exists in menus
+            if (!appData.menus[category]) {
+                appData.menus[category] = {};
+            }
+            
+            if (editingMode) {
+                // If name changed, update references
+                if (name !== currentMenu) {
+                    // Delete old menu if name changed
+                    delete appData.menus[currentCategory][currentMenu];
+                }
+                
+                // Add new/updated menu
+                appData.menus[category][name] = menu;
+            } else {
+                // Add new menu
+                appData.menus[category][name] = menu;
+            }
+            
+            // Save to Firebase
+            dbRef.child('Menu').set(appData.menus)
+                .then(() => {
+                    // Save and refresh
+                    saveAppData();
+                    renderMenus();
+                    closeMenuModal();
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error("Error saving menu:", error);
+                    alert("Gagal menyimpan menu ke Firebase");
+                    hideLoading();
+                });
+        }
+        
+        // Edit menu
+        function editMenu(categoryName, menuName) {
+            openMenuForm(categoryName, menuName);
+        }
+        
+        // Delete menu from Firebase
+        function deleteMenu(categoryName, menuName) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus menu "${menuName}"?`)) {
+                return;
+            }
+            
+            showLoading();
+            
+            if (appData.menus[categoryName] && appData.menus[categoryName][menuName]) {
+                delete appData.menus[categoryName][menuName];
+            }
+            
+            // Save to Firebase
+            dbRef.child('Menu').set(appData.menus)
+                .then(() => {
+                    saveAppData();
+                    renderMenus();
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error("Error deleting menu:", error);
+                    alert("Gagal menghapus menu dari Firebase");
+                    hideLoading();
+                });
+        }
+        
+        // Save app data to localStorage
+        function saveAppData() {
+            localStorage.setItem('appData', JSON.stringify(appData));
+        }
+        
+        // Update admin account
+        function updateAdminAccount() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const passwordConfirm = document.getElementById('adminPasswordConfirm').value;
+            
+            if (!username) {
+                alert("Username tidak boleh kosong!");
+                return;
+            }
+            
+            if (password && password !== passwordConfirm) {
+                alert("Password dan konfirmasi password tidak cocok!");
+                return;
+            }
+            
+            appData.admin.username = username;
+            if (password) {
+                appData.admin.password = password; // In a real app, this should be hashed
+            }
+            
+            saveAppData();
+            alert("Akun admin berhasil diperbarui!");
+        }
+        
+        // Initialize the app
+        initApp();
+    </script>
+</body>
+</html>
