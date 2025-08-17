@@ -950,7 +950,7 @@
         </div>
     </div>
     
-    <!-- Menu Form Modal -->
+    <!-- Menu Form Modal (DIUBAH) -->
     <div id="menuModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -963,7 +963,7 @@
                         <div class="form-group">
                             <label for="menuCategory">Kategori</label>
                             <select id="menuCategory" class="form-control">
-                                <!-- Options will be populated -->
+                                <!-- Options akan diisi -->
                             </select>
                         </div>
                     </div>
@@ -995,7 +995,6 @@
                         <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER (Digipos)</option>
                         <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION (Voucher)</option>
                         <option value="URL">URL (Tautan Eksternal)</option>
-                        <!-- Tambahkan tipe baru untuk PDAM -->
                         <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION (PDAM Berdasarkan Wilayah)</option>
                     </select>
                     <div class="type-info">
@@ -1011,57 +1010,10 @@
                         <input type="text" id="urlTarget" class="form-control" placeholder="https://example.com">
                     </div>
                 </div>
-
-                <!-- Form khusus untuk produk (PROVIDER_BASED, STATIC_PRODUCT, dll) -->
-                <div id="productsForm" class="products-form">
-                    <label>Produk dan Kode</label>
-                    <div id="productsContainer">
-                        <!-- Tempat untuk input produk dinamis -->
-                    </div>
-                    <button type="button" class="btn btn-sm btn-primary btn-add-product" onclick="addProductField()">
-                        <i class="fas fa-plus"></i> Tambah Produk
-                    </button>
-                </div>
-
-                <!-- Form khusus untuk wilayah PDAM -->
-                <div id="regionForm" class="region-editor">
-                    <div class="form-group">
-                        <label>Editor Wilayah dan Produk PDAM</label>
-                        <button type="button" class="btn btn-primary" onclick="openRegionEditor()">
-                            <i class="fas fa-edit"></i> Edit Wilayah
-                        </button>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="closeMenuModal()">Batal</button>
                 <button class="btn btn-primary" onclick="saveMenu()">Simpan</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Editor Wilayah (Baru) -->
-    <div id="regionModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editor Wilayah PDAM</h3>
-                <button class="close" onclick="closeRegionModal()">&times;</button>
-            </div>
-            <div class="modal-body region-editor">
-                <div id="regionTreeContainer">
-                    <div class="region-actions-top">
-                        <button class="btn btn-sm btn-primary" onclick="addProvince()">
-                            <i class="fas fa-plus"></i> Tambah Provinsi
-                        </button>
-                    </div>
-                    <div id="regionTree">
-                        <!-- Struktur wilayah akan di-render di sini -->
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeRegionModal()">Batal</button>
-                <button class="btn btn-primary" onclick="saveRegionData()">Simpan</button>
             </div>
         </div>
     </div>
@@ -1089,7 +1041,7 @@
             menus: {},
             admin: {
                 username: "admin",
-                password: "password123" // In a real app, this should be hashed
+                password: "password123"
             }
         };
         
@@ -1119,12 +1071,6 @@
         const urlForm = document.getElementById('urlForm');
         const menuTypeSelect = document.getElementById('menuType');
         const firebaseUrl = document.getElementById('firebaseUrl');
-        
-        // DOM Elements baru
-        const regionModal = document.getElementById('regionModal');
-        const regionTreeContainer = document.getElementById('regionTree');
-        const productsForm = document.getElementById('productsForm');
-        const productsContainer = document.getElementById('productsContainer');
         
         // Initialize application
         function initApp() {
@@ -1174,9 +1120,7 @@
             
             // Sembunyikan semua form khusus
             urlForm.classList.add('hidden');
-            productsForm.classList.add('hidden');
-            document.getElementById('regionForm').classList.add('hidden');
-
+            
             // Tampilkan form yang sesuai
             if (selectedType === "URL") {
                 urlForm.classList.remove('hidden');
@@ -1184,67 +1128,6 @@
             
             // Update deskripsi tipe
             typeDescription.textContent = typeDescriptions[selectedType];
-        }
-        
-        // Render product fields berdasarkan data saat ini
-        function renderProductFields() {
-            // Fungsi disembunyikan
-        }
-        
-        // Tambah input field produk
-        function addProductField(name = '', codes = '') {
-            // Fungsi disembunyikan
-        }
-        
-        // Hapus field produk
-        function removeProductField(fieldId) {
-            // Fungsi disembunyikan
-        }
-        
-        // Dapatkan data produk dari form
-        function getProductData() {
-            // Fungsi disembunyikan
-            return {};
-        }
-        
-        // Buka editor wilayah
-        function openRegionEditor() {
-            // Fungsi disembunyikan
-        }
-        
-        // Render region tree
-        function renderRegionTree(regionData) {
-            // Fungsi disembunyikan
-        }
-        
-        // Tambah provinsi
-        function addProvince() {
-            // Fungsi disembunyikan
-        }
-        
-        // Tambah kota (dipanggil dari tombol di provinsi)
-        function addCity(button) {
-            // Fungsi disembunyikan
-        }
-        
-        // Tambah kecamatan (dipanggil dari tombol di kota)
-        function addDistrict(button) {
-            // Fungsi disembunyikan
-        }
-        
-        // Hapus region
-        function removeRegion(button, level) {
-            // Fungsi disembunyikan
-        }
-        
-        // Simpan data wilayah dari modal
-        function saveRegionData() {
-            // Fungsi disembunyikan
-        }
-        
-        // Tutup modal wilayah
-        function closeRegionModal() {
-            regionModal.classList.add('hidden');
         }
         
         // Dapatkan data menu saat ini (untuk edit) atau kosong (untuk tambah)
@@ -1849,7 +1732,7 @@
             
             appData.admin.username = username;
             if (password) {
-                appData.admin.password = password; // In a real app, this should be hashed
+                appData.admin.password = password;
             }
             
             saveAppData();
