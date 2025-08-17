@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASIA PAYMENT - Console Menu</title>
+    <title>ASIA PAYMENT - Console Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -21,6 +21,7 @@
             --light-gray: #f8f9fa;
             --dark-gray: #343a40;
             --border: #dee2e6;
+            --region: #8e44ad;
         }
         
         * {
@@ -127,6 +128,17 @@
             background: var(--light-gray);
             border-right: 1px solid var(--border);
             padding: 20px 0;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
         }
         
         .nav-item {
@@ -167,6 +179,7 @@
             flex: 1;
             padding: 30px;
             background: white;
+            overflow-y: auto;
         }
         
         .section-title {
@@ -349,6 +362,11 @@
             color: purple;
         }
         
+        .badge-region {
+            background: rgba(142, 68, 173, 0.15);
+            color: var(--region);
+        }
+        
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -498,6 +516,131 @@
             margin: 15px 0;
             font-size: 14px;
         }
+        
+        /* Style tambahan untuk konten dinamis */
+        .dynamic-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .dynamic-content.active {
+            display: block;
+        }
+        
+        .loading-content {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .content-error {
+            padding: 20px;
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 8px;
+            color: var(--danger);
+            margin: 20px 0;
+        }
+        
+        .page-template {
+            padding: 20px;
+        }
+        
+        .page-template h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        
+        /* Style baru untuk form produk dan wilayah */
+        .products-form {
+            margin-top: 15px;
+            display: none; /* Disembunyikan */
+        }
+        
+        .product-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .product-item input {
+            flex: 1;
+        }
+        
+        .btn-add-product {
+            margin-top: 5px;
+        }
+        
+        .region-editor {
+            max-height: 500px;
+            overflow-y: auto;
+            display: none; /* Disembunyikan */
+        }
+        
+        .region-list {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        
+        .region-list li {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 2px solid #ddd;
+        }
+        
+        .region-list li > div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .region-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .region-product-codes {
+            margin-top: 5px;
+            padding: 5px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .product-codes-input {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .product-codes-input input {
+            flex: 1;
+            padding: 5px;
+        }
+        
+        .product-codes-list {
+            margin-top: 5px;
+        }
+        
+        .product-code-tag {
+            display: inline-block;
+            background: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .product-code-tag button {
+            background: none;
+            border: none;
+            color: #f44336;
+            cursor: pointer;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -550,169 +693,222 @@
             
             <div class="main-content">
                 <div class="sidebar">
-                    <div class="nav-item active" onclick="showSection('dashboard')">
+                    <!-- Menu Utama -->
+                    <div class="nav-item active" onclick="loadContent('dashboard')">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                     </div>
                     
-                    <div class="nav-item" onclick="showSection('categories')">
+                    <div class="nav-item" onclick="loadContent('categories')">
                         <i class="fas fa-layer-group"></i>
                         <span>Kategori Menu</span>
                     </div>
                     
-                    <div class="nav-item" onclick="showSection('menus')">
+                    <div class="nav-item" onclick="loadContent('menus')">
                         <i class="fas fa-list"></i>
                         <span>Menu Dinamis</span>
                     </div>
                     
-                    <div class="nav-item" onclick="showSection('settings')">
+                    <div class="nav-item" onclick="loadContent('settings')">
                         <i class="fas fa-cog"></i>
                         <span>Pengaturan</span>
+                    </div>
+                    
+                    <!-- Menu Baru -->
+                    <div class="nav-item" onclick="loadContent('banner')">
+                        <i class="fas fa-image"></i>
+                        <span>Banner</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('color')">
+                        <i class="fas fa-palette"></i>
+                        <span>Color</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('regex')">
+                        <i class="fas fa-code"></i>
+                        <span>RegexExtractor</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('textinfo')">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Text Information</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('cs')">
+                        <i class="fas fa-headset"></i>
+                        <span>Customer Service</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('produkcode')">
+                        <i class="fas fa-barcode"></i>
+                        <span>Kode Produk</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('prefix')">
+                        <i class="fas fa-list-ol"></i>
+                        <span>Prefik Tujuan</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('serverconfig')">
+                        <i class="fas fa-server"></i>
+                        <span>Server Config</span>
                     </div>
                 </div>
                 
                 <div class="content">
-                    <!-- Dashboard Section -->
-                    <div id="dashboardSection" class="section">
-                        <div class="section-title">
-                            <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
-                            <button class="btn btn-primary" onclick="refreshData()">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                        </div>
-                        
-                        <div class="card">
-                            <h3>Selamat datang di Console Admin</h3>
-                            <p>Gunakan panel ini untuk mengelola menu dinamis aplikasi ASIA PAYMENT.</p>
-                            
-                            <div class="firebase-info">
-                                <i class="fas fa-database"></i>
-                                <strong>Firebase Realtime Database</strong><br>
-                                URL: <span id="firebaseUrl">https://steady-fin-368617-default-rtdb.firebaseio.com/</span>
+                    <!-- Konten dinamis akan dimuat di sini -->
+                    <div id="contentContainer">
+                        <!-- Dashboard Section -->
+                        <div id="dashboardSection" class="section">
+                            <div class="section-title">
+                                <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                                <button class="btn btn-primary" onclick="refreshData()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
                             </div>
                             
-                            <div class="stats-container">
-                                <div class="form-row">
-                                    <div class="form-col">
-                                        <div class="card">
-                                            <h4><i class="fas fa-layer-group"></i> Kategori Menu</h4>
-                                            <p id="categoryCount">Memuat...</p>
+                            <div class="card">
+                                <h3>Selamat datang di Console Admin</h3>
+                                <p>Gunakan panel ini untuk mengelola menu dinamis aplikasi ASIA PAYMENT.</p>
+                                
+                                <div class="firebase-info">
+                                    <i class="fas fa-database"></i>
+                                    <strong>Firebase Realtime Database</strong><br>
+                                    URL: <span id="firebaseUrl">https://steady-fin-368617-default-rtdb.firebaseio.com/</span>
+                                </div>
+                                
+                                <div class="stats-container">
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="card">
+                                                <h4><i class="fas fa-layer-group"></i> Kategori Menu</h4>
+                                                <p id="categoryCount">Memuat...</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="form-col">
-                                        <div class="card">
-                                            <h4><i class="fas fa-list"></i> Total Menu</h4>
-                                            <p id="menuCount">Memuat...</p>
+                                        
+                                        <div class="form-col">
+                                            <div class="card">
+                                                <h4><i class="fas fa-list"></i> Total Menu</h4>
+                                                <p id="menuCount">Memuat...</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            
+                            <div class="card">
+                                <h3>Panduan Penggunaan</h3>
+                                <ul style="padding-left: 25px; margin-top: 15px;">
+                                    <li>Gunakan menu <strong>Kategori Menu</strong> untuk menambahkan atau mengelola kategori</li>
+                                    <li>Di menu <strong>Menu Dinamis</strong> Anda dapat menambahkan berbagai jenis menu</li>
+                                    <li>Setiap menu memiliki urutan untuk mengatur tampilan di aplikasi</li>
+                                    <li>Semua perubahan akan langsung disimpan ke Firebase Realtime Database</li>
+                                </ul>
+                            </div>
                         </div>
                         
-                        <div class="card">
-                            <h3>Panduan Penggunaan</h3>
-                            <ul style="padding-left: 25px; margin-top: 15px;">
-                                <li>Gunakan menu <strong>Kategori Menu</strong> untuk menambahkan atau mengelola kategori</li>
-                                <li>Di menu <strong>Menu Dinamis</strong> Anda dapat menambahkan berbagai jenis menu</li>
-                                <li>Setiap menu memiliki urutan untuk mengatur tampilan di aplikasi</li>
-                                <li>Semua perubahan akan langsung disimpan ke Firebase Realtime Database</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <!-- Categories Section -->
-                    <div id="categoriesSection" class="section hidden">
-                        <div class="section-title">
-                            <h2><i class="fas fa-layer-group"></i> Kategori Menu</h2>
-                            <button class="btn btn-primary" onclick="openCategoryForm()">
-                                <i class="fas fa-plus"></i> Tambah Kategori
-                            </button>
+                        <!-- Categories Section -->
+                        <div id="categoriesSection" class="section hidden">
+                            <div class="section-title">
+                                <h2><i class="fas fa-layer-group"></i> Kategori Menu</h2>
+                                <button class="btn btn-primary" onclick="openCategoryForm()">
+                                    <i class="fas fa-plus"></i> Tambah Kategori
+                                </button>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="table-container">
+                                    <table id="categoriesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Kategori</th>
+                                                <th>Urutan</th>
+                                                <th>Jumlah Menu</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="categoriesTableBody">
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="card">
-                            <div class="table-container">
-                                <table id="categoriesTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama Kategori</th>
-                                            <th>Urutan</th>
-                                            <th>Jumlah Menu</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="categoriesTableBody">
-                                        <!-- Data will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Menus Section -->
-                    <div id="menusSection" class="section hidden">
-                        <div class="section-title">
-                            <h2><i class="fas fa-list"></i> Menu Dinamis</h2>
-                            <button class="btn btn-primary" onclick="openMenuForm()">
-                                <i class="fas fa-plus"></i> Tambah Menu
-                            </button>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="form-group">
-                                <label>Pilih Kategori</label>
-                                <select id="categoryFilter" class="form-control" onchange="filterMenus()">
-                                    <option value="">Semua Kategori</option>
-                                    <!-- Options will be populated -->
-                                </select>
+                        <!-- Menus Section -->
+                        <div id="menusSection" class="section hidden">
+                            <div class="section-title">
+                                <h2><i class="fas fa-list"></i> Menu Dinamis</h2>
+                                <button class="btn btn-primary" onclick="openMenuForm()">
+                                    <i class="fas fa-plus"></i> Tambah Menu
+                                </button>
                             </div>
                             
-                            <div class="table-container">
-                                <table id="menusTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama Menu</th>
-                                            <th>Kategori</th>
-                                            <th>Tipe</th>
-                                            <th>Urutan</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="menusTableBody">
-                                        <!-- Data will be populated here -->
-                                    </tbody>
-                                </table>
+                            <div class="card">
+                                <div class="form-group">
+                                    <label>Pilih Kategori</label>
+                                    <select id="categoryFilter" class="form-control" onchange="filterMenus()">
+                                        <option value="">Semua Kategori</option>
+                                        <!-- Options will be populated -->
+                                    </select>
+                                </div>
+                                
+                                <div class="table-container">
+                                    <table id="menusTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Menu</th>
+                                                <th>Kategori</th>
+                                                <th>Tipe</th>
+                                                <th>Urutan</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="menusTableBody">
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Settings Section -->
-                    <div id="settingsSection" class="section hidden">
-                        <div class="section-title">
-                            <h2><i class="fas fa-cog"></i> Pengaturan</h2>
                         </div>
                         
-                        <div class="card">
-                            <h3>Akun Admin</h3>
-                            
-                            <div class="form-group">
-                                <label for="adminUsername">Username</label>
-                                <input type="text" id="adminUsername" class="form-control" value="admin">
+                        <!-- Settings Section -->
+                        <div id="settingsSection" class="section hidden">
+                            <div class="section-title">
+                                <h2><i class="fas fa-cog"></i> Pengaturan</h2>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="adminPassword">Password</label>
-                                <input type="password" id="adminPassword" class="form-control" placeholder="Masukkan password baru">
+                            <div class="card">
+                                <h3>Akun Admin</h3>
+                                
+                                <div class="form-group">
+                                    <label for="adminUsername">Username</label>
+                                    <input type="text" id="adminUsername" class="form-control" value="admin">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="adminPassword">Password</label>
+                                    <input type="password" id="adminPassword" class="form-control" placeholder="Masukkan password baru">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="adminPasswordConfirm">Konfirmasi Password</label>
+                                    <input type="password" id="adminPasswordConfirm" class="form-control" placeholder="Konfirmasi password baru">
+                                </div>
+                                
+                                <button class="btn btn-primary" onclick="updateAdminAccount()">
+                                    <i class="fas fa-save"></i> Simpan Perubahan
+                                </button>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="adminPasswordConfirm">Konfirmasi Password</label>
-                                <input type="password" id="adminPasswordConfirm" class="form-control" placeholder="Konfirmasi password baru">
+                        </div>
+                        
+                        <!-- Container untuk konten dinamis -->
+                        <div id="dynamicContent" class="dynamic-content">
+                            <div class="loading-content">
+                                <div class="spinner"></div>
+                                <p>Memuat konten...</p>
                             </div>
-                            
-                            <button class="btn btn-primary" onclick="updateAdminAccount()">
-                                <i class="fas fa-save"></i> Simpan Perubahan
-                            </button>
                         </div>
                     </div>
                     
@@ -799,6 +995,8 @@
                         <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER (Digipos)</option>
                         <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION (Voucher)</option>
                         <option value="URL">URL (Tautan Eksternal)</option>
+                        <!-- Tambahkan tipe baru untuk PDAM -->
+                        <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION (PDAM Berdasarkan Wilayah)</option>
                     </select>
                     <div class="type-info">
                         <i class="fas fa-info-circle"></i>
@@ -813,6 +1011,27 @@
                         <input type="text" id="urlTarget" class="form-control" placeholder="https://example.com">
                     </div>
                 </div>
+
+                <!-- Form khusus untuk produk (PROVIDER_BASED, STATIC_PRODUCT, dll) -->
+                <div id="productsForm" class="products-form">
+                    <label>Produk dan Kode</label>
+                    <div id="productsContainer">
+                        <!-- Tempat untuk input produk dinamis -->
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary btn-add-product" onclick="addProductField()">
+                        <i class="fas fa-plus"></i> Tambah Produk
+                    </button>
+                </div>
+
+                <!-- Form khusus untuk wilayah PDAM -->
+                <div id="regionForm" class="region-editor">
+                    <div class="form-group">
+                        <label>Editor Wilayah dan Produk PDAM</label>
+                        <button type="button" class="btn btn-primary" onclick="openRegionEditor()">
+                            <i class="fas fa-edit"></i> Edit Wilayah
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn" onclick="closeMenuModal()">Batal</button>
@@ -820,7 +1039,33 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Modal Editor Wilayah (Baru) -->
+    <div id="regionModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editor Wilayah PDAM</h3>
+                <button class="close" onclick="closeRegionModal()">&times;</button>
+            </div>
+            <div class="modal-body region-editor">
+                <div id="regionTreeContainer">
+                    <div class="region-actions-top">
+                        <button class="btn btn-sm btn-primary" onclick="addProvince()">
+                            <i class="fas fa-plus"></i> Tambah Provinsi
+                        </button>
+                    </div>
+                    <div id="regionTree">
+                        <!-- Struktur wilayah akan di-render di sini -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeRegionModal()">Batal</button>
+                <button class="btn btn-primary" onclick="saveRegionData()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Konfigurasi Firebase
         const firebaseConfig = {
@@ -855,7 +1100,8 @@
             POSTPAID_BILL: "Menu untuk pembayaran tagihan (contoh: Tagihan PLN)",
             DYNAMIC_PRODUCT_BASED_ON_NUMBER: "Menu produk dinamis berdasarkan nomor (contoh: Digipos)",
             VOUCHER_AKTIVATION: "Menu aktivasi voucher (contoh: Voucher Kosong)",
-            URL: "Menu yang mengarahkan ke URL eksternal"
+            URL: "Menu yang mengarahkan ke URL eksternal",
+            DYNAMIC_PRODUCT_BASED_ON_REGION: "Menu produk PDAM berbasis hierarki wilayah (Provinsi -> Kota -> Cabang)"
         };
         
         // Current state
@@ -874,9 +1120,25 @@
         const menuTypeSelect = document.getElementById('menuType');
         const firebaseUrl = document.getElementById('firebaseUrl');
         
+        // DOM Elements baru
+        const regionModal = document.getElementById('regionModal');
+        const regionTreeContainer = document.getElementById('regionTree');
+        const productsForm = document.getElementById('productsForm');
+        const productsContainer = document.getElementById('productsContainer');
+        
         // Initialize application
         function initApp() {
             firebaseUrl.textContent = firebaseConfig.databaseURL;
+            
+            // Check session
+            const session = localStorage.getItem('adminSession');
+            if (session) {
+                loginSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                document.getElementById('userName').textContent = JSON.parse(session).username;
+                
+                loadData();
+            }
             
             // Try to load from localStorage
             const savedData = localStorage.getItem('appData');
@@ -885,7 +1147,12 @@
             }
             
             // Setup event listeners
-            menuTypeSelect.addEventListener('change', updateTypeDescription);
+            if (menuTypeSelect) {
+                menuTypeSelect.addEventListener('change', function() {
+                    updateTypeDescription();
+                    updateFormByType();
+                });
+            }
         }
         
         // Update type description
@@ -901,6 +1168,93 @@
             }
         }
         
+        // Update form berdasarkan tipe
+        function updateFormByType() {
+            const selectedType = menuTypeSelect.value;
+            
+            // Sembunyikan semua form khusus
+            urlForm.classList.add('hidden');
+            productsForm.classList.add('hidden');
+            document.getElementById('regionForm').classList.add('hidden');
+
+            // Tampilkan form yang sesuai
+            if (selectedType === "URL") {
+                urlForm.classList.remove('hidden');
+            }
+            
+            // Update deskripsi tipe
+            typeDescription.textContent = typeDescriptions[selectedType];
+        }
+        
+        // Render product fields berdasarkan data saat ini
+        function renderProductFields() {
+            // Fungsi disembunyikan
+        }
+        
+        // Tambah input field produk
+        function addProductField(name = '', codes = '') {
+            // Fungsi disembunyikan
+        }
+        
+        // Hapus field produk
+        function removeProductField(fieldId) {
+            // Fungsi disembunyikan
+        }
+        
+        // Dapatkan data produk dari form
+        function getProductData() {
+            // Fungsi disembunyikan
+            return {};
+        }
+        
+        // Buka editor wilayah
+        function openRegionEditor() {
+            // Fungsi disembunyikan
+        }
+        
+        // Render region tree
+        function renderRegionTree(regionData) {
+            // Fungsi disembunyikan
+        }
+        
+        // Tambah provinsi
+        function addProvince() {
+            // Fungsi disembunyikan
+        }
+        
+        // Tambah kota (dipanggil dari tombol di provinsi)
+        function addCity(button) {
+            // Fungsi disembunyikan
+        }
+        
+        // Tambah kecamatan (dipanggil dari tombol di kota)
+        function addDistrict(button) {
+            // Fungsi disembunyikan
+        }
+        
+        // Hapus region
+        function removeRegion(button, level) {
+            // Fungsi disembunyikan
+        }
+        
+        // Simpan data wilayah dari modal
+        function saveRegionData() {
+            // Fungsi disembunyikan
+        }
+        
+        // Tutup modal wilayah
+        function closeRegionModal() {
+            regionModal.classList.add('hidden');
+        }
+        
+        // Dapatkan data menu saat ini (untuk edit) atau kosong (untuk tambah)
+        function getCurrentMenuData() {
+            if (editingMode && currentCategory && currentMenu) {
+                return appData.menus[currentCategory][currentMenu];
+            }
+            return null;
+        }
+        
         // Login function
         function login() {
             const username = document.getElementById('username').value;
@@ -911,6 +1265,14 @@
                 loginSection.classList.add('hidden');
                 appSection.classList.remove('hidden');
                 document.getElementById('userName').textContent = username;
+                
+                // Save session
+                localStorage.setItem('adminSession', JSON.stringify({
+                    username: username,
+                    loggedIn: true,
+                    timestamp: Date.now()
+                }));
+                
                 loadData();
             } else {
                 // Failed login
@@ -921,6 +1283,9 @@
         
         // Logout function
         function logout() {
+            // Clear session
+            localStorage.removeItem('adminSession');
+            
             appSection.classList.add('hidden');
             loginSection.classList.remove('hidden');
             document.getElementById('username').value = '';
@@ -984,21 +1349,104 @@
             document.getElementById('menuCount').textContent = `${menuCount} Menu`;
         }
         
-        // Show section
-        function showSection(sectionId) {
-            // Hide all sections
+        // Fungsi untuk memuat konten dinamis
+        function loadContent(page) {
+            // Sembunyikan semua konten
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.add('hidden');
             });
+            document.getElementById('dynamicContent').classList.remove('active');
             
-            // Remove active class from all nav items
+            // Tampilkan indikator loading
+            showLoading();
+            
+            // Update menu aktif
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
+            event.currentTarget.classList.add('active');
             
-            // Show selected section and mark nav item as active
-            document.getElementById(`${sectionId}Section`).classList.remove('hidden');
-            document.querySelector(`.nav-item[onclick="showSection('${sectionId}')"]`).classList.add('active');
+            // URL untuk masing-masing halaman
+            const pageMap = {
+                dashboard: null, // Gunakan konten yang sudah ada
+                categories: null,
+                menus: null,
+                settings: null,
+                banner: null,
+                color: null,
+                regex: null,
+                textinfo: null,
+                cs: null,
+                produkcode: null,
+                prefix: null,
+                serverconfig: null
+            };
+            
+            // Jika halaman sudah ada di DOM
+            if (!pageMap[page]) {
+                // Untuk halaman baru, tampilkan template dasar
+                if (page !== 'dashboard' && page !== 'categories' && page !== 'menus' && page !== 'settings') {
+                    showTemplatePage(page);
+                } else {
+                    document.getElementById(page + 'Section').classList.remove('hidden');
+                }
+                hideLoading();
+                return;
+            }
+        }
+        
+        // Tampilkan halaman template untuk menu baru
+        function showTemplatePage(pageName) {
+            const dynamicContent = document.getElementById('dynamicContent');
+            const pageTitles = {
+                banner: "Manajemen Banner",
+                color: "Manajemen Warna",
+                regex: "Regex Extractor",
+                textinfo: "Informasi Teks",
+                cs: "Customer Service",
+                produkcode: "Kode Produk",
+                prefix: "Prefik Tujuan",
+                serverconfig: "Konfigurasi Server"
+            };
+            
+            const pageIcons = {
+                banner: "fa-image",
+                color: "fa-palette",
+                regex: "fa-code",
+                textinfo: "fa-info-circle",
+                cs: "fa-headset",
+                produkcode: "fa-barcode",
+                prefix: "fa-list-ol",
+                serverconfig: "fa-server"
+            };
+            
+            dynamicContent.innerHTML = `
+                <div class="section">
+                    <div class="section-title">
+                        <h2><i class="fas ${pageIcons[pageName]}"></i> ${pageTitles[pageName]}</h2>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Baru
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="page-template">
+                            <h2>Halaman ${pageTitles[pageName]}</h2>
+                            <p>Halaman ini sedang dalam pengembangan. Silakan tambahkan fungsionalitas sesuai kebutuhan.</p>
+                            <p>Anda bisa mulai dengan menambahkan form dan tabel untuk mengelola data.</p>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Tips Pengembangan</strong>
+                                <p>1. Buat form input data</p>
+                                <p>2. Tambahkan tabel untuk menampilkan data</p>
+                                <p>3. Hubungkan dengan Firebase Realtime Database</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            dynamicContent.classList.add('active');
         }
         
         // Render categories table
@@ -1082,7 +1530,7 @@
         // Save category to Firebase
         function saveCategory() {
             const name = document.getElementById('categoryName').value;
-            const order = parseInt(document.getElementById('categoryOrder').value) || 1;
+            const urutan = parseInt(document.getElementById('categoryOrder').value) || 1;
             
             if (!name) {
                 alert("Nama kategori harus diisi!");
@@ -1108,10 +1556,10 @@
                 }
                 
                 // Update order
-                appData.categories[name].Urutan = order;
+                appData.categories[name].Urutan = urutan;
             } else {
                 // Add new category
-                appData.categories[name] = { Urutan: order };
+                appData.categories[name] = { Urutan: urutan };
                 
                 // Initialize empty menu object for this category
                 if (!appData.menus[name]) {
@@ -1196,6 +1644,7 @@
                         case 'DYNAMIC_PRODUCT_BASED_ON_NUMBER': badgeClass = 'badge-dynamic'; break;
                         case 'VOUCHER_AKTIVATION': badgeClass = 'badge-voucher'; break;
                         case 'URL': badgeClass = 'badge-url'; break;
+                        case 'DYNAMIC_PRODUCT_BASED_ON_REGION': badgeClass = 'badge-region'; break;
                         default: badgeClass = 'badge';
                     }
                     
@@ -1260,11 +1709,14 @@
                 // Add mode
                 modalTitle.textContent = "Tambah Menu Baru";
                 document.getElementById('menuCategory').value = "";
-                document.getElementById('menuType').value = "PROVIDER_BASED";
+                document.getElementById('menuType').value = "URL"; // Default to URL type
                 currentCategory = null;
                 currentMenu = null;
                 editingMode = false;
             }
+            
+            // Update form berdasarkan tipe
+            updateFormByType();
             
             // Update type description
             updateTypeDescription();
