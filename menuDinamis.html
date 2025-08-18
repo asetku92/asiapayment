@@ -2058,7 +2058,7 @@
                     return;
                 }
                 produkData.Code = code;
-                path = `ItemsCode/${type}/${category}/${menuName}/${provider}/${namaProduk}`;
+                path = `Items/${type}/${category}/${menuName}/${provider}/${namaProduk}`;
             } 
             else if (type === "POSTPAID_BILL" || type === "DYNAMIC_PRODUCT_BASED_ON_NUMBER") {
                 const kodeBayar = document.getElementById("kodeBayar").value.trim();
@@ -2071,7 +2071,7 @@
                 
                 produkData.KodeBayar = kodeBayar;
                 produkData.KodeCek = kodeCek;
-                path = `ItemsCode/${type}/${category}/${menuName}/${namaProduk}`;
+                path = `Items/${type}/${category}/${menuName}/${namaProduk}`;
             }
             else if (type === "DYNAMIC_PRODUCT_BASED_ON_REGION") {
                 const namaKota = document.getElementById("namaProdukRegion").value.trim();
@@ -2086,7 +2086,7 @@
                 
                 produkData.KodeBayar = kodeBayarRegion;
                 produkData.KodeCek = kodeCekRegion;
-                path = `ItemsCode/${type}/${category}/${menuName}/${namaKota}/Wilayah/${namaWilayah}`;
+                path = `Items/${type}/${category}/${menuName}/${namaKota}/Wilayah/${namaWilayah}`;
             }
             else {
                 if (!namaProduk || !code) {
@@ -2094,7 +2094,7 @@
                     return;
                 }
                 produkData.Code = code;
-                path = `ItemsCode/${type}/${category}/${menuName}/${namaProduk}`;
+                path = `Items/${type}/${category}/${menuName}/${namaProduk}`;
             }
             
             showLoading();
