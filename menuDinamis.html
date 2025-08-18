@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
+        /* Styles from both files combined */
         :root {
             --primary: #0055ff;
             --secondary: #00aaff;
@@ -195,6 +196,9 @@
             font-size: 22px;
             color: var(--dark);
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .btn {
@@ -240,6 +244,17 @@
             background: #218838;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2);
         }
         
         .card {
@@ -553,93 +568,69 @@
             padding-bottom: 10px;
         }
         
-        /* Style baru untuk form produk dan wilayah */
-        .products-form {
-            margin-top: 15px;
-            display: none; /* Disembunyikan */
+        /* Styles for produkcode section */
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
         }
         
-        .product-item {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
+        .notification.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            display: block;
         }
         
-        .product-item input {
-            flex: 1;
+        .notification.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            display: block;
         }
         
-        .btn-add-product {
-            margin-top: 5px;
+        .input-section {
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
         }
         
-        .region-editor {
-            max-height: 500px;
-            overflow-y: auto;
-            display: none; /* Disembunyikan */
-        }
-        
-        .region-list {
-            list-style-type: none;
-            padding-left: 20px;
-        }
-        
-        .region-list li {
-            margin: 10px 0;
-            padding: 10px;
-            border-left: 2px solid #ddd;
-        }
-        
-        .region-list li > div {
+        .input-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        .region-actions {
-            display: flex;
-            gap: 5px;
-            margin-left: 10px;
+        .input-section h3 i {
+            font-size: 20px;
         }
         
-        .region-product-codes {
-            margin-top: 5px;
-            padding: 5px;
-            background: #f9f9f9;
-            border-radius: 4px;
-        }
-        
-        .product-codes-input {
-            display: flex;
-            gap: 5px;
-            margin-top: 5px;
-        }
-        
-        .product-codes-input input {
-            flex: 1;
-            padding: 5px;
-        }
-        
-        .product-codes-list {
-            margin-top: 5px;
-        }
-        
-        .product-code-tag {
-            display: inline-block;
-            background: #e0e0e0;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-        
-        .product-code-tag button {
-            background: none;
-            border: none;
-            color: #f44336;
-            cursor: pointer;
-            margin-left: 5px;
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            header {
+                padding: 15px 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -903,6 +894,142 @@
                             </div>
                         </div>
                         
+                        <!-- Produk Code Section -->
+                        <div id="produkcodeSection" class="section hidden">
+                            <div class="section-title">
+                                <h2><i class="fas fa-barcode"></i> Input Kode Produk</h2>
+                            </div>
+                            
+                            <div id="notification" class="notification"></div>
+                            
+                            <div class="card">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="typeSelect">Tipe Produk</label>
+                                            <select id="typeSelect" class="form-control" onchange="loadMenus()">
+                                                <option value="">--Pilih Tipe Produk--</option>
+                                                <option value="PROVIDER_BASED">PROVIDER_BASED</option>
+                                                <option value="STATIC_PRODUCT">STATIC_PRODUCT</option>
+                                                <option value="POSTPAID_BILL">POSTPAID_BILL</option>
+                                                <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER</option>
+                                                <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION</option>
+                                                <option value="URL">URL</option>
+                                                <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="menuSelect">Kategori & Menu</label>
+                                            <select id="menuSelect" class="form-control">
+                                                <option value="">--Pilih Kategori/Menu--</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Provider -->
+                                <div id="providerSection" class="input-section hidden">
+                                    <h3><i class="fas fa-sim-card"></i> Informasi Provider</h3>
+                                    <div class="form-group">
+                                        <label for="providerPrefik">Provider Prefik</label>
+                                        <input type="text" id="providerPrefik" class="form-control" placeholder="Misal: Telkomsel">
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Produk Utama -->
+                                <div id="produkSection" class="input-section">
+                                    <h3><i class="fas fa-box"></i> Informasi Produk</h3>
+                                    <div class="form-group">
+                                        <label id="labelProduk">Nama Produk</label>
+                                        <input type="text" id="namaProduk" class="form-control" placeholder="Misal: Telkomsel Nasional">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Kode Produk</label>
+                                        <input type="text" id="codeProduk" class="form-control" placeholder="Misal: S">
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Bill -->
+                                <div id="billSection" class="input-section hidden">
+                                    <h3><i class="fas fa-receipt"></i> Informasi Tagihan</h3>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeBayar">Kode Bayar</label>
+                                                <input type="text" id="kodeBayar" class="form-control" placeholder="Misal: BYRPLN">
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeCek">Kode Cek</label>
+                                                <input type="text" id="kodeCek" class="form-control" placeholder="Misal: CEKPLN">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Region -->
+                                <div id="regionSection" class="input-section hidden">
+                                    <h3><i class="fas fa-map-marker-alt"></i> Informasi Wilayah</h3>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="namaProdukRegion">Nama Kota</label>
+                                                <input type="text" id="namaProdukRegion" class="form-control" placeholder="Misal: Gorontalo">
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="namaWilayah">Nama Wilayah</label>
+                                                <input type="text" id="namaWilayah" class="form-control" placeholder="Misal: Bonebolango">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeBayarRegion">Kode Bayar</label>
+                                                <input type="text" id="kodeBayarRegion" class="form-control" placeholder="Misal: BYRPDAM">
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeCekRegion">Kode Cek</label>
+                                                <input type="text" id="kodeCekRegion" class="form-control" placeholder="Misal: CEKPDAM">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Umum -->
+                                <div class="input-section">
+                                    <h3><i class="fas fa-info-circle"></i> Informasi Tambahan</h3>
+                                    <div class="form-group">
+                                        <label for="imageUrl">URL Gambar</label>
+                                        <input type="text" id="imageUrl" class="form-control" placeholder="https://...">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="keterangan">Keterangan</label>
+                                        <input type="text" id="keterangan" class="form-control" placeholder="Misal: Produk Nasional">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <button class="btn btn-primary" onclick="simpanProduk()" style="width:100%">
+                                            <i class="fas fa-save"></i> Simpan ke Firebase
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Container untuk konten dinamis -->
                         <div id="dynamicContent" class="dynamic-content">
                             <div class="loading-content">
@@ -950,7 +1077,7 @@
         </div>
     </div>
     
-    <!-- Menu Form Modal (DIUBAH) -->
+    <!-- Menu Form Modal -->
     <div id="menuModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -1084,12 +1211,6 @@
                 document.getElementById('userName').textContent = JSON.parse(session).username;
                 
                 loadData();
-            }
-            
-            // Try to load from localStorage
-            const savedData = localStorage.getItem('appData');
-            if (savedData) {
-                appData = JSON.parse(savedData);
             }
             
             // Setup event listeners
@@ -1249,32 +1370,31 @@
             });
             event.currentTarget.classList.add('active');
             
-            // URL untuk masing-masing halaman
-            const pageMap = {
-                dashboard: null, // Gunakan konten yang sudah ada
-                categories: null,
-                menus: null,
-                settings: null,
-                banner: null,
-                color: null,
-                regex: null,
-                textinfo: null,
-                cs: null,
-                produkcode: null,
-                prefix: null,
-                serverconfig: null
-            };
-            
-            // Jika halaman sudah ada di DOM
-            if (!pageMap[page]) {
-                // Untuk halaman baru, tampilkan template dasar
-                if (page !== 'dashboard' && page !== 'categories' && page !== 'menus' && page !== 'settings') {
+            // Handle specific pages
+            switch(page) {
+                case 'dashboard':
+                    document.getElementById('dashboardSection').classList.remove('hidden');
+                    hideLoading();
+                    break;
+                case 'categories':
+                    document.getElementById('categoriesSection').classList.remove('hidden');
+                    hideLoading();
+                    break;
+                case 'menus':
+                    document.getElementById('menusSection').classList.remove('hidden');
+                    hideLoading();
+                    break;
+                case 'settings':
+                    document.getElementById('settingsSection').classList.remove('hidden');
+                    hideLoading();
+                    break;
+                case 'produkcode':
+                    document.getElementById('produkcodeSection').classList.remove('hidden');
+                    hideLoading();
+                    break;
+                default:
                     showTemplatePage(page);
-                } else {
-                    document.getElementById(page + 'Section').classList.remove('hidden');
-                }
-                hideLoading();
-                return;
+                    hideLoading();
             }
         }
         
@@ -1287,7 +1407,6 @@
                 regex: "Regex Extractor",
                 textinfo: "Informasi Teks",
                 cs: "Customer Service",
-                produkcode: "Kode Produk",
                 prefix: "Prefik Tujuan",
                 serverconfig: "Konfigurasi Server"
             };
@@ -1298,7 +1417,6 @@
                 regex: "fa-code",
                 textinfo: "fa-info-circle",
                 cs: "fa-headset",
-                produkcode: "fa-barcode",
                 prefix: "fa-list-ol",
                 serverconfig: "fa-server"
             };
@@ -1457,7 +1575,6 @@
                 })
                 .then(() => {
                     // Save and refresh
-                    saveAppData();
                     renderCategories();
                     closeCategoryModal();
                     hideLoading();
@@ -1491,7 +1608,6 @@
                     return dbRef.child('Menu').set(appData.menus);
                 })
                 .then(() => {
-                    saveAppData();
                     renderCategories();
                     renderMenus();
                     hideLoading();
@@ -1666,7 +1782,6 @@
             dbRef.child('Menu').set(appData.menus)
                 .then(() => {
                     // Save and refresh
-                    saveAppData();
                     renderMenus();
                     closeMenuModal();
                     hideLoading();
@@ -1698,7 +1813,6 @@
             // Save to Firebase
             dbRef.child('Menu').set(appData.menus)
                 .then(() => {
-                    saveAppData();
                     renderMenus();
                     hideLoading();
                 })
@@ -1707,11 +1821,6 @@
                     alert("Gagal menghapus menu dari Firebase");
                     hideLoading();
                 });
-        }
-        
-        // Save app data to localStorage
-        function saveAppData() {
-            localStorage.setItem('appData', JSON.stringify(appData));
         }
         
         // Update admin account
@@ -1735,8 +1844,180 @@
                 appData.admin.password = password;
             }
             
-            saveAppData();
             alert("Akun admin berhasil diperbarui!");
+        }
+        
+        // ================ KODE PRODUK FUNCTIONS ================
+        function loadMenus() {
+            const typeSelect = document.getElementById("typeSelect");
+            const selectedType = typeSelect.value;
+            const menuSelect = document.getElementById("menuSelect");
+            menuSelect.innerHTML = '<option value="">--Pilih Kategori/Menu--</option>';
+            
+            if (!selectedType) {
+                hideAllSections();
+                return;
+            }
+            
+            const providerSection = document.getElementById("providerSection");
+            const billSection = document.getElementById("billSection");
+            const produkSection = document.getElementById("produkSection");
+            const regionSection = document.getElementById("regionSection");
+            const codeSection = document.getElementById("codeSection");
+            
+            const ref = dbRef.child("Menu");
+            ref.once("value").then(snapshot => {
+                const data = snapshot.val();
+                let found = false;
+                
+                for (const category in data) {
+                    for (const menuName in data[category]) {
+                        const menu = data[category][menuName];
+                        if (menu.type === selectedType) {
+                            const opt = document.createElement("option");
+                            opt.value = `${category}|${menuName}`;
+                            opt.textContent = `${category} / ${menuName}`;
+                            menuSelect.appendChild(opt);
+                            found = true;
+                        }
+                    }
+                }
+                
+                if (!found) {
+                    const opt = document.createElement("option");
+                    opt.value = "";
+                    opt.textContent = "Tidak ada menu untuk tipe ini";
+                    menuSelect.appendChild(opt);
+                }
+                
+                // Tampilkan/hide section berdasarkan type
+                providerSection.classList.toggle('hidden', selectedType !== "PROVIDER_BASED");
+                billSection.classList.toggle('hidden', 
+                    selectedType !== "POSTPAID_BILL" && 
+                    selectedType !== "DYNAMIC_PRODUCT_BASED_ON_NUMBER"
+                );
+                regionSection.classList.toggle('hidden', selectedType !== "DYNAMIC_PRODUCT_BASED_ON_REGION");
+                produkSection.classList.toggle('hidden', selectedType === "DYNAMIC_PRODUCT_BASED_ON_REGION");
+                codeSection.classList.toggle('hidden', 
+                    selectedType !== "PROVIDER_BASED" && 
+                    selectedType !== "STATIC_PRODUCT" && 
+                    selectedType !== "VOUCHER_AKTIVATION" && 
+                    selectedType !== "URL"
+                );
+                
+            }).catch(error => {
+                showNotification(`Error: ${error.message}`, 'error');
+            });
+        }
+        
+        function hideAllSections() {
+            const providerSection = document.getElementById("providerSection");
+            const billSection = document.getElementById("billSection");
+            const regionSection = document.getElementById("regionSection");
+            const codeSection = document.getElementById("codeSection");
+            
+            providerSection.classList.add('hidden');
+            billSection.classList.add('hidden');
+            regionSection.classList.add('hidden');
+            codeSection.classList.remove('hidden');
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Sembunyikan notifikasi setelah 5 detik
+            setTimeout(() => {
+                notification.classList.remove('success', 'error');
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        function simpanProduk() {
+            const typeSelect = document.getElementById("typeSelect");
+            const menuSelect = document.getElementById("menuSelect");
+            const type = typeSelect.value;
+            const menuVal = menuSelect.value;
+            
+            if (!type || !menuVal) {
+                showNotification("Type dan Menu harus dipilih!", 'error');
+                return;
+            }
+            
+            const provider = document.getElementById("providerPrefik").value.trim();
+            const namaProduk = document.getElementById("namaProduk").value.trim();
+            const code = document.getElementById("codeProduk").value.trim();
+            const imageUrl = document.getElementById("imageUrl").value.trim();
+            const ket = document.getElementById("keterangan").value.trim();
+            
+            const [category, menuName] = menuVal.split("|");
+            
+            // Struktur data dasar
+            const produkData = { ImageUrl: imageUrl, Ket: ket };
+            let path;
+            
+            if (type === "PROVIDER_BASED") {
+                if (!provider || !namaProduk || !code) {
+                    showNotification("Provider, Nama Produk, dan Code wajib diisi untuk PROVIDER_BASED", 'error');
+                    return;
+                }
+                produkData.Code = code;
+                path = `ItemsCode/${type}/${category}/${menuName}/${provider}/${namaProduk}`;
+            } 
+            else if (type === "POSTPAID_BILL" || type === "DYNAMIC_PRODUCT_BASED_ON_NUMBER") {
+                const kodeBayar = document.getElementById("kodeBayar").value.trim();
+                const kodeCek = document.getElementById("kodeCek").value.trim();
+                
+                if (!namaProduk || !kodeBayar || !kodeCek) {
+                    showNotification("Nama Produk, Kode Bayar, dan Kode Cek wajib diisi untuk " + type, 'error');
+                    return;
+                }
+                
+                produkData.KodeBayar = kodeBayar;
+                produkData.KodeCek = kodeCek;
+                path = `ItemsCode/${type}/${category}/${menuName}/${namaProduk}`;
+            }
+            else if (type === "DYNAMIC_PRODUCT_BASED_ON_REGION") {
+                const namaKota = document.getElementById("namaProdukRegion").value.trim();
+                const namaWilayah = document.getElementById("namaWilayah").value.trim();
+                const kodeBayarRegion = document.getElementById("kodeBayarRegion").value.trim();
+                const kodeCekRegion = document.getElementById("kodeCekRegion").value.trim();
+                
+                if (!namaKota || !namaWilayah || !kodeBayarRegion || !kodeCekRegion) {
+                    showNotification("Nama Kota, Wilayah, Kode Bayar, dan Kode Cek wajib diisi untuk DYNAMIC_PRODUCT_BASED_ON_REGION", 'error');
+                    return;
+                }
+                
+                produkData.KodeBayar = kodeBayarRegion;
+                produkData.KodeCek = kodeCekRegion;
+                path = `ItemsCode/${type}/${category}/${menuName}/${namaKota}/Wilayah/${namaWilayah}`;
+            }
+            else {
+                if (!namaProduk || !code) {
+                    showNotification("Nama Produk dan Code wajib diisi untuk type ini", 'error');
+                    return;
+                }
+                produkData.Code = code;
+                path = `ItemsCode/${type}/${category}/${menuName}/${namaProduk}`;
+            }
+            
+            showLoading();
+            
+            dbRef.child(path).set(produkData)
+                .then(() => {
+                    showNotification("Produk berhasil disimpan ke Firebase!", 'success');
+                    // Reset form
+                    document.querySelectorAll('input').forEach(input => {
+                        if (input.id !== 'typeSelect') input.value = '';
+                    });
+                    hideLoading();
+                })
+                .catch(err => {
+                    console.error(err);
+                    showNotification("Gagal menyimpan produk: " + err.message, 'error');
+                    hideLoading();
+                });
         }
         
         // Initialize the app
