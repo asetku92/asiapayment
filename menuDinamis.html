@@ -610,6 +610,41 @@
             font-size: 20px;
         }
         
+        /* Style for prefix section */
+        .prefix-table-container {
+            margin-top: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .prefix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .prefix-table th, 
+        .prefix-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .prefix-table th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .prefix-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .prefix-table tr:hover {
+            background-color: rgba(0, 85, 255, 0.03);
+        }
+        
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -736,9 +771,10 @@
                         <span>Kode Produk</span>
                     </div>
                     
+                    <!-- Diubah dari "Prefik Tujuan" menjadi "Provider Prefik" -->
                     <div class="nav-item" onclick="loadContent('prefix')">
                         <i class="fas fa-list-ol"></i>
-                        <span>Prefik Tujuan</span>
+                        <span>Provider Prefik</span>
                     </div>
                     
                     <div class="nav-item" onclick="loadContent('serverconfig')">
@@ -1030,6 +1066,55 @@
                             </div>
                         </div>
                         
+                        <!-- Provider Prefix Section -->
+                        <div id="prefixSection" class="section hidden">
+                            <div class="section-title">
+                                <h2><i class="fas fa-list-ol"></i> Provider Prefik</h2>
+                                <button class="btn btn-primary" onclick="refreshPrefixData()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            
+                            <div id="prefixNotification" class="notification"></div>
+                            
+                            <div class="card">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="providerName">Nama Provider</label>
+                                            <input type="text" id="providerName" class="form-control" placeholder="Misal: Telkomsel">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="prefixValue">Prefik Tujuan</label>
+                                            <input type="text" id="prefixValue" class="form-control" placeholder="Misal: 0812,0813,0821">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-primary" onclick="simpanPrefik()" style="width:100%">
+                                    <i class="fas fa-save"></i> Simpan ke Database
+                                </button>
+                                
+                                <div class="prefix-table-container">
+                                    <table class="prefix-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Provider</th>
+                                                <th>Prefik</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="prefixTableBody">
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Container untuk konten dinamis -->
                         <div id="dynamicContent" class="dynamic-content">
                             <div class="loading-content">
@@ -1161,6 +1246,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const dbRef = database.ref('AsiaPayment/MenuDinamis');
+        const prefixRef = database.ref('AsiaPayment/prefikTujuan');
         
         // Data structure
         let appData = {
@@ -1169,7 +1255,8 @@
             admin: {
                 username: "admin",
                 password: "password123"
-            }
+            },
+            prefixData: {}
         };
         
         // Type descriptions
@@ -1319,11 +1406,17 @@
                 dbRef.child('Menu').once('value').then(snapshot => {
                     appData.menus = snapshot.val() || {};
                     
-                    // Update UI
-                    updateDashboardStats();
-                    renderCategories();
-                    renderMenus();
-                    hideLoading();
+                    // Load prefix data
+                    prefixRef.once('value').then(snapshot => {
+                        appData.prefixData = snapshot.val() || {};
+                        
+                        // Update UI
+                        updateDashboardStats();
+                        renderCategories();
+                        renderMenus();
+                        renderPrefixData();
+                        hideLoading();
+                    });
                 }).catch(error => {
                     console.error("Error loading menus:", error);
                     hideLoading();
@@ -1392,6 +1485,10 @@
                     document.getElementById('produkcodeSection').classList.remove('hidden');
                     hideLoading();
                     break;
+                case 'prefix':
+                    document.getElementById('prefixSection').classList.remove('hidden');
+                    hideLoading();
+                    break;
                 default:
                     showTemplatePage(page);
                     hideLoading();
@@ -1407,7 +1504,6 @@
                 regex: "Regex Extractor",
                 textinfo: "Informasi Teks",
                 cs: "Customer Service",
-                prefix: "Prefik Tujuan",
                 serverconfig: "Konfigurasi Server"
             };
             
@@ -1417,7 +1513,6 @@
                 regex: "fa-code",
                 textinfo: "fa-info-circle",
                 cs: "fa-headset",
-                prefix: "fa-list-ol",
                 serverconfig: "fa-server"
             };
             
@@ -1919,7 +2014,7 @@
             providerSection.classList.add('hidden');
             billSection.classList.add('hidden');
             regionSection.classList.add('hidden');
-            codeSection.classList.remove('hidden');
+            codeSection.remove('hidden');
         }
         
         function showNotification(message, type) {
@@ -2018,6 +2113,110 @@
                     showNotification("Gagal menyimpan produk: " + err.message, 'error');
                     hideLoading();
                 });
+        }
+        
+        // ================ PROVIDER PREFIX FUNCTIONS ================
+        function simpanPrefik() {
+            const provider = document.getElementById("providerName").value.trim();
+            const prefix = document.getElementById("prefixValue").value.trim();
+            
+            if (!provider || !prefix) {
+                showPrefixNotification("Nama Provider dan Prefik wajib diisi!", 'error');
+                return;
+            }
+            
+            showLoading();
+            
+            prefixRef.child(provider).set(prefix)
+                .then(() => {
+                    showPrefixNotification("Prefik berhasil disimpan ke Database!", 'success');
+                    document.getElementById("providerName").value = "";
+                    document.getElementById("prefixValue").value = "";
+                    loadPrefixData();
+                    hideLoading();
+                })
+                .catch(err => {
+                    console.error(err);
+                    showPrefixNotification("Gagal simpan ke Database: " + err.message, 'error');
+                    hideLoading();
+                });
+        }
+        
+        function refreshPrefixData() {
+            showLoading();
+            loadPrefixData();
+        }
+        
+        function loadPrefixData() {
+            prefixRef.once("value").then(snapshot => {
+                appData.prefixData = snapshot.val() || {};
+                renderPrefixData();
+                hideLoading();
+            }).catch(error => {
+                console.error("Error loading prefix data:", error);
+                showPrefixNotification("Gagal memuat data prefik", 'error');
+                hideLoading();
+            });
+        }
+        
+        function renderPrefixData() {
+            const tbody = document.getElementById("prefixTableBody");
+            tbody.innerHTML = "";
+            
+            for (const provider in appData.prefixData) {
+                const prefix = appData.prefixData[provider];
+                
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${provider}</td>
+                    <td>${prefix}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-edit btn-sm" onclick="editPrefix('${provider}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-delete btn-sm" onclick="deletePrefix('${provider}')">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+        
+        function editPrefix(provider) {
+            document.getElementById("providerName").value = provider;
+            document.getElementById("prefixValue").value = appData.prefixData[provider] || "";
+        }
+        
+        function deletePrefix(provider) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus provider "${provider}"?`)) {
+                return;
+            }
+            
+            showLoading();
+            
+            prefixRef.child(provider).remove()
+                .then(() => {
+                    showPrefixNotification("Provider berhasil dihapus", 'success');
+                    loadPrefixData();
+                })
+                .catch(error => {
+                    console.error("Error deleting prefix:", error);
+                    showPrefixNotification("Gagal menghapus provider", 'error');
+                    hideLoading();
+                });
+        }
+        
+        function showPrefixNotification(message, type) {
+            const notification = document.getElementById("prefixNotification");
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Sembunyikan notifikasi setelah 5 detik
+            setTimeout(() => {
+                notification.classList.remove('success', 'error');
+                notification.style.display = 'none';
+            }, 5000);
         }
         
         // Initialize the app
