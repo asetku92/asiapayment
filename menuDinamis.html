@@ -645,150 +645,6 @@
             background-color: rgba(0, 85, 255, 0.03);
         }
         
-        /* Styles for UI Display section */
-        .ui-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-        
-        .ui-tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--gray);
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-        
-        .ui-tab.active {
-            color: var(--primary);
-            border-bottom: 3px solid var(--primary);
-        }
-        
-        .ui-tab-content {
-            display: none;
-        }
-        
-        .ui-tab-content.active {
-            display: block;
-        }
-        
-        .banner-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 15px;
-            background: var(--light-gray);
-        }
-        
-        .banner-item img {
-            width: 100px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-        
-        .banner-item-details {
-            flex: 1;
-        }
-        
-        .banner-item-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .color-preview {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-        }
-        
-        .mobile-preview {
-            width: 300px;
-            height: 600px;
-            border: 2px solid var(--dark);
-            border-radius: 30px;
-            overflow: hidden;
-            position: relative;
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .mobile-header {
-            height: 60px;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-        }
-        
-        .mobile-banner {
-            height: 150px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .mobile-banner img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.5s ease;
-        }
-        
-        .mobile-content {
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
-        
-        .mobile-nav {
-            height: 70px;
-            background: #f8f9fa;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid var(--border);
-        }
-        
-        .mobile-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 12px;
-            color: var(--gray);
-        }
-        
-        .mobile-nav-item.active {
-            color: var(--primary);
-        }
-        
-        .mobile-nav-item i {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        
-        .gradient-preview {
-            height: 100px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border);
-        }
-        
-        .color-scheme-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -809,11 +665,6 @@
             
             .action-buttons {
                 flex-direction: column;
-            }
-            
-            .mobile-preview {
-                width: 250px;
-                height: 500px;
             }
         }
     </style>
@@ -889,10 +740,15 @@
                         <span>Pengaturan</span>
                     </div>
                     
-                    <!-- Menu Tampilan UI (gabungan Banner dan Color) -->
-                    <div class="nav-item" onclick="loadContent('uidisplay')">
-                        <i class="fas fa-paint-brush"></i>
-                        <span>Tampilan UI</span>
+                    <!-- Menu Baru -->
+                    <div class="nav-item" onclick="loadContent('banner')">
+                        <i class="fas fa-image"></i>
+                        <span>Banner</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="loadContent('color')">
+                        <i class="fas fa-palette"></i>
+                        <span>Color</span>
                     </div>
                     
                     <div class="nav-item" onclick="loadContent('regex')">
@@ -1074,145 +930,189 @@
                             </div>
                         </div>
                         
-                        <!-- Tampilan UI Section (Banner + Color) -->
-                        <div id="uidisplaySection" class="section hidden">
-                            <div class="section-title">
-                                <h2><i class="fas fa-paint-brush"></i> Tampilan UI</h2>
-                            </div>
-                            
-                            <div class="ui-tabs">
-                                <div class="ui-tab active" onclick="switchUiTab('banner')">Banner</div>
-                                <div class="ui-tab" onclick="switchUiTab('color')">Warna</div>
-                                <div class="ui-tab" onclick="switchUiTab('preview')">Preview</div>
-                            </div>
-                            
-                            <!-- Banner Tab -->
-                            <div id="bannerTab" class="ui-tab-content active">
-                                <div class="card">
-                                    <h3>Pengaturan Banner Slide</h3>
-                                    
-                                    <div class="form-group">
-                                        <label for="bannerInterval">Interval Perubahan Banner (detik)</label>
-                                        <input type="number" id="bannerInterval" class="form-control" min="1" value="3">
-                                    </div>
-                                    
-                                    <button class="btn btn-primary" onclick="saveBannerInterval()">
-                                        <i class="fas fa-save"></i> Simpan Interval
-                                    </button>
-                                    
-                                    <div class="form-group" style="margin-top: 20px;">
-                                        <label for="newBannerUrl">URL Banner Baru</label>
-                                        <input type="text" id="newBannerUrl" class="form-control" placeholder="https://example.com/banner.jpg">
-                                    </div>
-                                    
-                                    <button class="btn btn-success" onclick="addBanner()">
-                                        <i class="fas fa-plus"></i> Tambah Banner
-                                    </button>
-                                    
-                                    <div id="bannerList" style="margin-top: 20px;">
-                                        <!-- Banner list will be populated here -->
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Color Tab -->
-                            <div id="colorTab" class="ui-tab-content">
-                                <div class="card">
-                                    <h3>Pengaturan Warna Aplikasi</h3>
-                                    
-                                    <div class="form-group">
-                                        <label>Background Gradient</label>
-                                        <div class="form-row">
-                                            <div class="form-col">
-                                                <input type="color" id="gradientColor1" class="form-control" value="#ffffff">
-                                            </div>
-                                            <div class="form-col">
-                                                <input type="color" id="gradientColor2" class="form-control" value="#FF3537">
-                                            </div>
-                                            <div class="form-col">
-                                                <input type="color" id="gradientColor3" class="form-control" value="#FEB400">
-                                            </div>
-                                            <div class="form-col">
-                                                <input type="color" id="gradientColor4" class="form-control" value="#FA2F62">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>Color Scheme</label>
-                                        <div class="form-row">
-                                            <div class="form-col">
-                                                <label for="primaryColor">Primary Color</label>
-                                                <input type="color" id="primaryColor" class="form-control" value="#FEB400">
-                                            </div>
-                                            <div class="form-col">
-                                                <label for="secondaryColor">Secondary Color</label>
-                                                <input type="color" id="secondaryColor" class="form-control" value="#ff5722">
-                                            </div>
-                                            <div class="form-col">
-                                                <label for="textColor">Text Color</label>
-                                                <input type="color" id="textColor" class="form-control" value="#212121">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <button class="btn btn-primary" onclick="saveColorSettings()">
-                                        <i class="fas fa-save"></i> Simpan Pengaturan Warna
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Preview Tab -->
-                            <div id="previewTab" class="ui-tab-content">
-                                <div class="card">
-                                    <h3>Preview Tampilan Mobile</h3>
-                                    <p>Berikut adalah preview bagaimana tampilan aplikasi di perangkat mobile dengan pengaturan banner dan warna saat ini.</p>
-                                    
-                                    <div class="mobile-preview">
-                                        <div class="mobile-header" id="previewHeader">
-                                            ASIA PAYMENT
-                                        </div>
-                                        <div class="mobile-banner" id="previewBanner">
-                                            <!-- Banner will be populated here -->
-                                        </div>
-                                        <div class="mobile-content">
-                                            <h4>Selamat Datang</h4>
-                                            <p>Ini adalah preview tampilan aplikasi mobile dengan pengaturan warna dan banner yang telah dikonfigurasi.</p>
-                                            
-                                            <div class="form-group">
-                                                <label>Nomor Tujuan</label>
-                                                <input type="text" class="form-control" placeholder="08xxxxxxxxxx">
-                                            </div>
-                                            
-                                            <button class="btn btn-primary" style="width: 100%;">Lanjutkan</button>
-                                        </div>
-                                        <div class="mobile-nav">
-                                            <div class="mobile-nav-item active">
-                                                <i class="fas fa-home"></i>
-                                                <span>Home</span>
-                                            </div>
-                                            <div class="mobile-nav-item">
-                                                <i class="fas fa-history"></i>
-                                                <span>Riwayat</span>
-                                            </div>
-                                            <div class="mobile-nav-item">
-                                                <i class="fas fa-user"></i>
-                                                <span>Profil</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <!-- Produk Code Section -->
                         <div id="produkcodeSection" class="section hidden">
-                            <!-- ... existing produkcode content ... -->
+                            <div class="section-title">
+                                <h2><i class="fas fa-barcode"></i> Input Kode Produk</h2>
+                            </div>
+                            
+                            <div id="notification" class="notification"></div>
+                            
+                            <div class="card">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="typeSelect">Tipe Produk</label>
+                                            <select id="typeSelect" class="form-control" onchange="loadMenus()">
+                                                <option value="">--Pilih Tipe Produk--</option>
+                                                <option value="PROVIDER_BASED">PROVIDER_BASED</option>
+                                                <option value="STATIC_PRODUCT">STATIC_PRODUCT</option>
+                                                <option value="POSTPAID_BILL">POSTPAID_BILL</option>
+                                                <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER</option>
+                                                <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION</option>
+                                                <option value="URL">URL</option>
+                                                <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="menuSelect">Kategori & Menu</label>
+                                            <select id="menuSelect" class="form-control">
+                                                <option value="">--Pilih Kategori/Menu--</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Provider -->
+                                <div id="providerSection" class="input-section hidden">
+                                    <h3><i class="fas fa-sim-card"></i> Informasi Provider</h3>
+                                    <div class="form-group">
+                                        <label for="providerPrefik">Provider Prefik</label>
+                                        <input type="text" id="providerPrefik" class="form-control" placeholder="Misal: Telkomsel">
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Produk Utama -->
+                                <div id="produkSection" class="input-section">
+                                    <h3><i class="fas fa-box"></i> Informasi Produk</h3>
+                                    <div class="form-group">
+                                        <label id="labelProduk">Nama Produk</label>
+                                        <input type="text" id="namaProduk" class="form-control" placeholder="Misal: Telkomsel Nasional">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Kode Produk</label>
+                                        <input type="text" id="codeProduk" class="form-control" placeholder="Misal: S">
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Bill -->
+                                <div id="billSection" class="input-section hidden">
+                                    <h3><i class="fas fa-receipt"></i> Informasi Tagihan</h3>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeBayar">Kode Bayar</label>
+                                                <input type="text" id="kodeBayar" class="form-control" placeholder="Misal: BYRPLN">
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeCek">Kode Cek</label>
+                                                <input type="text" id="kodeCek" class="form-control" placeholder="Misal: CEKPLN">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Region -->
+                                <div id="regionSection" class="input-section hidden">
+                                    <h3><i class="fas fa-map-marker-alt"></i> Informasi Wilayah</h3>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="namaProdukRegion">Nama Kota</label>
+                                                <input type="text" id="namaProdukRegion" class="form-control" placeholder="Misal: Gorontalo">
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="namaWilayah">Nama Wilayah</label>
+                                                <input type="text" id="namaWilayah" class="form-control" placeholder="Misal: Bonebolango">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeBayarRegion">Kode Bayar</label>
+                                                <input type="text" id="kodeBayarRegion" class="form-control" placeholder="Misal: BYRPDAM">
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label for="kodeCekRegion">Kode Cek</label>
+                                                <input type="text" id="kodeCekRegion" class="form-control" placeholder="Misal: CEKPDAM">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Umum -->
+                                <div class="input-section">
+                                    <h3><i class="fas fa-info-circle"></i> Informasi Tambahan</h3>
+                                    <div class="form-group">
+                                        <label for="imageUrl">URL Gambar</label>
+                                        <input type="text" id="imageUrl" class="form-control" placeholder="https://...">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="keterangan">Keterangan</label>
+                                        <input type="text" id="keterangan" class="form-control" placeholder="Misal: Produk Nasional">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <button class="btn btn-primary" onclick="simpanProduk()" style="width:100%">
+                                            <i class="fas fa-save"></i> Simpan ke Firebase
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Provider Prefix Section -->
                         <div id="prefixSection" class="section hidden">
-                            <!-- ... existing prefix content ... -->
+                            <div class="section-title">
+                                <h2><i class="fas fa-list-ol"></i> Provider Prefik</h2>
+                                <button class="btn btn-primary" onclick="refreshPrefixData()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            
+                            <div id="prefixNotification" class="notification"></div>
+                            
+                            <div class="card">
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="providerName">Nama Provider</label>
+                                            <input type="text" id="providerName" class="form-control" placeholder="Misal: Telkomsel">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for="prefixValue">Prefik Tujuan</label>
+                                            <input type="text" id="prefixValue" class="form-control" placeholder="Misal: 0812,0813,0821">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-primary" onclick="simpanPrefik()" style="width:100%">
+                                    <i class="fas fa-save"></i> Simpan ke Database
+                                </button>
+                                
+                                <div class="prefix-table-container">
+                                    <table class="prefix-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Provider</th>
+                                                <th>Prefik</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="prefixTableBody">
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Container untuk konten dinamis -->
@@ -1239,12 +1139,95 @@
     
     <!-- Category Form Modal -->
     <div id="categoryModal" class="modal hidden">
-        <!-- ... existing category modal ... -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">Tambah Kategori Baru</h3>
+                <button class="close" onclick="closeCategoryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="categoryName">Nama Kategori</label>
+                    <input type="text" id="categoryName" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="categoryOrder">Urutan</label>
+                    <input type="number" id="categoryOrder" class="form-control" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeCategoryModal()">Batal</button>
+                <button class="btn btn-primary" onclick="saveCategory()">Simpan</button>
+            </div>
+        </div>
     </div>
     
     <!-- Menu Form Modal -->
     <div id="menuModal" class="modal hidden">
-        <!-- ... existing menu modal ... -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="menuModalTitle">Tambah Menu Baru</h3>
+                <button class="close" onclick="closeMenuModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="menuCategory">Kategori</label>
+                            <select id="menuCategory" class="form-control">
+                                <!-- Options akan diisi -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="menuName">Nama Menu</label>
+                            <input type="text" id="menuName" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuIconUrl">URL Icon Menu</label>
+                    <input type="text" id="menuIconUrl" class="form-control" placeholder="https://example.com/icon.png">
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuOrder">Urutan Menu</label>
+                    <input type="number" id="menuOrder" class="form-control" min="1" value="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuType">Tipe Menu</label>
+                    <select id="menuType" class="form-control">
+                        <option value="PROVIDER_BASED">PROVIDER_BASED (Pulsa Reguler)</option>
+                        <option value="STATIC_PRODUCT">STATIC_PRODUCT (Token PLN)</option>
+                        <option value="POSTPAID_BILL">POSTPAID_BILL (Tagihan PLN)</option>
+                        <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER (Digipos)</option>
+                        <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION (Voucher)</option>
+                        <option value="URL">URL (Tautan Eksternal)</option>
+                        <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION (PDAM Berdasarkan Wilayah)</option>
+                    </select>
+                    <div class="type-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="typeDescription">PROVIDER_BASED: Menu dengan pilihan provider dan nominal</span>
+                    </div>
+                </div>
+                
+                <!-- Form khusus untuk URL -->
+                <div id="urlForm" class="hidden">
+                    <div class="form-group">
+                        <label for="urlTarget">URL Tujuan</label>
+                        <input type="text" id="urlTarget" class="form-control" placeholder="https://example.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeMenuModal()">Batal</button>
+                <button class="btn btn-primary" onclick="saveMenu()">Simpan</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1264,8 +1247,6 @@
         const database = firebase.database();
         const dbRef = database.ref('AsiaPayment/MenuDinamis');
         const prefixRef = database.ref('AsiaPayment/prefikTujuan');
-        const bannerRef = database.ref('AsiaPayment/BannerSlide');
-        const colorRef = database.ref('AsiaPayment/Color');
         
         // Data structure
         let appData = {
@@ -1275,9 +1256,7 @@
                 username: "admin",
                 password: "password123"
             },
-            prefixData: {},
-            bannerData: {},
-            colorData: {}
+            prefixData: {}
         };
         
         // Type descriptions
@@ -1295,7 +1274,6 @@
         let currentCategory = null;
         let currentMenu = null;
         let editingMode = false;
-        let currentBannerKey = null;
         
         // DOM Elements
         const loginSection = document.getElementById('loginSection');
@@ -1432,27 +1410,11 @@
                     prefixRef.once('value').then(snapshot => {
                         appData.prefixData = snapshot.val() || {};
                         
-                        // Load banner data
-                        bannerRef.once('value').then(snapshot => {
-                            appData.bannerData = snapshot.val() || {};
-                            
-                            // Load color data
-                            colorRef.once('value').then(snapshot => {
-                                appData.colorData = snapshot.val() || {};
-                                
-                                // Update UI
-                                updateDashboardStats();
-                                renderCategories();
-                                renderMenus();
-                                renderPrefixData();
-                                renderBannerData();
-                                renderColorData();
-                                updatePreview();
-                                hideLoading();
-                            });
-                        });
-                    }).catch(error => {
-                        console.error("Error loading prefix data:", error);
+                        // Update UI
+                        updateDashboardStats();
+                        renderCategories();
+                        renderMenus();
+                        renderPrefixData();
                         hideLoading();
                     });
                 }).catch(error => {
@@ -1519,10 +1481,6 @@
                     document.getElementById('settingsSection').classList.remove('hidden');
                     hideLoading();
                     break;
-                case 'uidisplay':
-                    document.getElementById('uidisplaySection').classList.remove('hidden');
-                    hideLoading();
-                    break;
                 case 'produkcode':
                     document.getElementById('produkcodeSection').classList.remove('hidden');
                     hideLoading();
@@ -1541,6 +1499,8 @@
         function showTemplatePage(pageName) {
             const dynamicContent = document.getElementById('dynamicContent');
             const pageTitles = {
+                banner: "Manajemen Banner",
+                color: "Manajemen Warna",
                 regex: "Regex Extractor",
                 textinfo: "Informasi Teks",
                 cs: "Customer Service",
@@ -1548,6 +1508,8 @@
             };
             
             const pageIcons = {
+                banner: "fa-image",
+                color: "fa-palette",
                 regex: "fa-code",
                 textinfo: "fa-info-circle",
                 cs: "fa-headset",
@@ -1978,250 +1940,6 @@
             }
             
             alert("Akun admin berhasil diperbarui!");
-        }
-        
-        // ================ TAMPILAN UI FUNCTIONS ================
-        function switchUiTab(tabName) {
-            // Hide all tabs
-            document.getElementById('bannerTab').classList.remove('active');
-            document.getElementById('colorTab').classList.remove('active');
-            document.getElementById('previewTab').classList.remove('active');
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.ui-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Activate selected tab
-            document.getElementById(tabName + 'Tab').classList.add('active');
-            event.currentTarget.classList.add('active');
-            
-            // If preview tab, update the preview
-            if (tabName === 'preview') {
-                updatePreview();
-            }
-        }
-        
-        function renderBannerData() {
-            const bannerList = document.getElementById('bannerList');
-            bannerList.innerHTML = '';
-            
-            // Set interval value
-            if (appData.bannerData.IntervalPerdetik) {
-                document.getElementById('bannerInterval').value = appData.bannerData.IntervalPerdetik;
-            }
-            
-            // Render banners
-            for (const key in appData.bannerData) {
-                if (key === 'IntervalPerdetik') continue;
-                
-                const bannerUrl = appData.bannerData[key];
-                
-                const bannerItem = document.createElement('div');
-                bannerItem.className = 'banner-item';
-                bannerItem.innerHTML = `
-                    <img src="${bannerUrl}" alt="Banner ${key}">
-                    <div class="banner-item-details">
-                        <strong>Banner ${key}</strong>
-                        <div>${bannerUrl}</div>
-                    </div>
-                    <div class="banner-item-actions">
-                        <button class="btn btn-edit btn-sm" onclick="editBanner('${key}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn btn-delete btn-sm" onclick="deleteBanner('${key}')">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
-                    </div>
-                `;
-                bannerList.appendChild(bannerItem);
-            }
-        }
-        
-        function renderColorData() {
-            // Set gradient colors
-            if (appData.colorData.BackgroundGradient) {
-                const gradients = appData.colorData.BackgroundGradient;
-                document.getElementById('gradientColor1').value = gradients[0] || '#ffffff';
-                document.getElementById('gradientColor2').value = gradients[1] || '#FF3537';
-                document.getElementById('gradientColor3').value = gradients[2] || '#FEB400';
-                document.getElementById('gradientColor4').value = gradients[3] || '#FA2F62';
-            }
-            
-            // Set color scheme
-            if (appData.colorData.ColorScheme) {
-                const scheme = appData.colorData.ColorScheme;
-                document.getElementById('primaryColor').value = scheme.primaryColor || '#FEB400';
-                document.getElementById('secondaryColor').value = scheme.secondaryColor || '#ff5722';
-                document.getElementById('textColor').value = scheme.textColor || '#212121';
-            }
-        }
-        
-        function addBanner() {
-            const bannerUrl = document.getElementById('newBannerUrl').value.trim();
-            
-            if (!bannerUrl) {
-                alert('URL banner tidak boleh kosong!');
-                return;
-            }
-            
-            showLoading();
-            
-            // Find the next available key
-            let maxKey = 0;
-            for (const key in appData.bannerData) {
-                if (key !== 'IntervalPerdetik' && parseInt(key) > maxKey) {
-                    maxKey = parseInt(key);
-                }
-            }
-            const newKey = (maxKey + 1).toString();
-            
-            // Add to data and update Firebase
-            appData.bannerData[newKey] = bannerUrl;
-            
-            bannerRef.set(appData.bannerData)
-                .then(() => {
-                    renderBannerData();
-                    document.getElementById('newBannerUrl').value = '';
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error('Error adding banner:', error);
-                    alert('Gagal menambahkan banner');
-                    hideLoading();
-                });
-        }
-        
-        function editBanner(key) {
-            const bannerUrl = prompt('Edit URL Banner:', appData.bannerData[key]);
-            
-            if (bannerUrl !== null) {
-                showLoading();
-                
-                appData.bannerData[key] = bannerUrl;
-                
-                bannerRef.set(appData.bannerData)
-                    .then(() => {
-                        renderBannerData();
-                        hideLoading();
-                    })
-                    .catch(error => {
-                        console.error('Error editing banner:', error);
-                        alert('Gagal mengedit banner');
-                        hideLoading();
-                    });
-            }
-        }
-        
-        function deleteBanner(key) {
-            if (confirm('Apakah Anda yakin ingin menghapus banner ini?')) {
-                showLoading();
-                
-                delete appData.bannerData[key];
-                
-                bannerRef.set(appData.bannerData)
-                    .then(() => {
-                        renderBannerData();
-                        hideLoading();
-                    })
-                    .catch(error => {
-                        console.error('Error deleting banner:', error);
-                        alert('Gagal menghapus banner');
-                        hideLoading();
-                    });
-            }
-        }
-        
-        function saveBannerInterval() {
-            const interval = document.getElementById('bannerInterval').value;
-            
-            showLoading();
-            
-            appData.bannerData.IntervalPerdetik = parseInt(interval);
-            
-            bannerRef.set(appData.bannerData)
-                .then(() => {
-                    alert('Interval berhasil disimpan');
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error('Error saving interval:', error);
-                    alert('Gagal menyimpan interval');
-                    hideLoading();
-                });
-        }
-        
-        function saveColorSettings() {
-            showLoading();
-            
-            const gradientColors = [
-                document.getElementById('gradientColor1').value,
-                document.getElementById('gradientColor2').value,
-                document.getElementById('gradientColor3').value,
-                document.getElementById('gradientColor4').value
-            ];
-            
-            const colorScheme = {
-                primaryColor: document.getElementById('primaryColor').value,
-                secondaryColor: document.getElementById('secondaryColor').value,
-                textColor: document.getElementById('textColor').value
-            };
-            
-            appData.colorData = {
-                BackgroundGradient: gradientColors,
-                ColorScheme: colorScheme
-            };
-            
-            colorRef.set(appData.colorData)
-                .then(() => {
-                    alert('Pengaturan warna berhasil disimpan');
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error('Error saving color settings:', error);
-                    alert('Gagal menyimpan pengaturan warna');
-                    hideLoading();
-                });
-        }
-        
-        function updatePreview() {
-            // Update banner preview
-            const previewBanner = document.getElementById('previewBanner');
-            previewBanner.innerHTML = '';
-            
-            // Get first banner for preview
-            for (const key in appData.bannerData) {
-                if (key !== 'IntervalPerdetik') {
-                    const bannerImg = document.createElement('img');
-                    bannerImg.src = appData.bannerData[key];
-                    bannerImg.alt = 'Banner Preview';
-                    previewBanner.appendChild(bannerImg);
-                    break;
-                }
-            }
-            
-            // Update color preview
-            if (appData.colorData.ColorScheme) {
-                const scheme = appData.colorData.ColorScheme;
-                document.getElementById('previewHeader').style.backgroundColor = scheme.primaryColor;
-                
-                // Update buttons in preview
-                const previewButtons = document.querySelectorAll('.mobile-content .btn');
-                previewButtons.forEach(btn => {
-                    btn.style.backgroundColor = scheme.primaryColor;
-                });
-                
-                // Update active nav item
-                const activeNav = document.querySelector('.mobile-nav-item.active');
-                activeNav.style.color = scheme.primaryColor;
-            }
-            
-            // Update gradient background if available
-            if (appData.colorData.BackgroundGradient) {
-                const gradients = appData.colorData.BackgroundGradient;
-                const gradientStr = `linear-gradient(135deg, ${gradients[0]}, ${gradients[1]}, ${gradients[2]}, ${gradients[3]})`;
-                document.querySelector('.mobile-preview').style.background = gradientStr;
-            }
         }
         
         // ================ KODE PRODUK FUNCTIONS ================
