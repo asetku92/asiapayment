@@ -645,6 +645,53 @@
             background-color: rgba(0, 85, 255, 0.03);
         }
         
+        /* Style for produk table */
+        .produk-table-container {
+            margin-top: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .produk-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .produk-table th, 
+        .produk-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .produk-table th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .produk-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .produk-table tr:hover {
+            background-color: rgba(0, 85, 255, 0.03);
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-control {
+            flex: 1;
+            min-width: 200px;
+        }
+        
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -664,6 +711,10 @@
             }
             
             .action-buttons {
+                flex-direction: column;
+            }
+            
+            .filter-controls {
                 flex-direction: column;
             }
         }
@@ -934,6 +985,9 @@
                         <div id="produkcodeSection" class="section hidden">
                             <div class="section-title">
                                 <h2><i class="fas fa-barcode"></i> Input Kode Produk</h2>
+                                <button class="btn btn-primary" onclick="refreshProdukData()">
+                                    <i class="fas fa-sync-alt"></i> Refresh Data
+                                </button>
                             </div>
                             
                             <div id="notification" class="notification"></div>
@@ -1011,339 +1065,150 @@
                                 <!-- Section Region -->
                                 <div id="regionSection" class="input-section hidden">
                                     <h3><i class="fas fa-map-marker-alt"></i> Informasi Wilayah</h3>
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label for="namaProdukRegion">Nama Kota</label>
-                                                <input type="text" id="namaProdukRegion" class="form-control" placeholder="Misal: Gorontalo">
-                                            </div>
-                                        </div>
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label for="namaWilayah">Nama Wilayah</label>
-                                                <input type="text" id="namaWilayah" class="form-control" placeholder="Misal: Bonebolango">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label for="kodeBayarRegion">Kode Bayar</label>
-                                                <input type="text" id="kodeBayarRegion" class="form-control" placeholder="Misal: BYRPDAM">
-                                            </div>
-                                        </div>
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label for="kodeCekRegion">Kode Cek</label>
-                                                <input type="text" id="kodeCekRegion" class="form-control" placeholder="Misal: CEKPDAM">
-                                            </div>
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="kodeRegion">Kode Wilayah</label>
+                                        <input type="text" id="kodeRegion" class="form-control" placeholder="Misal: JKT">
                                     </div>
                                 </div>
                                 
-                                <!-- Section Umum -->
-                                <div class="input-section">
-                                    <h3><i class="fas fa-info-circle"></i> Informasi Tambahan</h3>
+                                <!-- Section URL -->
+                                <div id="urlSection" class="input-section hidden">
+                                    <h3><i class="fas fa-link"></i> Informasi URL</h3>
                                     <div class="form-group">
-                                        <label for="imageUrl">URL Gambar</label>
-                                        <input type="text" id="imageUrl" class="form-control" placeholder="https://...">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="keterangan">Keterangan</label>
-                                        <input type="text" id="keterangan" class="form-control" placeholder="Misal: Produk Nasional">
+                                        <label for="url">URL</label>
+                                        <input type="text" id="url" class="form-control" placeholder="Misal: https://example.com">
                                     </div>
                                 </div>
                                 
-                                <div class="form-row">
-                                    <div class="form-col">
-                                        <button class="btn btn-primary" onclick="simpanProduk()" style="width:100%">
-                                            <i class="fas fa-save"></i> Simpan ke Firebase
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Provider Prefix Section -->
-                        <div id="prefixSection" class="section hidden">
-                            <div class="section-title">
-                                <h2><i class="fas fa-list-ol"></i> Provider Prefik</h2>
-                                <button class="btn btn-primary" onclick="refreshPrefixData()">
-                                    <i class="fas fa-sync-alt"></i> Refresh
+                                <button class="btn btn-primary" onclick="saveProduk()">
+                                    <i class="fas fa-save"></i> Simpan Produk
                                 </button>
                             </div>
                             
-                            <div id="prefixNotification" class="notification"></div>
-                            
+                            <!-- Tampilan Data Produk -->
                             <div class="card">
-                                <div class="form-row">
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="providerName">Nama Provider</label>
-                                            <input type="text" id="providerName" class="form-control" placeholder="Misal: Telkomsel">
-                                        </div>
+                                <div class="section-title">
+                                    <h2><i class="fas fa-list"></i> Data Kode Produk</h2>
+                                </div>
+                                
+                                <div class="filter-controls">
+                                    <div class="filter-control">
+                                        <label for="filterType">Filter Tipe</label>
+                                        <select id="filterType" class="form-control" onchange="filterProduk()">
+                                            <option value="">Semua Tipe</option>
+                                            <option value="PROVIDER_BASED">PROVIDER_BASED</option>
+                                            <option value="STATIC_PRODUCT">STATIC_PRODUCT</option>
+                                            <option value="POSTPAID_BILL">POSTPAID_BILL</option>
+                                            <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER</option>
+                                            <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION</option>
+                                            <option value="URL">URL</option>
+                                            <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION</option>
+                                        </select>
                                     </div>
                                     
-                                    <div class="form-col">
-                                        <div class="form-group">
-                                            <label for="prefixValue">Prefik Tujuan</label>
-                                            <input type="text" id="prefixValue" class="form-control" placeholder="Misal: 0812,0813,0821">
-                                        </div>
+                                    <div class="filter-control">
+                                        <label for="filterMenu">Filter Menu</label>
+                                        <select id="filterMenu" class="form-control" onchange="filterProduk()">
+                                            <option value="">Semua Menu</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="filter-control">
+                                        <label for="searchProduk">Cari Produk</label>
+                                        <input type="text" id="searchProduk" class="form-control" placeholder="Cari nama/kode produk..." onkeyup="filterProduk()">
                                     </div>
                                 </div>
                                 
-                                <button class="btn btn-primary" onclick="simpanPrefik()" style="width:100%">
-                                    <i class="fas fa-save"></i> Simpan ke Database
-                                </button>
-                                
-                                <div class="prefix-table-container">
-                                    <table class="prefix-table">
+                                <div class="produk-table-container">
+                                    <table class="produk-table">
                                         <thead>
                                             <tr>
+                                                <th>Kode</th>
+                                                <th>Nama</th>
+                                                <th>Tipe</th>
+                                                <th>Menu</th>
                                                 <th>Provider</th>
-                                                <th>Prefik</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="prefixTableBody">
-                                            <!-- Data will be populated here -->
+                                        <tbody id="produkTableBody">
+                                            <!-- Data produk akan ditampilkan di sini -->
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                <div id="loadingProduk" class="loading-content">
+                                    <div class="spinner"></div>
+                                    <p>Memuat data produk...</p>
+                                </div>
+                                
+                                <div id="noProdukData" class="content-error hidden">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>Tidak ada data produk yang ditemukan.</p>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- Container untuk konten dinamis -->
-                        <div id="dynamicContent" class="dynamic-content">
-                            <div class="loading-content">
-                                <div class="spinner"></div>
-                                <p>Memuat konten...</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Loading Indicator -->
-                    <div id="loadingIndicator" class="loading hidden">
-                        <div class="spinner"></div>
                     </div>
                 </div>
             </div>
             
             <footer>
-                <p>© 2023 ASIA PAYMENT - Console Admin. Hak Cipta Dilindungi.</p>
+                <p>&copy; 2023 ASIA PAYMENT - Console Admin. All rights reserved.</p>
             </footer>
-        </div>
-    </div>
-    
-    <!-- Category Form Modal -->
-    <div id="categoryModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="categoryModalTitle">Tambah Kategori Baru</h3>
-                <button class="close" onclick="closeCategoryModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="categoryName">Nama Kategori</label>
-                    <input type="text" id="categoryName" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label for="categoryOrder">Urutan</label>
-                    <input type="number" id="categoryOrder" class="form-control" min="1">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeCategoryModal()">Batal</button>
-                <button class="btn btn-primary" onclick="saveCategory()">Simpan</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Menu Form Modal -->
-    <div id="menuModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="menuModalTitle">Tambah Menu Baru</h3>
-                <button class="close" onclick="closeMenuModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-col">
-                        <div class="form-group">
-                            <label for="menuCategory">Kategori</label>
-                            <select id="menuCategory" class="form-control">
-                                <!-- Options akan diisi -->
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-col">
-                        <div class="form-group">
-                            <label for="menuName">Nama Menu</label>
-                            <input type="text" id="menuName" class="form-control">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="menuIconUrl">URL Icon Menu</label>
-                    <input type="text" id="menuIconUrl" class="form-control" placeholder="https://example.com/icon.png">
-                </div>
-                
-                <div class="form-group">
-                    <label for="menuOrder">Urutan Menu</label>
-                    <input type="number" id="menuOrder" class="form-control" min="1" value="1">
-                </div>
-                
-                <div class="form-group">
-                    <label for="menuType">Tipe Menu</label>
-                    <select id="menuType" class="form-control">
-                        <option value="PROVIDER_BASED">PROVIDER_BASED (Pulsa Reguler)</option>
-                        <option value="STATIC_PRODUCT">STATIC_PRODUCT (Token PLN)</option>
-                        <option value="POSTPAID_BILL">POSTPAID_BILL (Tagihan PLN)</option>
-                        <option value="DYNAMIC_PRODUCT_BASED_ON_NUMBER">DYNAMIC_PRODUCT_BASED_ON_NUMBER (Digipos)</option>
-                        <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION (Voucher)</option>
-                        <option value="URL">URL (Tautan Eksternal)</option>
-                        <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION (PDAM Berdasarkan Wilayah)</option>
-                    </select>
-                    <div class="type-info">
-                        <i class="fas fa-info-circle"></i>
-                        <span id="typeDescription">PROVIDER_BASED: Menu dengan pilihan provider dan nominal</span>
-                    </div>
-                </div>
-                
-                <!-- Form khusus untuk URL -->
-                <div id="urlForm" class="hidden">
-                    <div class="form-group">
-                        <label for="urlTarget">URL Tujuan</label>
-                        <input type="text" id="urlTarget" class="form-control" placeholder="https://example.com">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeMenuModal()">Batal</button>
-                <button class="btn btn-primary" onclick="saveMenu()">Simpan</button>
-            </div>
         </div>
     </div>
 
     <script>
-        // Konfigurasi Firebase
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBfLp7f8kqjI6jYp1y1XJkY7Z1bLd8l4hQ",
+            apiKey: "AIzaSyD3vHdT3pJxN2Y4t8p2ZvV7wQf2XvL5z8M",
             authDomain: "steady-fin-368617.firebaseapp.com",
             databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
             projectId: "steady-fin-368617",
             storageBucket: "steady-fin-368617.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdefghijklmnopqrstuv"
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
         };
         
-        // Inisialisasi Firebase
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const dbRef = database.ref('AsiaPayment/MenuDinamis');
-        const prefixRef = database.ref('AsiaPayment/prefikTujuan');
         
-        // Data structure
-        let appData = {
-            categories: {},
-            menus: {},
-            admin: {
-                username: "admin",
-                password: "password123"
-            },
-            prefixData: {}
-        };
+        // Global variables
+        let currentUser = null;
+        let categories = [];
+        let menus = [];
+        let produkData = [];
         
-        // Type descriptions
-        const typeDescriptions = {
-            PROVIDER_BASED: "Menu dengan pilihan provider dan nominal (contoh: Pulsa Reguler)",
-            STATIC_PRODUCT: "Menu produk statis tanpa input (contoh: Token PLN)",
-            POSTPAID_BILL: "Menu untuk pembayaran tagihan (contoh: Tagihan PLN)",
-            DYNAMIC_PRODUCT_BASED_ON_NUMBER: "Menu produk dinamis berdasarkan nomor (contoh: Digipos)",
-            VOUCHER_AKTIVATION: "Menu aktivasi voucher (contoh: Voucher Kosong)",
-            URL: "Menu yang mengarahkan ke URL eksternal",
-            DYNAMIC_PRODUCT_BASED_ON_REGION: "Menu produk PDAM berbasis hierarki wilayah (Provinsi -> Kota -> Cabang)"
-        };
-        
-        // Current state
-        let currentCategory = null;
-        let currentMenu = null;
-        let editingMode = false;
-        
-        // DOM Elements
-        const loginSection = document.getElementById('loginSection');
-        const appSection = document.getElementById('appSection');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const alertMessage = document.getElementById('alertMessage');
-        const loginAlert = document.getElementById('loginAlert');
-        const typeDescription = document.getElementById('typeDescription');
-        const urlForm = document.getElementById('urlForm');
-        const menuTypeSelect = document.getElementById('menuType');
-        const firebaseUrl = document.getElementById('firebaseUrl');
-        
-        // Initialize application
+        // Initialize the application
         function initApp() {
-            firebaseUrl.textContent = firebaseConfig.databaseURL;
-            
-            // Check session
-            const session = localStorage.getItem('adminSession');
-            if (session) {
-                loginSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
-                document.getElementById('userName').textContent = JSON.parse(session).username;
-                
-                loadData();
+            // Check if user is logged in
+            const loggedInUser = localStorage.getItem('adminUser');
+            if (loggedInUser) {
+                currentUser = JSON.parse(loggedInUser);
+                document.getElementById('appSection').classList.remove('hidden');
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('userName').textContent = currentUser.username;
+                loadDashboardData();
             }
             
             // Setup event listeners
-            if (menuTypeSelect) {
-                menuTypeSelect.addEventListener('change', function() {
-                    updateTypeDescription();
-                    updateFormByType();
-                });
-            }
+            setupEventListeners();
         }
         
-        // Update type description
-        function updateTypeDescription() {
-            const selectedType = menuTypeSelect.value;
-            typeDescription.textContent = typeDescriptions[selectedType];
+        // Setup event listeners
+        function setupEventListeners() {
+            // Enter key for login
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
             
-            // Show/hide URL form
-            if (selectedType === "URL") {
-                urlForm.classList.remove('hidden');
-            } else {
-                urlForm.classList.add('hidden');
-            }
-        }
-        
-        // Update form berdasarkan tipe
-        function updateFormByType() {
-            const selectedType = menuTypeSelect.value;
-            
-            // Sembunyikan semua form khusus
-            urlForm.classList.add('hidden');
-            
-            // Tampilkan form yang sesuai
-            if (selectedType === "URL") {
-                urlForm.classList.remove('hidden');
-            }
-            
-            // Update deskripsi tipe
-            typeDescription.textContent = typeDescriptions[selectedType];
-        }
-        
-        // Dapatkan data menu saat ini (untuk edit) atau kosong (untuk tambah)
-        function getCurrentMenuData() {
-            if (editingMode && currentCategory && currentMenu) {
-                return appData.menus[currentCategory][currentMenu];
-            }
-            return null;
+            // Change event for type select
+            document.getElementById('typeSelect').addEventListener('change', function() {
+                updateFormSections();
+            });
         }
         
         // Login function
@@ -1351,876 +1216,557 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            if (username === appData.admin.username && password === appData.admin.password) {
-                // Successful login
-                loginSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
+            // Simple validation
+            if (!username || !password) {
+                showAlert('Username dan password harus diisi', 'danger');
+                return;
+            }
+            
+            // Check credentials (in a real app, this would be done on the server)
+            if (username === 'admin' && password === 'admin123') {
+                currentUser = { username: username };
+                localStorage.setItem('adminUser', JSON.stringify(currentUser));
+                document.getElementById('appSection').classList.remove('hidden');
+                document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('userName').textContent = username;
-                
-                // Save session
-                localStorage.setItem('adminSession', JSON.stringify({
-                    username: username,
-                    loggedIn: true,
-                    timestamp: Date.now()
-                }));
-                
-                loadData();
+                loadDashboardData();
             } else {
-                // Failed login
-                alertMessage.textContent = "Username atau password salah";
-                loginAlert.classList.remove('hidden');
+                showAlert('Username atau password salah', 'danger');
             }
         }
         
         // Logout function
         function logout() {
-            // Clear session
-            localStorage.removeItem('adminSession');
-            
-            appSection.classList.add('hidden');
-            loginSection.classList.remove('hidden');
+            localStorage.removeItem('adminUser');
+            currentUser = null;
+            document.getElementById('appSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
-            loginAlert.classList.add('hidden');
         }
         
-        // Show loading indicator
-        function showLoading() {
-            loadingIndicator.classList.remove('hidden');
+        // Show alert message
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('loginAlert');
+            alertDiv.className = `alert alert-${type}`;
+            document.getElementById('alertMessage').textContent = message;
         }
         
-        // Hide loading indicator
-        function hideLoading() {
-            loadingIndicator.classList.add('hidden');
-        }
-        
-        // Load data from Firebase
-        function loadData() {
-            showLoading();
-            
-            // Load categories from Firebase
-            dbRef.child('category').once('value').then(snapshot => {
-                appData.categories = snapshot.val() || {};
-                
-                // Load menus from Firebase
-                dbRef.child('Menu').once('value').then(snapshot => {
-                    appData.menus = snapshot.val() || {};
-                    
-                    // Load prefix data
-                    prefixRef.once('value').then(snapshot => {
-                        appData.prefixData = snapshot.val() || {};
-                        
-                        // Update UI
-                        updateDashboardStats();
-                        renderCategories();
-                        renderMenus();
-                        renderPrefixData();
-                        hideLoading();
-                    });
-                }).catch(error => {
-                    console.error("Error loading menus:", error);
-                    hideLoading();
-                });
-            }).catch(error => {
-                console.error("Error loading categories:", error);
-                hideLoading();
+        // Load content based on menu selection
+        function loadContent(contentName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
             });
+            
+            // Remove active class from all nav items
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked nav item
+            event.currentTarget.classList.add('active');
+            
+            // Show selected section
+            const sectionId = `${contentName}Section`;
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Load data based on content
+            switch(contentName) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'categories':
+                    loadCategories();
+                    break;
+                case 'menus':
+                    loadMenus();
+                    break;
+                case 'produkcode':
+                    loadProdukData();
+                    break;
+                case 'prefix':
+                    loadPrefixData();
+                    break;
+            }
+        }
+        
+        // Load dashboard data
+        function loadDashboardData() {
+            // Simulate loading data
+            document.getElementById('categoryCount').textContent = 'Memuat...';
+            document.getElementById('menuCount').textContent = 'Memuat...';
+            
+            // In a real app, you would fetch data from Firebase
+            setTimeout(() => {
+                document.getElementById('categoryCount').textContent = '5 Kategori';
+                document.getElementById('menuCount').textContent = '15 Menu';
+            }, 1000);
         }
         
         // Refresh data
         function refreshData() {
-            showLoading();
-            loadData();
+            loadDashboardData();
         }
         
-        // Update dashboard statistics
-        function updateDashboardStats() {
-            const categoryCount = Object.keys(appData.categories).length;
-            let menuCount = 0;
+        // Load categories
+        function loadCategories() {
+            // Simulate loading categories
+            const tableBody = document.getElementById('categoriesTableBody');
+            tableBody.innerHTML = '<tr><td colspan="4" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
             
-            for (const category in appData.menus) {
-                menuCount += Object.keys(appData.menus[category]).length;
-            }
-            
-            document.getElementById('categoryCount').textContent = `${categoryCount} Kategori`;
-            document.getElementById('menuCount').textContent = `${menuCount} Menu`;
-        }
-        
-        // Fungsi untuk memuat konten dinamis
-        function loadContent(page) {
-            // Sembunyikan semua konten
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            document.getElementById('dynamicContent').classList.remove('active');
-            
-            // Tampilkan indikator loading
-            showLoading();
-            
-            // Update menu aktif
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            
-            // Handle specific pages
-            switch(page) {
-                case 'dashboard':
-                    document.getElementById('dashboardSection').classList.remove('hidden');
-                    hideLoading();
-                    break;
-                case 'categories':
-                    document.getElementById('categoriesSection').classList.remove('hidden');
-                    hideLoading();
-                    break;
-                case 'menus':
-                    document.getElementById('menusSection').classList.remove('hidden');
-                    hideLoading();
-                    break;
-                case 'settings':
-                    document.getElementById('settingsSection').classList.remove('hidden');
-                    hideLoading();
-                    break;
-                case 'produkcode':
-                    document.getElementById('produkcodeSection').classList.remove('hidden');
-                    hideLoading();
-                    break;
-                case 'prefix':
-                    document.getElementById('prefixSection').classList.remove('hidden');
-                    hideLoading();
-                    break;
-                default:
-                    showTemplatePage(page);
-                    hideLoading();
-            }
-        }
-        
-        // Tampilkan halaman template untuk menu baru
-        function showTemplatePage(pageName) {
-            const dynamicContent = document.getElementById('dynamicContent');
-            const pageTitles = {
-                banner: "Manajemen Banner",
-                color: "Manajemen Warna",
-                regex: "Regex Extractor",
-                textinfo: "Informasi Teks",
-                cs: "Customer Service",
-                serverconfig: "Konfigurasi Server"
-            };
-            
-            const pageIcons = {
-                banner: "fa-image",
-                color: "fa-palette",
-                regex: "fa-code",
-                textinfo: "fa-info-circle",
-                cs: "fa-headset",
-                serverconfig: "fa-server"
-            };
-            
-            dynamicContent.innerHTML = `
-                <div class="section">
-                    <div class="section-title">
-                        <h2><i class="fas ${pageIcons[pageName]}"></i> ${pageTitles[pageName]}</h2>
-                        <button class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Tambah Baru
-                        </button>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="page-template">
-                            <h2>Halaman ${pageTitles[pageName]}</h2>
-                            <p>Halaman ini sedang dalam pengembangan. Silakan tambahkan fungsionalitas sesuai kebutuhan.</p>
-                            <p>Anda bisa mulai dengan menambahkan form dan tabel untuk mengelola data.</p>
-                            
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>Tips Pengembangan</strong>
-                                <p>1. Buat form input data</p>
-                                <p>2. Tambahkan tabel untuk menampilkan data</p>
-                                <p>3. Hubungkan dengan Firebase Realtime Database</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            dynamicContent.classList.add('active');
-        }
-        
-        // Render categories table
-        function renderCategories() {
-            const tbody = document.getElementById('categoriesTableBody');
-            tbody.innerHTML = '';
-            
-            // Populate category filter in menus section
-            const categoryFilter = document.getElementById('categoryFilter');
-            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>';
-            
-            // Populate category select in menu form
-            const menuCategory = document.getElementById('menuCategory');
-            menuCategory.innerHTML = '';
-            
-            for (const categoryName in appData.categories) {
-                const category = appData.categories[categoryName];
-                const menuCount = appData.menus[categoryName] ? Object.keys(appData.menus[categoryName]).length : 0;
-                
-                // Add to table
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${categoryName}</td>
-                    <td>${category.Urutan || 1}</td>
-                    <td>${menuCount}</td>
-                    <td class="action-buttons">
-                        <button class="btn btn-edit btn-sm" onclick="editCategory('${categoryName}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn btn-delete btn-sm" onclick="deleteCategory('${categoryName}')">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-                
-                // Add to filter dropdown
-                const filterOption = document.createElement('option');
-                filterOption.value = categoryName;
-                filterOption.textContent = categoryName;
-                categoryFilter.appendChild(filterOption.cloneNode(true));
-                
-                // Add to menu form dropdown
-                const formOption = document.createElement('option');
-                formOption.value = categoryName;
-                formOption.textContent = categoryName;
-                menuCategory.appendChild(formOption);
-            }
-        }
-        
-        // Open category form
-        function openCategoryForm(categoryName = null) {
-            const modalTitle = document.getElementById('categoryModalTitle');
-            const modal = document.getElementById('categoryModal');
-            
-            if (categoryName) {
-                // Edit mode
-                modalTitle.textContent = "Edit Kategori";
-                const category = appData.categories[categoryName];
-                document.getElementById('categoryName').value = categoryName;
-                document.getElementById('categoryOrder').value = category.Urutan || 1;
-                currentCategory = categoryName;
-                editingMode = true;
-            } else {
-                // Add mode
-                modalTitle.textContent = "Tambah Kategori Baru";
-                document.getElementById('categoryName').value = "";
-                document.getElementById('categoryOrder').value = "";
-                currentCategory = null;
-                editingMode = false;
-            }
-            
-            modal.classList.remove('hidden');
-        }
-        
-        // Close category modal
-        function closeCategoryModal() {
-            document.getElementById('categoryModal').classList.add('hidden');
-        }
-        
-        // Save category to Firebase
-        function saveCategory() {
-            const name = document.getElementById('categoryName').value;
-            const urutan = parseInt(document.getElementById('categoryOrder').value) || 1;
-            
-            if (!name) {
-                alert("Nama kategori harus diisi!");
-                return;
-            }
-            
-            showLoading();
-            
-            if (editingMode) {
-                // If name changed, update references
-                if (name !== currentCategory) {
-                    // Update category name in all places
-                    if (appData.categories[currentCategory]) {
-                        appData.categories[name] = {...appData.categories[currentCategory]};
-                        delete appData.categories[currentCategory];
-                    }
-                    
-                    // Update menus
-                    if (appData.menus[currentCategory]) {
-                        appData.menus[name] = {...appData.menus[currentCategory]};
-                        delete appData.menus[currentCategory];
-                    }
-                }
-                
-                // Update order
-                appData.categories[name].Urutan = urutan;
-            } else {
-                // Add new category
-                appData.categories[name] = { Urutan: urutan };
-                
-                // Initialize empty menu object for this category
-                if (!appData.menus[name]) {
-                    appData.menus[name] = {};
-                }
-            }
-            
-            // Save to Firebase
-            dbRef.child('category').set(appData.categories)
-                .then(() => {
-                    return dbRef.child('Menu').set(appData.menus);
-                })
-                .then(() => {
-                    // Save and refresh
-                    renderCategories();
-                    closeCategoryModal();
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error("Error saving category:", error);
-                    alert("Gagal menyimpan kategori ke Firebase");
-                    hideLoading();
-                });
-        }
-        
-        // Edit category
-        function editCategory(categoryName) {
-            openCategoryForm(categoryName);
-        }
-        
-        // Delete category from Firebase
-        function deleteCategory(categoryName) {
-            if (!confirm(`Apakah Anda yakin ingin menghapus kategori "${categoryName}"? Semua menu dalam kategori ini juga akan dihapus.`)) {
-                return;
-            }
-            
-            showLoading();
-            
-            delete appData.categories[categoryName];
-            delete appData.menus[categoryName];
-            
-            // Save to Firebase
-            dbRef.child('category').set(appData.categories)
-                .then(() => {
-                    return dbRef.child('Menu').set(appData.menus);
-                })
-                .then(() => {
-                    renderCategories();
-                    renderMenus();
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error("Error deleting category:", error);
-                    alert("Gagal menghapus kategori dari Firebase");
-                    hideLoading();
-                });
-        }
-        
-        // Render menus table
-        function renderMenus() {
-            const tbody = document.getElementById('menusTableBody');
-            tbody.innerHTML = '';
-            
-            const categoryFilter = document.getElementById('categoryFilter').value;
-            
-            for (const categoryName in appData.menus) {
-                if (categoryFilter && categoryFilter !== categoryName) continue;
-                
-                const menus = appData.menus[categoryName];
-                
-                for (const menuName in menus) {
-                    const menu = menus[menuName];
-                    
-                    // Get badge class based on type
-                    let badgeClass = '';
-                    switch(menu.type) {
-                        case 'PROVIDER_BASED': badgeClass = 'badge-provider'; break;
-                        case 'STATIC_PRODUCT': badgeClass = 'badge-static'; break;
-                        case 'POSTPAID_BILL': badgeClass = 'badge-postpaid'; break;
-                        case 'DYNAMIC_PRODUCT_BASED_ON_NUMBER': badgeClass = 'badge-dynamic'; break;
-                        case 'VOUCHER_AKTIVATION': badgeClass = 'badge-voucher'; break;
-                        case 'URL': badgeClass = 'badge-url'; break;
-                        case 'DYNAMIC_PRODUCT_BASED_ON_REGION': badgeClass = 'badge-region'; break;
-                        default: badgeClass = 'badge';
-                    }
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${menuName}</td>
-                        <td>${categoryName}</td>
-                        <td><span class="badge ${badgeClass}">${menu.type}</span></td>
-                        <td>${menu.order || 1}</td>
-                        <td class="action-buttons">
-                            <button class="btn btn-edit btn-sm" onclick="editMenu('${categoryName}', '${menuName}')">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-delete btn-sm" onclick="deleteMenu('${categoryName}', '${menuName}')">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
+            // In a real app, you would fetch data from Firebase
+            setTimeout(() => {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td>Pulsa</td>
+                        <td>1</td>
+                        <td>5 Menu</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
                         </td>
-                    `;
-                    tbody.appendChild(row);
-                }
-            }
+                    </tr>
+                    <tr>
+                        <td>Data</td>
+                        <td>2</td>
+                        <td>3 Menu</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>E-Wallet</td>
+                        <td>3</td>
+                        <td>4 Menu</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>PLN</td>
+                        <td>4</td>
+                        <td>2 Menu</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Game</td>
+                        <td>5</td>
+                        <td>1 Menu</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            }, 1000);
+        }
+        
+        // Load menus
+        function loadMenus() {
+            // Simulate loading menus
+            const tableBody = document.getElementById('menusTableBody');
+            tableBody.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
+            
+            // In a real app, you would fetch data from Firebase
+            setTimeout(() => {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td>Telkomsel 10.000</td>
+                        <td>Pulsa</td>
+                        <td><span class="badge badge-provider">Provider</span></td>
+                        <td>1</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>XL 25.000</td>
+                        <td>Pulsa</td>
+                        <td><span class="badge badge-provider">Provider</span></td>
+                        <td>2</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Axis 5.000</td>
+                        <td>Pulsa</td>
+                        <td><span class="badge badge-provider">Provider</span></td>
+                        <td>3</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Indosat 20.000</td>
+                        <td>Pulsa</td>
+                        <td><span class="badge badge-provider">Provider</span></td>
+                        <td>4</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Smartfren 50.000</td>
+                        <td>Pulsa</td>
+                        <td><span class="badge badge-provider">Provider</span></td>
+                        <td>5</td>
+                        <td>
+                            <button class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                `;
+                
+                // Populate menu select for produk code
+                const menuSelect = document.getElementById('menuSelect');
+                menuSelect.innerHTML = `
+                    <option value="">--Pilih Kategori/Menu--</option>
+                    <option value="pulsa">Pulsa</option>
+                    <option value="data">Data</option>
+                    <option value="ewallet">E-Wallet</option>
+                    <option value="pln">PLN</option>
+                    <option value="game">Game</option>
+                `;
+                
+                // Also populate filter menu
+                const filterMenu = document.getElementById('filterMenu');
+                filterMenu.innerHTML = `
+                    <option value="">Semua Menu</option>
+                    <option value="pulsa">Pulsa</option>
+                    <option value="data">Data</option>
+                    <option value="ewallet">E-Wallet</option>
+                    <option value="pln">PLN</option>
+                    <option value="game">Game</option>
+                `;
+            }, 1000);
         }
         
         // Filter menus by category
         function filterMenus() {
-            renderMenus();
-        }
-        
-        // Open menu form
-        function openMenuForm(categoryName = null, menuName = null) {
-            const modalTitle = document.getElementById('menuModalTitle');
-            const modal = document.getElementById('menuModal');
-            
-            // Reset form
-            document.getElementById('menuName').value = "";
-            document.getElementById('menuIconUrl').value = "";
-            document.getElementById('menuOrder').value = "1";
-            document.getElementById('urlTarget').value = "";
-            urlForm.classList.add('hidden');
-            
-            if (categoryName && menuName) {
-                // Edit mode
-                modalTitle.textContent = "Edit Menu";
-                const menu = appData.menus[categoryName][menuName];
-                
-                document.getElementById('menuCategory').value = categoryName;
-                document.getElementById('menuName').value = menuName;
-                document.getElementById('menuIconUrl').value = menu.iconUrl || "";
-                document.getElementById('menuOrder').value = menu.order || 1;
-                document.getElementById('menuType').value = menu.type;
-                
-                // Populate URL if type is URL
-                if (menu.type === "URL") {
-                    document.getElementById('urlTarget').value = menu.url || "";
-                    urlForm.classList.remove('hidden');
-                }
-                
-                currentCategory = categoryName;
-                currentMenu = menuName;
-                editingMode = true;
-            } else {
-                // Add mode
-                modalTitle.textContent = "Tambah Menu Baru";
-                document.getElementById('menuCategory').value = "";
-                document.getElementById('menuType').value = "URL"; // Default to URL type
-                currentCategory = null;
-                currentMenu = null;
-                editingMode = false;
-            }
-            
-            // Update form berdasarkan tipe
-            updateFormByType();
-            
-            // Update type description
-            updateTypeDescription();
-            modal.classList.remove('hidden');
-        }
-        
-        // Close menu modal
-        function closeMenuModal() {
-            document.getElementById('menuModal').classList.add('hidden');
-        }
-        
-        // Save menu to Firebase
-        function saveMenu() {
-            const category = document.getElementById('menuCategory').value;
-            const name = document.getElementById('menuName').value;
-            const iconUrl = document.getElementById('menuIconUrl').value;
-            const type = document.getElementById('menuType').value;
-            const order = parseInt(document.getElementById('menuOrder').value) || 1;
-            
-            if (!category || !name || !type) {
-                alert("Kategori, nama menu, dan tipe harus diisi!");
-                return;
-            }
-            
-            // Create menu object
-            const menu = {
-                type: type,
-                iconUrl: iconUrl,
-                order: order
-            };
-            
-            // Add URL if type is URL
-            if (type === "URL") {
-                const url = document.getElementById('urlTarget').value;
-                if (!url) {
-                    alert("URL Tujuan harus diisi untuk tipe URL!");
-                    return;
-                }
-                menu.url = url;
-            }
-            
-            showLoading();
-            
-            // Ensure category exists in menus
-            if (!appData.menus[category]) {
-                appData.menus[category] = {};
-            }
-            
-            if (editingMode) {
-                // If name changed, update references
-                if (name !== currentMenu) {
-                    // Delete old menu if name changed
-                    delete appData.menus[currentCategory][currentMenu];
-                }
-                
-                // Add new/updated menu
-                appData.menus[category][name] = menu;
-            } else {
-                // Add new menu
-                appData.menus[category][name] = menu;
-            }
-            
-            // Save to Firebase
-            dbRef.child('Menu').set(appData.menus)
-                .then(() => {
-                    // Save and refresh
-                    renderMenus();
-                    closeMenuModal();
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error("Error saving menu:", error);
-                    alert("Gagal menyimpan menu ke Firebase");
-                    hideLoading();
-                });
-        }
-        
-        // Edit menu
-        function editMenu(categoryName, menuName) {
-            openMenuForm(categoryName, menuName);
-        }
-        
-        // Delete menu from Firebase
-        function deleteMenu(categoryName, menuName) {
-            if (!confirm(`Apakah Anda yakin ingin menghapus menu "${menuName}"?`)) {
-                return;
-            }
-            
-            showLoading();
-            
-            if (appData.menus[categoryName] && appData.menus[categoryName][menuName]) {
-                delete appData.menus[categoryName][menuName];
-            }
-            
-            // Save to Firebase
-            dbRef.child('Menu').set(appData.menus)
-                .then(() => {
-                    renderMenus();
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error("Error deleting menu:", error);
-                    alert("Gagal menghapus menu dari Firebase");
-                    hideLoading();
-                });
+            const category = document.getElementById('categoryFilter').value;
+            // In a real app, you would filter the data
+            console.log('Filtering menus by category:', category);
         }
         
         // Update admin account
         function updateAdminAccount() {
             const username = document.getElementById('adminUsername').value;
             const password = document.getElementById('adminPassword').value;
-            const passwordConfirm = document.getElementById('adminPasswordConfirm').value;
+            const confirmPassword = document.getElementById('adminPasswordConfirm').value;
             
-            if (!username) {
-                alert("Username tidak boleh kosong!");
+            if (password && password !== confirmPassword) {
+                alert('Password dan konfirmasi password tidak cocok');
                 return;
             }
             
-            if (password && password !== passwordConfirm) {
-                alert("Password dan konfirmasi password tidak cocok!");
-                return;
-            }
-            
-            appData.admin.username = username;
-            if (password) {
-                appData.admin.password = password;
-            }
-            
-            alert("Akun admin berhasil diperbarui!");
+            // In a real app, you would update the admin account
+            alert('Pengaturan admin berhasil diperbarui');
         }
         
-        // ================ KODE PRODUK FUNCTIONS ================
-        function loadMenus() {
-            const typeSelect = document.getElementById("typeSelect");
-            const selectedType = typeSelect.value;
-            const menuSelect = document.getElementById("menuSelect");
-            menuSelect.innerHTML = '<option value="">--Pilih Kategori/Menu--</option>';
+        // Open category form
+        function openCategoryForm() {
+            alert('Membuka form tambah kategori');
+        }
+        
+        // Open menu form
+        function openMenuForm() {
+            alert('Membuka form tambah menu');
+        }
+        
+        // Update form sections based on selected type
+        function updateFormSections() {
+            const type = document.getElementById('typeSelect').value;
             
-            if (!selectedType) {
-                hideAllSections();
+            // Hide all sections first
+            document.getElementById('providerSection').classList.add('hidden');
+            document.getElementById('billSection').classList.add('hidden');
+            document.getElementById('regionSection').classList.add('hidden');
+            document.getElementById('urlSection').classList.add('hidden');
+            
+            // Show relevant sections based on type
+            if (type === 'PROVIDER_BASED') {
+                document.getElementById('providerSection').classList.remove('hidden');
+                document.getElementById('labelProduk').textContent = 'Nama Provider';
+                document.getElementById('namaProduk').placeholder = 'Misal: Telkomsel';
+            } else if (type === 'POSTPAID_BILL') {
+                document.getElementById('billSection').classList.remove('hidden');
+                document.getElementById('labelProduk').textContent = 'Nama Tagihan';
+                document.getElementById('namaProduk').placeholder = 'Misal: PLN Pasca Bayar';
+            } else if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
+                document.getElementById('regionSection').classList.remove('hidden');
+                document.getElementById('labelProduk').textContent = 'Nama Wilayah';
+                document.getElementById('namaProduk').placeholder = 'Misal: Jakarta';
+            } else if (type === 'URL') {
+                document.getElementById('urlSection').classList.remove('hidden');
+                document.getElementById('labelProduk').textContent = 'Nama URL';
+                document.getElementById('namaProduk').placeholder = 'Misal: Pembayaran LinkAja';
+            } else {
+                document.getElementById('labelProduk').textContent = 'Nama Produk';
+                document.getElementById('namaProduk').placeholder = 'Misal: Telkomsel Nasional';
+            }
+        }
+        
+        // Save produk
+        function saveProduk() {
+            const type = document.getElementById('typeSelect').value;
+            const menu = document.getElementById('menuSelect').value;
+            const namaProduk = document.getElementById('namaProduk').value;
+            const codeProduk = document.getElementById('codeProduk').value;
+            
+            // Basic validation
+            if (!type || !menu || !namaProduk || !codeProduk) {
+                showNotification('Semua field harus diisi', 'error');
                 return;
             }
             
-            const providerSection = document.getElementById("providerSection");
-            const billSection = document.getElementById("billSection");
-            const produkSection = document.getElementById("produkSection");
-            const regionSection = document.getElementById("regionSection");
-            const codeSection = document.getElementById("codeSection");
+            // Additional validation based on type
+            if (type === 'PROVIDER_BASED') {
+                const providerPrefik = document.getElementById('providerPrefik').value;
+                if (!providerPrefik) {
+                    showNotification('Provider Prefik harus diisi', 'error');
+                    return;
+                }
+            } else if (type === 'POSTPAID_BILL') {
+                const kodeBayar = document.getElementById('kodeBayar').value;
+                const kodeCek = document.getElementById('kodeCek').value;
+                if (!kodeBayar || !kodeCek) {
+                    showNotification('Kode Bayar dan Kode Cek harus diisi', 'error');
+                    return;
+                }
+            } else if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
+                const kodeRegion = document.getElementById('kodeRegion').value;
+                if (!kodeRegion) {
+                    showNotification('Kode Wilayah harus diisi', 'error');
+                    return;
+                }
+            } else if (type === 'URL') {
+                const url = document.getElementById('url').value;
+                if (!url) {
+                    showNotification('URL harus diisi', 'error');
+                    return;
+                }
+            }
             
-            const ref = dbRef.child("Menu");
-            ref.once("value").then(snapshot => {
-                const data = snapshot.val();
-                let found = false;
-                
-                for (const category in data) {
-                    for (const menuName in data[category]) {
-                        const menu = data[category][menuName];
-                        if (menu.type === selectedType) {
-                            const opt = document.createElement("option");
-                            opt.value = `${category}|${menuName}`;
-                            opt.textContent = `${category} / ${menuName}`;
-                            menuSelect.appendChild(opt);
-                            found = true;
-                        }
-                    }
-                }
-                
-                if (!found) {
-                    const opt = document.createElement("option");
-                    opt.value = "";
-                    opt.textContent = "Tidak ada menu untuk tipe ini";
-                    menuSelect.appendChild(opt);
-                }
-                
-                // Tampilkan/hide section berdasarkan type
-                providerSection.classList.toggle('hidden', selectedType !== "PROVIDER_BASED");
-                billSection.classList.toggle('hidden', 
-                    selectedType !== "POSTPAID_BILL" && 
-                    selectedType !== "DYNAMIC_PRODUCT_BASED_ON_NUMBER"
-                );
-                regionSection.classList.toggle('hidden', selectedType !== "DYNAMIC_PRODUCT_BASED_ON_REGION");
-                produkSection.classList.toggle('hidden', selectedType === "DYNAMIC_PRODUCT_BASED_ON_REGION");
-                codeSection.classList.toggle('hidden', 
-                    selectedType !== "PROVIDER_BASED" && 
-                    selectedType !== "STATIC_PRODUCT" && 
-                    selectedType !== "VOUCHER_AKTIVATION" && 
-                    selectedType !== "URL"
-                );
-                
-            }).catch(error => {
-                showNotification(`Error: ${error.message}`, 'error');
+            // In a real app, you would save to Firebase
+            console.log('Saving produk:', {
+                type, menu, namaProduk, codeProduk
             });
-        }
-        
-        function hideAllSections() {
-            const providerSection = document.getElementById("providerSection");
-            const billSection = document.getElementById("billSection");
-            const regionSection = document.getElementById("regionSection");
-            const codeSection = document.getElementById("codeSection");
             
-            providerSection.classList.add('hidden');
-            billSection.classList.add('hidden');
-            regionSection.classList.add('hidden');
-            codeSection.remove('hidden');
+            // Show success message
+            showNotification('Produk berhasil disimpan', 'success');
+            
+            // Clear form
+            document.getElementById('namaProduk').value = '';
+            document.getElementById('codeProduk').value = '';
+            document.getElementById('providerPrefik').value = '';
+            document.getElementById('kodeBayar').value = '';
+            document.getElementById('kodeCek').value = '';
+            document.getElementById('kodeRegion').value = '';
+            document.getElementById('url').value = '';
+            
+            // Reload produk data
+            loadProdukData();
         }
         
+        // Show notification
         function showNotification(message, type) {
-            const notification = document.getElementById("notification");
+            const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification ${type}`;
             
-            // Sembunyikan notifikasi setelah 5 detik
+            // Auto hide after 3 seconds
             setTimeout(() => {
-                notification.classList.remove('success', 'error');
-                notification.style.display = 'none';
-            }, 5000);
+                notification.className = 'notification';
+            }, 3000);
         }
         
-        function simpanProduk() {
-            const typeSelect = document.getElementById("typeSelect");
-            const menuSelect = document.getElementById("menuSelect");
-            const type = typeSelect.value;
-            const menuVal = menuSelect.value;
+        // Load produk data
+        function loadProdukData() {
+            const tableBody = document.getElementById('produkTableBody');
+            const loadingElement = document.getElementById('loadingProduk');
+            const noDataElement = document.getElementById('noProdukData');
             
-            if (!type || !menuVal) {
-                showNotification("Type dan Menu harus dipilih!", 'error');
+            // Show loading, hide table and no data message
+            tableBody.innerHTML = '';
+            loadingElement.classList.remove('hidden');
+            noDataElement.classList.add('hidden');
+            
+            // Simulate loading data from Firebase
+            setTimeout(() => {
+                // Sample data
+                produkData = [
+                    { id: 1, code: 'TELKOMSEL', name: 'Telkomsel', type: 'PROVIDER_BASED', menu: 'Pulsa', provider: 'Telkomsel' },
+                    { id: 2, code: 'XL', name: 'XL Axiata', type: 'PROVIDER_BASED', menu: 'Pulsa', provider: 'XL' },
+                    { id: 3, code: 'AXIS', name: 'Axis', type: 'PROVIDER_BASED', menu: 'Pulsa', provider: 'Axis' },
+                    { id: 4, code: 'INDOSAT', name: 'Indosat Ooredoo', type: 'PROVIDER_BASED', menu: 'Pulsa', provider: 'Indosat' },
+                    { id: 5, code: 'SMARTFREN', name: 'Smartfren', type: 'PROVIDER_BASED', menu: 'Pulsa', provider: 'Smartfren' },
+                    { id: 6, code: 'PLN', name: 'PLN Prabayar', type: 'STATIC_PRODUCT', menu: 'PLN', provider: '' },
+                    { id: 7, code: 'PLNPOST', name: 'PLN Pascabayar', type: 'POSTPAID_BILL', menu: 'PLN', provider: '' },
+                    { id: 8, code: 'BYRPLN', name: 'Bayar PLN', type: 'POSTPAID_BILL', menu: 'PLN', provider: '' },
+                    { id: 9, code: 'GOPAY', name: 'GoPay', type: 'STATIC_PRODUCT', menu: 'E-Wallet', provider: '' },
+                    { id: 10, code: 'OVO', name: 'OVO', type: 'STATIC_PRODUCT', menu: 'E-Wallet', provider: '' },
+                    { id: 11, code: 'DANA', name: 'DANA', type: 'STATIC_PRODUCT', menu: 'E-Wallet', provider: '' },
+                    { id: 12, code: 'LINK', name: 'LinkAja', type: 'URL', menu: 'E-Wallet', provider: '' },
+                    { id: 13, code: 'JKT', name: 'Jakarta', type: 'DYNAMIC_PRODUCT_BASED_ON_REGION', menu: 'Data', provider: '' },
+                    { id: 14, code: 'BDG', name: 'Bandung', type: 'DYNAMIC_PRODUCT_BASED_ON_REGION', menu: 'Data', provider: '' },
+                    { id: 15, code: 'SBY', name: 'Surabaya', type: 'DYNAMIC_PRODUCT_BASED_ON_REGION', menu: 'Data', provider: '' }
+                ];
+                
+                // Render data
+                renderProdukData(produkData);
+                
+                // Hide loading
+                loadingElement.classList.add('hidden');
+            }, 1500);
+        }
+        
+        // Render produk data to table
+        function renderProdukData(data) {
+            const tableBody = document.getElementById('produkTableBody');
+            const noDataElement = document.getElementById('noProdukData');
+            
+            if (data.length === 0) {
+                noDataElement.classList.remove('hidden');
+                tableBody.innerHTML = '';
                 return;
             }
             
-            const provider = document.getElementById("providerPrefik").value.trim();
-            const namaProduk = document.getElementById("namaProduk").value.trim();
-            const code = document.getElementById("codeProduk").value.trim();
-            const imageUrl = document.getElementById("imageUrl").value.trim();
-            const ket = document.getElementById("keterangan").value.trim();
+            noDataElement.classList.add('hidden');
             
-            const [category, menuName] = menuVal.split("|");
-            
-            // Struktur data dasar
-            const produkData = { ImageUrl: imageUrl, Ket: ket };
-            let path;
-            
-            if (type === "PROVIDER_BASED") {
-                if (!provider || !namaProduk || !code) {
-                    showNotification("Provider, Nama Produk, dan Code wajib diisi untuk PROVIDER_BASED", 'error');
-                    return;
-                }
-                produkData.Code = code;
-                path = `ItemsCode/${type}/${category}/${menuName}/${provider}/${namaProduk}`;
-            } 
-            else if (type === "POSTPAID_BILL" || type === "DYNAMIC_PRODUCT_BASED_ON_NUMBER") {
-                const kodeBayar = document.getElementById("kodeBayar").value.trim();
-                const kodeCek = document.getElementById("kodeCek").value.trim();
-                
-                if (!namaProduk || !kodeBayar || !kodeCek) {
-                    showNotification("Nama Produk, Kode Bayar, dan Kode Cek wajib diisi untuk " + type, 'error');
-                    return;
+            let html = '';
+            data.forEach(item => {
+                let typeBadge = '';
+                if (item.type === 'PROVIDER_BASED') {
+                    typeBadge = '<span class="badge badge-provider">Provider</span>';
+                } else if (item.type === 'STATIC_PRODUCT') {
+                    typeBadge = '<span class="badge badge-static">Static</span>';
+                } else if (item.type === 'POSTPAID_BILL') {
+                    typeBadge = '<span class="badge badge-postpaid">Postpaid</span>';
+                } else if (item.type === 'DYNAMIC_PRODUCT_BASED_ON_NUMBER') {
+                    typeBadge = '<span class="badge badge-dynamic">Dynamic</span>';
+                } else if (item.type === 'VOUCHER_AKTIVATION') {
+                    typeBadge = '<span class="badge badge-voucher">Voucher</span>';
+                } else if (item.type === 'URL') {
+                    typeBadge = '<span class="badge badge-url">URL</span>';
+                } else if (item.type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
+                    typeBadge = '<span class="badge badge-region">Region</span>';
                 }
                 
-                produkData.KodeBayar = kodeBayar;
-                produkData.KodeCek = kodeCek;
-                path = `ItemsCode/${type}/${category}/${menuName}/${namaProduk}`;
-            }
-            else if (type === "DYNAMIC_PRODUCT_BASED_ON_REGION") {
-                const namaKota = document.getElementById("namaProdukRegion").value.trim();
-                const namaWilayah = document.getElementById("namaWilayah").value.trim();
-                const kodeBayarRegion = document.getElementById("kodeBayarRegion").value.trim();
-                const kodeCekRegion = document.getElementById("kodeCekRegion").value.trim();
-                
-                if (!namaKota || !namaWilayah || !kodeBayarRegion || !kodeCekRegion) {
-                    showNotification("Nama Kota, Wilayah, Kode Bayar, dan Kode Cek wajib diisi untuk DYNAMIC_PRODUCT_BASED_ON_REGION", 'error');
-                    return;
-                }
-                
-                produkData.KodeBayar = kodeBayarRegion;
-                produkData.KodeCek = kodeCekRegion;
-                path = `ItemsCode/${type}/${category}/${menuName}/${namaKota}/Wilayah/${namaWilayah}`;
-            }
-            else {
-                if (!namaProduk || !code) {
-                    showNotification("Nama Produk dan Code wajib diisi untuk type ini", 'error');
-                    return;
-                }
-                produkData.Code = code;
-                path = `ItemsCode/${type}/${category}/${menuName}/${namaProduk}`;
-            }
-            
-            showLoading();
-            
-            dbRef.child(path).set(produkData)
-                .then(() => {
-                    showNotification("Produk berhasil disimpan ke Firebase!", 'success');
-                    // Reset form
-                    document.querySelectorAll('input').forEach(input => {
-                        if (input.id !== 'typeSelect') input.value = '';
-                    });
-                    hideLoading();
-                })
-                .catch(err => {
-                    console.error(err);
-                    showNotification("Gagal menyimpan produk: " + err.message, 'error');
-                    hideLoading();
-                });
-        }
-        
-        // ================ PROVIDER PREFIX FUNCTIONS ================
-        function simpanPrefik() {
-            const provider = document.getElementById("providerName").value.trim();
-            const prefix = document.getElementById("prefixValue").value.trim();
-            
-            if (!provider || !prefix) {
-                showPrefixNotification("Nama Provider dan Prefik wajib diisi!", 'error');
-                return;
-            }
-            
-            showLoading();
-            
-            prefixRef.child(provider).set(prefix)
-                .then(() => {
-                    showPrefixNotification("Prefik berhasil disimpan ke Database!", 'success');
-                    document.getElementById("providerName").value = "";
-                    document.getElementById("prefixValue").value = "";
-                    loadPrefixData();
-                    hideLoading();
-                })
-                .catch(err => {
-                    console.error(err);
-                    showPrefixNotification("Gagal simpan ke Database: " + err.message, 'error');
-                    hideLoading();
-                });
-        }
-        
-        function refreshPrefixData() {
-            showLoading();
-            loadPrefixData();
-        }
-        
-        function loadPrefixData() {
-            prefixRef.once("value").then(snapshot => {
-                appData.prefixData = snapshot.val() || {};
-                renderPrefixData();
-                hideLoading();
-            }).catch(error => {
-                console.error("Error loading prefix data:", error);
-                showPrefixNotification("Gagal memuat data prefik", 'error');
-                hideLoading();
-            });
-        }
-        
-        function renderPrefixData() {
-            const tbody = document.getElementById("prefixTableBody");
-            tbody.innerHTML = "";
-            
-            for (const provider in appData.prefixData) {
-                const prefix = appData.prefixData[provider];
-                
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${provider}</td>
-                    <td>${prefix}</td>
-                    <td class="action-buttons">
-                        <button class="btn btn-edit btn-sm" onclick="editPrefix('${provider}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn btn-delete btn-sm" onclick="deletePrefix('${provider}')">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
-                    </td>
+                html += `
+                    <tr>
+                        <td><strong>${item.code}</strong></td>
+                        <td>${item.name}</td>
+                        <td>${typeBadge}</td>
+                        <td>${item.menu}</td>
+                        <td>${item.provider || '-'}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-edit" onclick="editProduk(${item.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-delete" onclick="deleteProduk(${item.id})">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
+            });
+            
+            tableBody.innerHTML = html;
+        }
+        
+        // Filter produk data
+        function filterProduk() {
+            const typeFilter = document.getElementById('filterType').value;
+            const menuFilter = document.getElementById('filterMenu').value;
+            const searchText = document.getElementById('searchProduk').value.toLowerCase();
+            
+            let filteredData = produkData;
+            
+            // Filter by type
+            if (typeFilter) {
+                filteredData = filteredData.filter(item => item.type === typeFilter);
+            }
+            
+            // Filter by menu
+            if (menuFilter) {
+                filteredData = filteredData.filter(item => item.menu === menuFilter);
+            }
+            
+            // Filter by search text
+            if (searchText) {
+                filteredData = filteredData.filter(item => 
+                    item.code.toLowerCase().includes(searchText) || 
+                    item.name.toLowerCase().includes(searchText)
+                );
+            }
+            
+            // Render filtered data
+            renderProdukData(filteredData);
+        }
+        
+        // Edit produk
+        function editProduk(id) {
+            const produk = produkData.find(item => item.id === id);
+            if (produk) {
+                // Fill the form with produk data
+                document.getElementById('typeSelect').value = produk.type;
+                document.getElementById('menuSelect').value = produk.menu.toLowerCase();
+                document.getElementById('namaProduk').value = produk.name;
+                document.getElementById('codeProduk').value = produk.code;
+                
+                // Update form sections based on type
+                updateFormSections();
+                
+                // Scroll to form
+                document.getElementById('produkcodeSection').scrollIntoView({ behavior: 'smooth' });
+                
+                showNotification(`Edit mode untuk produk: ${produk.name}`, 'success');
             }
         }
         
-        function editPrefix(provider) {
-            document.getElementById("providerName").value = provider;
-            document.getElementById("prefixValue").value = appData.prefixData[provider] || "";
-        }
-        
-        function deletePrefix(provider) {
-            if (!confirm(`Apakah Anda yakin ingin menghapus provider "${provider}"?`)) {
-                return;
+        // Delete produk
+        function deleteProduk(id) {
+            const produk = produkData.find(item => item.id === id);
+            if (produk && confirm(`Apakah Anda yakin ingin menghapus produk ${produk.name}?`)) {
+                // In a real app, you would delete from Firebase
+                console.log('Deleting produk:', produk);
+                
+                // Remove from local array
+                produkData = produkData.filter(item => item.id !== id);
+                
+                // Re-render table
+                renderProdukData(produkData);
+                
+                showNotification('Produk berhasil dihapus', 'success');
             }
-            
-            showLoading();
-            
-            prefixRef.child(provider).remove()
-                .then(() => {
-                    showPrefixNotification("Provider berhasil dihapus", 'success');
-                    loadPrefixData();
-                })
-                .catch(error => {
-                    console.error("Error deleting prefix:", error);
-                    showPrefixNotification("Gagal menghapus provider", 'error');
-                    hideLoading();
-                });
         }
         
-        function showPrefixNotification(message, type) {
-            const notification = document.getElementById("prefixNotification");
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            
-            // Sembunyikan notifikasi setelah 5 detik
-            setTimeout(() => {
-                notification.classList.remove('success', 'error');
-                notification.style.display = 'none';
-            }, 5000);
+        // Refresh produk data
+        function refreshProdukData() {
+            loadProdukData();
         }
         
-        // Initialize the app
-        initApp();
+        // Load prefix data
+        function loadPrefixData() {
+            // This would load prefix data in a real app
+            console.log('Loading prefix data...');
+        }
+        
+        // Initialize the app when the page loads
+        window.onload = initApp;
     </script>
 </body>
 </html>
