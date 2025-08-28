@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Management - ASIA PAYMENT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #0055ff;
+            --secondary: #00aaff;
+            --accent: #ff5500;
+            --light: #ffffff;
+            --dark: #212121;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border: #dee2e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(30deg);
+            animation: shine 4s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo img {
+            height: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .auth-info button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .auth-info button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 700px;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--light-gray);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: var(--dark);
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+            color: var(--gray);
+        }
+        
+        .nav-item:hover {
+            background: rgba(0, 85, 255, 0.05);
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .nav-item.active i {
+            color: var(--primary);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 30px;
+            background: white;
+            overflow-y: auto;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section-title h2 {
+            font-size: 22px;
+            color: var(--dark);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0044cc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #bd2130;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th {
+            background: var(--light-gray);
+            text-align: left;
+            padding: 15px;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: rgba(0, 85, 255, 0.03);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        
+        .btn-edit {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .btn-edit:hover {
+            background: rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(220, 53, 69, 0.2);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--gray);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            background: var(--light-gray);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 85, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 600px;
+            animation: modalopen 0.3s;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+        
+        .close {
+            color: var(--gray);
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .notification.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            display: block;
+        }
+        
+        .notification.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            display: block;
+        }
+        
+        .notification.info {
+            background: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.2);
+            display: block;
+        }
+        
+        .firebase-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .firebase-status.connected {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .firebase-status.disconnected {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        /* Color Preview Styles */
+        .color-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .color-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 120px;
+        }
+        
+        .color-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        
+        .color-value {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            word-break: break-all;
+        }
+        
+        .gradient-preview {
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-input {
+            flex: 1;
+        }
+        
+        .color-picker-btn {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            background: var(--light-gray);
+        }
+        
+        .add-color-btn {
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            header {
+                padding: 15px 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .color-preview {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="appSection">
+            <header>
+                <div class="logo">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo">
+                    <h1>ASIA PAYMENT Console</h1>
+                </div>
+                
+                <div class="auth-info">
+                    <span id="userName">Administrator</span>
+                    <button onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+            
+            <div class="main-content">
+                <div class="sidebar">
+                    <!-- Menu Utama -->
+                    <div class="nav-item" onclick="window.location.href='dashboard.html'">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='index.html'">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Kategori Menu</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='menus.html'">
+                        <i class="fas fa-list"></i>
+                        <span>Menu Dinamis</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='settings.html'">
+                        <i class="fas fa-cog"></i>
+                        <span>Pengaturan</span>
+                    </div>
+                    
+                    <!-- Menu Baru -->
+                    <div class="nav-item" onclick="window.location.href='banner.html'">
+                        <i class="fas fa-image"></i>
+                        <span>Banner</span>
+                    </div>
+                    
+                    <div class="nav-item active">
+                        <i class="fas fa-palette"></i>
+                        <span>Color</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='regex.html'">
+                        <i class="fas fa-code"></i>
+                        <span>RegexExtractor</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='textinfo.html'">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Text Information</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='cs.html'">
+                        <i class="fas fa-headset"></i>
+                        <span>Customer Service</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='produkcode.html'">
+                        <i class="fas fa-barcode"></i>
+                        <span>Kode Produk</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='prefix.html'">
+                        <i class="fas fa-list-ol"></i>
+                        <span>Provider Prefik</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='serverconfig.html'">
+                        <i class="fas fa-server"></i>
+                        <span>Server Config</span>
+                    </div>
+                </div>
+                
+                <div class="content">
+                    <!-- Notification -->
+                    <div id="notification" class="notification"></div>
+                    
+                    <!-- Firebase Status -->
+                    <div id="firebaseStatus" class="firebase-status hidden">
+                        <i class="fas fa-circle"></i>
+                        <span id="firebaseStatusText">Status Firebase</span>
+                    </div>
+                    
+                    <!-- Color Section -->
+                    <div class="section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-palette"></i> Color Management</h2>
+                            <button class="btn btn-primary" onclick="saveColorConfig()">
+                                <i class="fas fa-save"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Preview Warna Saat Ini</h3>
+                            <div class="color-preview">
+                                <div class="color-item">
+                                    <div class="gradient-preview" id="gradientPreview"></div>
+                                    <span class="color-value">Background Gradient</span>
+                                </div>
+                                <div class="color-item">
+                                    <div class="color-box" id="primaryColorPreview"></div>
+                                    <span class="color-value" id="primaryColorValue">#0055ff</span>
+                                </div>
+                                <div class="color-item">
+                                    <div class="color-box" id="secondaryColorPreview"></div>
+                                    <span class="color-value" id="secondaryColorValue">#00aaff</span>
+                                </div>
+                                <div class="color-item">
+                                    <div class="color-box" id="textColorPreview"></div>
+                                    <span class="color-value" id="textColorValue">#FFFFFF</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Background Gradient</h3>
+                            <div id="gradientColors">
+                                <!-- Gradient colors will be populated here -->
+                            </div>
+                            <button class="btn btn-primary add-color-btn" onclick="addGradientColor()">
+                                <i class="fas fa-plus"></i> Tambah Warna Gradient
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Color Scheme</h3>
+                            <div class="form-group">
+                                <label for="primaryColor">Primary Color</label>
+                                <div class="color-input-group">
+                                    <input type="text" id="primaryColor" class="form-control color-input" value="#0055ff" placeholder="Masukkan kode warna (hex)">
+                                    <input type="color" id="primaryColorPicker" class="color-picker-btn" value="#0055ff">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="secondaryColor">Secondary Color</label>
+                                <div class="color-input-group">
+                                    <input type="text" id="secondaryColor" class="form-control color-input" value="#00aaff" placeholder="Masukkan kode warna (hex)">
+                                    <input type="color" id="secondaryColorPicker" class="color-picker-btn" value="#00aaff">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="textColor">Text Color</label>
+                                <div class="color-input-group">
+                                    <input type="text" id="textColor" class="form-control color-input" value="#FFFFFF" placeholder="Masukkan kode warna (hex)">
+                                    <input type="color" id="textColorPicker" class="color-picker-btn" value="#FFFFFF">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>
+                <p>&copy; 2023 ASIA PAYMENT - Console Admin. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3vHdT3pJxN2Y4t8p2ZvV7wQf2XvL5z8M",
+            authDomain: "steady-fin-368617.firebaseapp.com",
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+            projectId: "steady-fin-368617",
+            storageBucket: "steady-fin-368617.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+        
+        // Initialize Firebase
+        let database;
+        let firebaseConnected = false;
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            firebaseConnected = true;
+            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            firebaseConnected = false;
+            updateFirebaseStatus('Tidak terhubung ke Firebase - Menggunakan data simulasi', 'disconnected');
+        }
+        
+        // Global variables
+        let currentUser = null;
+        let colorConfig = {
+            BackgroundGradient: ["#0055ff", "#00aaff"],
+            ColorScheme: {
+                primaryColor: "#0055ff",
+                secondaryColor: "#00aaff",
+                textColor: "#FFFFFF"
+            }
+        };
+        
+        // Update Firebase status
+        function updateFirebaseStatus(message, status) {
+            const statusElement = document.getElementById('firebaseStatus');
+            const statusText = document.getElementById('firebaseStatusText');
+            
+            statusElement.classList.remove('hidden');
+            statusElement.classList.remove('connected');
+            statusElement.classList.remove('disconnected');
+            
+            statusElement.classList.add(status);
+            statusText.textContent = message;
+        }
+        
+        // Initialize the application
+        function initApp() {
+            // Check if user is logged in
+            const loggedInUser = localStorage.getItem('adminUser');
+            if (loggedInUser) {
+                currentUser = JSON.parse(loggedInUser);
+                document.getElementById('userName').textContent = currentUser.username;
+                loadColorConfig();
+            } else {
+                window.location.href = 'login.html';
+            }
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Color picker synchronization
+            document.getElementById('primaryColor').addEventListener('input', function() {
+                document.getElementById('primaryColorPicker').value = this.value;
+                updateColorPreview();
+            });
+            
+            document.getElementById('primaryColorPicker').addEventListener('input', function() {
+                document.getElementById('primaryColor').value = this.value;
+                updateColorPreview();
+            });
+            
+            document.getElementById('secondaryColor').addEventListener('input', function() {
+                document.getElementById('secondaryColorPicker').value = this.value;
+                updateColorPreview();
+            });
+            
+            document.getElementById('secondaryColorPicker').addEventListener('input', function() {
+                document.getElementById('secondaryColor').value = this.value;
+                updateColorPreview();
+            });
+            
+            document.getElementById('textColor').addEventListener('input', function() {
+                document.getElementById('textColorPicker').value = this.value;
+                updateColorPreview();
+            });
+            
+            document.getElementById('textColorPicker').addEventListener('input', function() {
+                document.getElementById('textColor').value = this.value;
+                updateColorPreview();
+            });
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminUser');
+            window.location.href = 'login.html';
+        }
+        
+        // Load color configuration from Firebase
+        function loadColorConfig() {
+            if (firebaseConnected) {
+                const colorRef = database.ref('AsiaPayment/Color');
+                
+                colorRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        colorConfig = data;
+                        populateColorForm();
+                        updateColorPreview();
+                    } else {
+                        useSampleColorConfig();
+                    }
+                }, (error) => {
+                    console.error('Firebase error:', error);
+                    updateFirebaseStatus('Error menghubungi Firebase - Menggunakan data simulasi', 'disconnected');
+                    useSampleColorConfig();
+                });
+            } else {
+                useSampleColorConfig();
+            }
+        }
+        
+        // Use sample color config when Firebase is not available
+        function useSampleColorConfig() {
+            colorConfig = {
+                BackgroundGradient: ["#0055ff", "#00aaff"],
+                ColorScheme: {
+                    primaryColor: "#0055ff",
+                    secondaryColor: "#00aaff",
+                    textColor: "#FFFFFF"
+                }
+            };
+            
+            populateColorForm();
+            updateColorPreview();
+            showNotification('Menggunakan data simulasi karena tidak dapat terhubung ke Firebase', 'info');
+        }
+        
+        // Populate color form with current values
+        function populateColorForm() {
+            // Set Color Scheme values
+            if (colorConfig.ColorScheme) {
+                document.getElementById('primaryColor').value = colorConfig.ColorScheme.primaryColor || "#0055ff";
+                document.getElementById('primaryColorPicker').value = colorConfig.ColorScheme.primaryColor || "#0055ff";
+                
+                document.getElementById('secondaryColor').value = colorConfig.ColorScheme.secondaryColor || "#00aaff";
+                document.getElementById('secondaryColorPicker').value = colorConfig.ColorScheme.secondaryColor || "#00aaff";
+                
+                document.getElementById('textColor').value = colorConfig.ColorScheme.textColor || "#FFFFFF";
+                document.getElementById('textColorPicker').value = colorConfig.ColorScheme.textColor || "#FFFFFF";
+            }
+            
+            // Populate gradient colors
+            const gradientContainer = document.getElementById('gradientColors');
+            gradientContainer.innerHTML = '';
+            
+            if (colorConfig.BackgroundGradient && colorConfig.BackgroundGradient.length > 0) {
+                colorConfig.BackgroundGradient.forEach((color, index) => {
+                    addGradientColorInput(color, index);
+                });
+            } else {
+                addGradientColorInput("#0055ff", 0);
+                addGradientColorInput("#00aaff", 1);
+            }
+        }
+        
+        // Add gradient color input field
+        function addGradientColorInput(color = "#000000", index = null) {
+            const gradientContainer = document.getElementById('gradientColors');
+            const colorId = index !== null ? index : gradientContainer.children.length;
+            
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'form-group';
+            colorDiv.innerHTML = `
+                <label>Warna Gradient ${colorId + 1}</label>
+                <div class="color-input-group">
+                    <input type="text" class="form-control color-input gradient-color" value="${color}" placeholder="Masukkan kode warna (hex)" data-index="${colorId}" oninput="updateGradientColor(this)">
+                    <input type="color" class="color-picker-btn gradient-color-picker" value="${color}" data-index="${colorId}" oninput="updateGradientColor(this)">
+                    <button class="btn btn-danger btn-sm" onclick="removeGradientColor(this)" ${gradientContainer.children.length < 2 ? 'disabled' : ''}>
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            if (index !== null) {
+                // Replace existing input if index is specified
+                if (gradientContainer.children[index]) {
+                    gradientContainer.replaceChild(colorDiv, gradientContainer.children[index]);
+                } else {
+                    gradientContainer.appendChild(colorDiv);
+                }
+            } else {
+                gradientContainer.appendChild(colorDiv);
+            }
+            
+            updateColorPreview();
+        }
+        
+        // Add new gradient color
+        function addGradientColor() {
+            addGradientColorInput("#000000");
+        }
+        
+        // Remove gradient color
+        function removeGradientColor(button) {
+            const colorDiv = button.closest('.form-group');
+            const index = Array.from(colorDiv.parentNode.children).indexOf(colorDiv);
+            
+            colorDiv.remove();
+            
+            // Update indices
+            const gradientInputs = document.querySelectorAll('.gradient-color');
+            const gradientPickers = document.querySelectorAll('.gradient-color-picker');
+            
+            gradientInputs.forEach((input, i) => {
+                input.setAttribute('data-index', i);
+                input.previousElementSibling.textContent = `Warna Gradient ${i + 1}`;
+            });
+            
+            gradientPickers.forEach((picker, i) => {
+                picker.setAttribute('data-index', i);
+            });
+            
+            // Disable remove button if only one color left
+            if (gradientInputs.length <= 2) {
+                document.querySelectorAll('.btn-danger').forEach(btn => {
+                    btn.disabled = true;
+                });
+            }
+            
+            updateColorPreview();
+        }
+        
+        // Update gradient color value
+        function updateGradientColor(input) {
+            const index = input.getAttribute('data-index');
+            const value = input.value;
+            
+            if (input.type === 'color') {
+                // If color picker changed, update the text input
+                const textInput = document.querySelector(`.gradient-color[data-index="${index}"]`);
+                textInput.value = value;
+            } else {
+                // If text input changed, update the color picker
+                const colorPicker = document.querySelector(`.gradient-color-picker[data-index="${index}"]`);
+                colorPicker.value = value;
+            }
+            
+            updateColorPreview();
+        }
+        
+        // Update color preview
+        function updateColorPreview() {
+            // Update gradient preview
+            const gradientColors = Array.from(document.querySelectorAll('.gradient-color')).map(input => input.value);
+            const gradientPreview = document.getElementById('gradientPreview');
+            
+            if (gradientColors.length > 0) {
+                gradientPreview.style.background = `linear-gradient(135deg, ${gradientColors.join(', ')})`;
+            }
+            
+            // Update color scheme previews
+            const primaryColor = document.getElementById('primaryColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const textColor = document.getElementById('textColor').value;
+            
+            document.getElementById('primaryColorPreview').style.backgroundColor = primaryColor;
+            document.getElementById('primaryColorValue').textContent = primaryColor;
+            
+            document.getElementById('secondaryColorPreview').style.backgroundColor = secondaryColor;
+            document.getElementById('secondaryColorValue').textContent = secondaryColor;
+            
+            document.getElementById('textColorPreview').style.backgroundColor = textColor;
+            document.getElementById('textColorValue').textContent = textColor;
+        }
+        
+        // Save color configuration to Firebase
+        function saveColorConfig() {
+            // Get gradient colors
+            const gradientColors = Array.from(document.querySelectorAll('.gradient-color')).map(input => input.value);
+            
+            // Get color scheme
+            const colorScheme = {
+                primaryColor: document.getElementById('primaryColor').value,
+                secondaryColor: document.getElementById('secondaryColor').value,
+                textColor: document.getElementById('textColor').value
+            };
+            
+            // Prepare data for Firebase
+            const colorData = {
+                BackgroundGradient: gradientColors,
+                ColorScheme: colorScheme
+            };
+            
+            if (firebaseConnected) {
+                const colorRef = database.ref('AsiaPayment/Color');
+                
+                colorRef.set(colorData)
+                    .then(() => {
+                        showNotification('Konfigurasi warna berhasil disimpan', 'success');
+                    })
+                    .catch((error) => {
+                        showNotification('Gagal menyimpan konfigurasi warna: ' + error.message, 'error');
+                    });
+            } else {
+                // Save to local storage if Firebase is not connected
+                colorConfig = colorData;
+                showNotification('Konfigurasi warna berhasil disimpan (data lokal)', 'success');
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 5000);
+        }
+        
+        // Initialize the app when the page loads
+        window.onload = initApp;
+    </script>
+</body>
+</html>
