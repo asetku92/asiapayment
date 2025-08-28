@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Dinamis - ASIA PAYMENT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #0055ff;
+            --secondary: #00aaff;
+            --accent: #ff5500;
+            --light: #ffffff;
+            --dark: #212121;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border: #dee2e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(30deg);
+            animation: shine 4s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo img {
+            height: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .auth-info button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .auth-info button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 700px;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--light-gray);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: var(--dark);
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+            color: var(--gray);
+        }
+        
+        .nav-item:hover {
+            background: rgba(0, 85, 255, 0.05);
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .nav-item.active i {
+            color: var(--primary);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 30px;
+            background: white;
+            overflow-y: auto;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section-title h2 {
+            font-size: 22px;
+            color: var(--dark);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0044cc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #bd2130;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th {
+            background: var(--light-gray);
+            text-align: left;
+            padding: 15px;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: rgba(0, 85, 255, 0.03);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        
+        .btn-edit {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .btn-edit:hover {
+            background: rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(220, 53, 69, 0.2);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--gray);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            background: var(--light-gray);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 85, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 600px;
+            animation: modalopen 0.3s;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+        
+        .close {
+            color: var(--gray);
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .notification.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            display: block;
+        }
+        
+        .notification.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            display: block;
+        }
+        
+        .notification.info {
+            background: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.2);
+            display: block;
+        }
+        
+        .firebase-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .firebase-status.connected {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .firebase-status.disconnected {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            min-width: 200px;
+        }
+        
+        .type-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .type-DYNAMIC_PRODUCT_ON_NUMBER {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .type-DYNAMIC_PRODUCT_BASED_ON_REGION {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+        
+        .type-POSTPAID_BILL {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+        
+        .type-PROVIDER_BASED {
+            background: rgba(111, 66, 193, 0.1);
+            color: #6f42c1;
+        }
+        
+        .type-STATIC_PRODUCT {
+            background: rgba(253, 126, 20, 0.1);
+            color: #fd7e14;
+        }
+        
+        .type-URL {
+            background: rgba(32, 201, 151, 0.1);
+            color: #20c997;
+        }
+        
+        .type-VOUCHER_AKTIVATION {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            header {
+                padding: 15px 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="appSection">
+            <header>
+                <div class="logo">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo">
+                    <h1>ASIA PAYMENT Console</h1>
+                </div>
+                
+                <div class="auth-info">
+                    <span id="userName">Administrator</span>
+                    <button onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+            
+            <div class="main-content">
+                <div class="sidebar">
+                    <!-- Menu Utama -->
+                    <div class="nav-item" onclick="window.location.href='dashboard.html'">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='index.html'">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Kategori Menu</span>
+                    </div>
+                    
+                    <div class="nav-item active">
+                        <i class="fas fa-list"></i>
+                        <span>Menu Dinamis</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='settings.html'">
+                        <i class="fas fa-cog"></i>
+                        <span>Pengaturan</span>
+                    </div>
+                    
+                    <!-- Menu Baru -->
+                    <div class="nav-item" onclick="window.location.href='banner.html'">
+                        <i class="fas fa-image"></i>
+                        <span>Banner</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='color.html'">
+                        <i class="fas fa-palette"></i>
+                        <span>Color</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='regex.html'">
+                        <i class="fas fa-code"></i>
+                        <span>RegexExtractor</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='textinfo.html'">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Text Information</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='cs.html'">
+                        <i class="fas fa-headset"></i>
+                        <span>Customer Service</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='produkcode.html'">
+                        <i class="fas fa-barcode"></i>
+                        <span>Kode Produk</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='prefix.html'">
+                        <i class="fas fa-list-ol"></i>
+                        <span>Provider Prefik</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='serverconfig.html'">
+                        <i class="fas fa-server"></i>
+                        <span>Server Config</span>
+                    </div>
+                </div>
+                
+                <div class="content">
+                    <!-- Notification -->
+                    <div id="notification" class="notification"></div>
+                    
+                    <!-- Firebase Status -->
+                    <div id="firebaseStatus" class="firebase-status hidden">
+                        <i class="fas fa-circle"></i>
+                        <span id="firebaseStatusText">Status Firebase</span>
+                    </div>
+                    
+                    <!-- Menu Section -->
+                    <div class="section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-list"></i> Menu Dinamis</h2>
+                            <button class="btn btn-primary" onclick="openMenuForm()">
+                                <i class="fas fa-plus"></i> Tambah Menu
+                            </button>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="form-group">
+                                <label for="categoryFilter">Filter Kategori:</label>
+                                <select id="categoryFilter" class="filter-select" onchange="filterMenus()">
+                                    <option value="">Semua Kategori</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="typeFilter">Filter Tipe:</label>
+                                <select id="typeFilter" class="filter-select" onchange="filterMenus()">
+                                    <option value="">Semua Tipe</option>
+                                    <option value="DYNAMIC_PRODUCT_ON_NUMBER">DYNAMIC_PRODUCT_ON_NUMBER</option>
+                                    <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION</option>
+                                    <option value="POSTPAID_BILL">POSTPAID_BILL</option>
+                                    <option value="PROVIDER_BASED">PROVIDER_BASED</option>
+                                    <option value="STATIC_PRODUCT">STATIC_PRODUCT</option>
+                                    <option value="URL">URL</option>
+                                    <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="table-container">
+                                <table id="menusTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Menu</th>
+                                            <th>Kategori</th>
+                                            <th>Tipe</th>
+                                            <th>Urutan</th>
+                                            <th>Icon</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="menusTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>
+                <p>&copy; 2023 ASIA PAYMENT - Console Admin. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal Form for Add/Edit Menu -->
+    <div id="menuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-list"></i> <span id="modalTitle">Tambah Menu</span></h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <form id="menuForm">
+                <input type="hidden" id="menuId">
+                <input type="hidden" id="originalCategory">
+                <input type="hidden" id="originalName">
+                
+                <div class="form-group">
+                    <label for="menuCategory">Kategori</label>
+                    <select id="menuCategory" class="form-control" required>
+                        <option value="">Pilih Kategori</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuName">Nama Menu</label>
+                    <input type="text" id="menuName" class="form-control" placeholder="Masukkan nama menu" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuType">Tipe Menu</label>
+                    <select id="menuType" class="form-control" required>
+                        <option value="">Pilih Tipe Menu</option>
+                        <option value="DYNAMIC_PRODUCT_ON_NUMBER">DYNAMIC_PRODUCT_ON_NUMBER</option>
+                        <option value="DYNAMIC_PRODUCT_BASED_ON_REGION">DYNAMIC_PRODUCT_BASED_ON_REGION</option>
+                        <option value="POSTPAID_BILL">POSTPAID_BILL</option>
+                        <option value="PROVIDER_BASED">PROVIDER_BASED</option>
+                        <option value="STATIC_PRODUCT">STATIC_PRODUCT</option>
+                        <option value="URL">URL</option>
+                        <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuOrder">Urutan</label>
+                    <input type="number" id="menuOrder" class="form-control" placeholder="Masukkan urutan" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuIconUrl">URL Icon</label>
+                    <input type="text" id="menuIconUrl" class="form-control" placeholder="Masukkan URL icon" required>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3vHdT3pJxN2Y4t8p2ZvV7wQf2XvL5z8M",
+            authDomain: "steady-fin-368617.firebaseapp.com",
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+            projectId: "steady-fin-368617",
+            storageBucket: "steady-fin-368617.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+        
+        // Initialize Firebase
+        let database;
+        let firebaseConnected = false;
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            firebaseConnected = true;
+            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            firebaseConnected = false;
+            updateFirebaseStatus('Tidak terhubung ke Firebase - Menggunakan data simulasi', 'disconnected');
+        }
+        
+        // Global variables
+        let currentUser = null;
+        let categories = [];
+        let menus = [];
+        let filteredMenus = [];
+        
+        // Update Firebase status
+        function updateFirebaseStatus(message, status) {
+            const statusElement = document.getElementById('firebaseStatus');
+            const statusText = document.getElementById('firebaseStatusText');
+            
+            statusElement.classList.remove('hidden');
+            statusElement.classList.remove('connected');
+            statusElement.classList.remove('disconnected');
+            
+            statusElement.classList.add(status);
+            statusText.textContent = message;
+        }
+        
+        // Initialize the application
+        function initApp() {
+            // Check if user is logged in
+            const loggedInUser = localStorage.getItem('adminUser');
+            if (loggedInUser) {
+                currentUser = JSON.parse(loggedInUser);
+                document.getElementById('userName').textContent = currentUser.username;
+                loadCategories();
+                loadMenus();
+            } else {
+                window.location.href = 'login.html';
+            }
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Form submission
+            document.getElementById('menuForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveMenu();
+            });
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminUser');
+            window.location.href = 'login.html';
+        }
+        
+        // Load categories from Firebase
+        function loadCategories() {
+            if (firebaseConnected) {
+                const categoriesRef = database.ref('AsiaPayment/MenuDinamis/category');
+                
+                categoriesRef.on('value', (snapshot) => {
+                    categories = [];
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            categories.push({
+                                id: key,
+                                name: key,
+                                ...data[key]
+                            });
+                        });
+                        
+                        // Sort by order
+                        categories.sort((a, b) => a.Urutan - b.Urutan);
+                        
+                        populateCategoryDropdown();
+                    }
+                }, (error) => {
+                    console.error('Firebase error:', error);
+                    useSampleCategories();
+                });
+            } else {
+                useSampleCategories();
+            }
+        }
+        
+        // Use sample categories when Firebase is not available
+        function useSampleCategories() {
+            categories = [
+                { id: 'Pulsa', name: 'Pulsa', Urutan: 1, Icon: 'fa-mobile-alt' },
+                { id: 'Data', name: 'Data', Urutan: 2, Icon: 'fa-wifi' },
+                { id: 'E-Wallet', name: 'E-Wallet', Urutan: 3, Icon: 'fa-wallet' }
+            ];
+            
+            populateCategoryDropdown();
+        }
+        
+        // Populate category dropdown
+        function populateCategoryDropdown() {
+            const categoryDropdown = document.getElementById('menuCategory');
+            const categoryFilter = document.getElementById('categoryFilter');
+            
+            // Clear existing options
+            categoryDropdown.innerHTML = '<option value="">Pilih Kategori</option>';
+            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>';
+            
+            // Add categories to dropdowns
+            categories.forEach(category => {
+                categoryDropdown.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+                categoryFilter.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+            });
+        }
+        
+        // Load menus from Firebase
+        function loadMenus() {
+            const tableBody = document.getElementById('menusTableBody');
+            tableBody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
+            
+            if (firebaseConnected) {
+                const menusRef = database.ref('AsiaPayment/MenuDinamis/Menu');
+                
+                menusRef.on('value', (snapshot) => {
+                    menus = [];
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        // Convert nested object to array
+                        Object.keys(data).forEach(category => {
+                            if (data[category]) {
+                                Object.keys(data[category]).forEach(menuName => {
+                                    menus.push({
+                                        id: menuName,
+                                        name: menuName,
+                                        category: category,
+                                        ...data[category][menuName]
+                                    });
+                                });
+                            }
+                        });
+                        
+                        // Sort by order
+                        menus.sort((a, b) => a.order - b.order);
+                        filteredMenus = [...menus];
+                        
+                        renderMenus();
+                    } else {
+                        useSampleMenus();
+                    }
+                }, (error) => {
+                    console.error('Firebase error:', error);
+                    updateFirebaseStatus('Error menghubungi Firebase - Menggunakan data simulasi', 'disconnected');
+                    useSampleMenus();
+                });
+            } else {
+                useSampleMenus();
+            }
+        }
+        
+        // Use sample menus when Firebase is not available
+        function useSampleMenus() {
+            menus = [
+                { id: 'Telkomsel', name: 'Telkomsel', category: 'Pulsa', order: 1, type: 'STATIC_PRODUCT', iconUrl: 'https://example.com/icon1.png' },
+                { id: 'XL', name: 'XL', category: 'Pulsa', order: 2, type: 'STATIC_PRODUCT', iconUrl: 'https://example.com/icon2.png' },
+                { id: 'Indosat', name: 'Indosat', category: 'Pulsa', order: 3, type: 'STATIC_PRODUCT', iconUrl: 'https://example.com/icon3.png' },
+                { id: 'Axis', name: 'Axis', category: 'Pulsa', order: 4, type: 'STATIC_PRODUCT', iconUrl: 'https://example.com/icon4.png' }
+            ];
+            
+            filteredMenus = [...menus];
+            renderMenus();
+            showNotification('Menggunakan data simulasi karena tidak dapat terhubung ke Firebase', 'info');
+        }
+        
+        // Filter menus based on selected category and type
+        function filterMenus() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            
+            filteredMenus = menus.filter(menu => {
+                const categoryMatch = !categoryFilter || menu.category === categoryFilter;
+                const typeMatch = !typeFilter || menu.type === typeFilter;
+                return categoryMatch && typeMatch;
+            });
+            
+            renderMenus();
+        }
+        
+        // Render menus to table
+        function renderMenus() {
+            const tableBody = document.getElementById('menusTableBody');
+            
+            if (filteredMenus.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">Tidak ada data menu</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            filteredMenus.forEach(menu => {
+                html += `
+                    <tr>
+                        <td>${menu.name}</td>
+                        <td>${menu.category}</td>
+                        <td><span class="type-badge type-${menu.type}">${menu.type}</span></td>
+                        <td>${menu.order}</td>
+                        <td><img src="${menu.iconUrl}" alt="Icon" style="width: 30px; height: 30px; object-fit: contain;"></td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-edit" onclick="editMenu('${menu.category}', '${menu.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-delete" onclick="deleteMenu('${menu.category}', '${menu.id}', '${menu.name}')">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+        
+        // Open menu form modal
+        function openMenuForm() {
+            document.getElementById('modalTitle').textContent = 'Tambah Menu';
+            document.getElementById('menuId').value = '';
+            document.getElementById('originalCategory').value = '';
+            document.getElementById('originalName').value = '';
+            document.getElementById('menuCategory').value = '';
+            document.getElementById('menuName').value = '';
+            document.getElementById('menuType').value = '';
+            document.getElementById('menuOrder').value = '';
+            document.getElementById('menuIconUrl').value = '';
+            document.getElementById('menuModal').style.display = 'block';
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('menuModal').style.display = 'none';
+        }
+        
+        // Edit menu
+        function editMenu(category, id) {
+            const menu = menus.find(m => m.category === category && m.id === id);
+            
+            if (menu) {
+                document.getElementById('modalTitle').textContent = 'Edit Menu';
+                document.getElementById('menuId').value = menu.id;
+                document.getElementById('originalCategory').value = menu.category;
+                document.getElementById('originalName').value = menu.name;
+                document.getElementById('menuCategory').value = menu.category;
+                document.getElementById('menuName').value = menu.name;
+                document.getElementById('menuType').value = menu.type;
+                document.getElementById('menuOrder').value = menu.order;
+                document.getElementById('menuIconUrl').value = menu.iconUrl;
+                document.getElementById('menuModal').style.display = 'block';
+            }
+        }
+        
+        // Save menu to Firebase or local storage
+        function saveMenu() {
+            const id = document.getElementById('menuId').value;
+            const originalCategory = document.getElementById('originalCategory').value;
+            const originalName = document.getElementById('originalName').value;
+            const category = document.getElementById('menuCategory').value;
+            const name = document.getElementById('menuName').value;
+            const type = document.getElementById('menuType').value;
+            const order = document.getElementById('menuOrder').value;
+            const iconUrl = document.getElementById('menuIconUrl').value;
+            
+            if (!category || !name || !type || !order || !iconUrl) {
+                showNotification('Semua field harus diisi', 'error');
+                return;
+            }
+            
+            const menuData = {
+                order: parseInt(order),
+                type: type,
+                iconUrl: iconUrl
+            };
+            
+            if (firebaseConnected) {
+                const menuRef = database.ref(`AsiaPayment/MenuDinamis/Menu/${category}/${name}`);
+                
+                if (id) {
+                    // Update existing menu
+                    if (originalCategory !== category || originalName !== name) {
+                        // Category or name changed, delete old and create new
+                        const oldRef = database.ref(`AsiaPayment/MenuDinamis/Menu/${originalCategory}/${originalName}`);
+                        
+                        oldRef.remove()
+                            .then(() => {
+                                menuRef.set(menuData)
+                                    .then(() => {
+                                        showNotification('Menu berhasil diperbarui', 'success');
+                                        closeModal();
+                                    })
+                                    .catch((error) => {
+                                        showNotification('Gagal memperbarui menu: ' + error.message, 'error');
+                                    });
+                            })
+                            .catch((error) => {
+                                showNotification('Gagal memperbarui menu: ' + error.message, 'error');
+                            });
+                    } else {
+                        // Just update the existing menu
+                        menuRef.update(menuData)
+                            .then(() => {
+                                showNotification('Menu berhasil diperbarui', 'success');
+                                closeModal();
+                            })
+                            .catch((error) => {
+                                showNotification('Gagal memperbarui menu: ' + error.message, 'error');
+                            });
+                    }
+                } else {
+                    // Add new menu
+                    menuRef.set(menuData)
+                        .then(() => {
+                            showNotification('Menu berhasil ditambahkan', 'success');
+                            closeModal();
+                        })
+                        .catch((error) => {
+                            showNotification('Gagal menambahkan menu: ' + error.message, 'error');
+                        });
+                }
+            } else {
+                // Save to local storage if Firebase is not connected
+                if (id) {
+                    // Update existing menu
+                    const index = menus.findIndex(m => m.category === originalCategory && m.id === id);
+                    if (index !== -1) {
+                        if (originalCategory !== category || originalName !== name) {
+                            // Remove old and add new
+                            menus = menus.filter(m => !(m.category === originalCategory && m.id === id));
+                            
+                            menus.push({
+                                id: name,
+                                name: name,
+                                category: category,
+                                order: parseInt(order),
+                                type: type,
+                                iconUrl: iconUrl
+                            });
+                        } else {
+                            // Update in place
+                            menus[index].order = parseInt(order);
+                            menus[index].type = type;
+                            menus[index].iconUrl = iconUrl;
+                        }
+                        
+                        showNotification('Menu berhasil diperbarui (data lokal)', 'success');
+                    }
+                } else {
+                    // Add new menu
+                    const newMenu = {
+                        id: name,
+                        name: name,
+                        category: category,
+                        order: parseInt(order),
+                        type: type,
+                        iconUrl: iconUrl
+                    };
+                    
+                    menus.push(newMenu);
+                    showNotification('Menu berhasil ditambahkan (data lokal)', 'success');
+                }
+                
+                filteredMenus = [...menus];
+                renderMenus();
+                closeModal();
+            }
+        }
+        
+        // Delete menu
+        function deleteMenu(category, id, name) {
+            if (confirm(`Apakah Anda yakin ingin menghapus menu "${name}"?`)) {
+                if (firebaseConnected) {
+                    const menuRef = database.ref(`AsiaPayment/MenuDinamis/Menu/${category}/${id}`);
+                    
+                    menuRef.remove()
+                        .then(() => {
+                            showNotification('Menu berhasil dihapus', 'success');
+                        })
+                        .catch((error) => {
+                            showNotification('Gagal menghapus menu: ' + error.message, 'error');
+                        });
+                } else {
+                    // Remove from local array
+                    menus = menus.filter(m => !(m.category === category && m.id === id));
+                    filteredMenus = [...menus];
+                    renderMenus();
+                    showNotification('Menu berhasil dihapus (data lokal)', 'success');
+                }
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 3000);
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('menuModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+        
+        // Initialize the app when the page loads
+        window.onload = initApp;
+    </script>
+</body>
+</html>
