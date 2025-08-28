@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ASIA PAYMENT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0055ff;
+            --secondary: #00aaff;
+            --accent: #ff5500;
+            --light: #ffffff;
+            --dark: #212121;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border: #dee2e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(30deg);
+            animation: shine 4s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .logo img {
+            height: 60px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .logo h1 {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        
+        .login-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .login-form {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0044cc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
+        }
+        
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .notification.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            display: block;
+        }
+        
+        .login-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            background: var(--light-gray);
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                max-width: 100%;
+            }
+            
+            .login-header {
+                padding: 20px;
+            }
+            
+            .login-form {
+                padding: 20px;
+            }
+            
+            .logo h1 {
+                font-size: 22px;
+            }
+            
+            .logo img {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo">
+                <h1>ASIA PAYMENT</h1>
+            </div>
+            <p>Console Administrator</p>
+        </div>
+        
+        <div class="login-form">
+            <div id="notification" class="notification"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Masukkan username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Masukkan password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+        
+        <div class="login-footer">
+            <p>&copy; 2023 ASIA PAYMENT. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi aplikasi
+        function initLogin() {
+            // Cek jika pengguna sudah login
+            const loggedInUser = localStorage.getItem('adminUser');
+            if (loggedInUser) {
+                window.location.href = 'dashboard.html';
+            }
+            
+            // Setup event listeners
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                login();
+            });
+        }
+        
+        // Fungsi login
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Validasi sederhana
+            if (!username || !password) {
+                showNotification('Username dan password harus diisi', 'error');
+                return;
+            }
+            
+            // Kredensial admin (bisa diganti sesuai kebutuhan)
+            const adminCredentials = {
+                username: 'admin',
+                password: 'admin123'
+            };
+            
+            // Simulasi proses login
+            if (username === adminCredentials.username && password === adminCredentials.password) {
+                // Simpan informasi user ke localStorage
+                const user = {
+                    username: username,
+                    loginTime: new Date().toISOString()
+                };
+                
+                localStorage.setItem('adminUser', JSON.stringify(user));
+                
+                // Redirect ke dashboard
+                window.location.href = 'index.html';
+            } else {
+                showNotification('Username atau password salah', 'error');
+            }
+        }
+        
+        // Tampilkan notifikasi
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Sembunyikan setelah 3 detik
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 3000);
+        }
+        
+        // Inisialisasi aplikasi saat halaman dimuat
+        window.onload = initLogin;
+    </script>
+</body>
+</html>
