@@ -230,7 +230,7 @@
         .btn-danger:hover {
             background: #bd2130;
             transform: translateY(-2px);
-            box-shadow: 0 5px extremely15px rgba(220, 53, 69, 0.2);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2);
         }
         
         .btn-success {
@@ -443,7 +443,7 @@
         .form-control:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 extremely 0 3px rgba(0, 85, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
         }
         
         .modal-footer {
@@ -496,7 +496,7 @@
         .firebase-status.connected {
             background: rgba(40, 167, 69, 0.1);
             color: var(--success);
-            border: 1px extremely solid rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.2);
         }
         
         .firebase-status.disconnected {
@@ -570,6 +570,12 @@
         
         .breadcrumb .separator {
             color: var(--gray);
+        }
+        
+        /* Style untuk textarea regex */
+        .regex-field {
+            font-family: monospace;
+            font-size: 14px;
         }
         
         @media (max-width: 768px) {
@@ -855,7 +861,7 @@
                     <input type="text" id="productName" class="form-control" placeholder="Masukkan nama produk" required>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" id="codeGroup">
                     <label for="productCode">Kode</label>
                     <input type="text" id="productCode" class="form-control" placeholder="Masukkan kode produk">
                 </div>
@@ -883,6 +889,16 @@
                 <div class="form-group" id="kodeCekGroup">
                     <label for="productKodeCek">Kode Cek</label>
                     <input type="text" id="productKodeCek" class="form-control" placeholder="Masukkan kode cek">
+                </div>
+                
+                <div class="form-group" id="regexBayarGroup" style="display: none;">
+                    <label for="productRegexBayar">Regex Bayar</label>
+                    <textarea id="productRegexBayar" class="form-control regex-field" placeholder="Masukkan regex untuk pembayaran" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group" id="regexCekGroup" style="display: none;">
+                    <label for="productRegexCek">Regex Cek</label>
+                    <textarea id="productRegexCek" class="form-control regex-field" placeholder="Masukkan regex untuk pengecekan" rows="3"></textarea>
                 </div>
                 
                 <div class="form-group" id="createdAtGroup" style="display: none;">
@@ -1017,7 +1033,8 @@
             categories = [
                 { id: 'Pulsa', name: 'Pulsa', Urutan: 1, Icon: 'fa-mobile-alt' },
                 { id: 'Data', name: 'Data', Urutan: 2, Icon: 'fa-wifi' },
-                { id: 'E-Wallet', name: 'E-Wallet', Urutan: 3, Icon: 'fa-wallet' }
+                { id: 'E-Wallet', name: 'E-Wallet', Urutan: 3, Icon: 'fa-wallet' },
+                { id: 'Tagihan', name: 'Tagihan', Urutan: 4, Icon: 'fa-file-invoice-dollar' }
             ];
             
             populateCategoryDropdown();
@@ -1180,6 +1197,19 @@
                     ImageUrl: 'https://example.com/pln.png',
                     Ket: 'Tagihan Listrik',
                     path: 'POSTPAID_BILL/Tagihan/Listrik/PLN'
+                },
+                {
+                    type: 'POSTPAID_BILL',
+                    category: 'Tagihan',
+                    menu: 'BPJS',
+                    name: 'BPJS Kesehatan',
+                    KodeBayar: 'Byrbpjs',
+                    KodeCek: 'Cekbpjs',
+                    ImageUrl: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgjPBbVezOv9SUT2ep3bjC6NX96ddP-rNQa-V5cWpsjDkdQW9bLl0MOkymFPhOx908Xi5J5ZyFE4IitsrV_sssAyBbwrQONwmr4l1hy3lqSl8V6VczXMZe2UBgO3WgNRQLTjte-8KjydQbPn340-KAXHnPD5p8tx5EanGfc1Us9UFJ3zMVe6qhQyiofPO0/s320/bpjs.png',
+                    Ket: 'BPJS Kesehatan',
+                    RegexBayar: "^#\\d+##\\s+CEKBPJS\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Nama\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
+                    RegexCek: "^#\\d+##\\s+CEKBPJS\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Name\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
+                    path: 'POSTPAID_BILL/Tagihan/BPJS/BPJS Kesehatan'
                 }
             ];
             
@@ -1216,12 +1246,20 @@
                 filteredProducts.forEach(product => {
                     const row = document.createElement('tr');
                     
+                    // Determine which code to display
+                    let codeDisplay = '-';
+                    if (product.Code) {
+                        codeDisplay = product.Code;
+                    } else if (product.KodeBayar) {
+                        codeDisplay = product.KodeBayar;
+                    }
+                    
                     row.innerHTML = `
                         <td>${product.name}</td>
                         <td>${product.type}</td>
                         <td>${product.category}</td>
                         <td>${product.menu}</td>
-                        <td>${product.Code || product.KodeBayar || '-'}</td>
+                        <td>${codeDisplay}</td>
                         <td>
                             <div class="action-buttons">
                                 <button class="btn btn-sm btn-edit" onclick="editProduct('${product.path}')">
@@ -1284,7 +1322,15 @@
             document.getElementById('wilayahGroup').style.display = 'none';
             document.getElementById('jenisGroup').style.display = 'none';
             document.getElementById('urlGroup').style.display = 'none';
+            document.getElementById('regexBayarGroup').style.display = 'none';
+            document.getElementById('regexCekGroup').style.display = 'none';
             document.getElementById('createdAtGroup').style.display = 'none';
+            
+            // Show all standard fields
+            document.getElementById('codeGroup').style.display = 'block';
+            document.getElementById('kodeBayarGroup').style.display = 'block';
+            document.getElementById('kodeCekGroup').style.display = 'block';
+            document.getElementById('menuGroup').style.display = 'block';
             
             document.getElementById('productModal').style.display = 'block';
         }
@@ -1303,8 +1349,9 @@
             document.getElementById('wilayahGroup').style.display = 'none';
             document.getElementById('jenisGroup').style.display = 'none';
             document.getElementById('urlGroup').style.display = 'none';
+            document.getElementById('regexBayarGroup').style.display = 'none';
+            document.getElementById('regexCekGroup').style.display = 'none';
             document.getElementById('createdAtGroup').style.display = 'none';
-            document.getElementById('menuGroup').style.display = 'block';
             
             // Show/hide fields based on type
             if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
@@ -1315,6 +1362,20 @@
                 document.getElementById('menuGroup').style.display = 'none';
             } else if (type === 'URL') {
                 document.getElementById('urlGroup').style.display = 'block';
+                document.getElementById('codeGroup').style.display = 'none';
+            } else if (type === 'POSTPAID_BILL') {
+                document.getElementById('regexBayarGroup').style.display = 'block';
+                document.getElementById('regexCekGroup').style.display = 'block';
+                document.getElementById('codeGroup').style.display = 'none';
+            } else if (type === 'VOUCHER_AKTIVATION') {
+                document.getElementById('codeGroup').style.display = 'block';
+                document.getElementById('kodeBayarGroup').style.display = 'none';
+                document.getElementById('kodeCekGroup').style.display = 'none';
+            } else {
+                // For other types, show standard fields
+                document.getElementById('codeGroup').style.display = 'block';
+                document.getElementById('kodeBayarGroup').style.display = 'block';
+                document.getElementById('kodeCekGroup').style.display = 'block';
             }
         }
         
@@ -1338,6 +1399,8 @@
                 document.getElementById('productUrl').value = product.Url || '';
                 document.getElementById('productKodeBayar').value = product.KodeBayar || '';
                 document.getElementById('productKodeCek').value = product.KodeCek || '';
+                document.getElementById('productRegexBayar').value = product.RegexBayar || '';
+                document.getElementById('productRegexCek').value = product.RegexCek || '';
                 document.getElementById('productCreatedAt').value = product.CreatedAt || '';
                 
                 // Set region and wilayah if applicable
@@ -1399,6 +1462,8 @@
             const url = document.getElementById('productUrl').value;
             const kodeBayar = document.getElementById('productKodeBayar').value;
             const kodeCek = document.getElementById('productKodeCek').value;
+            const regexBayar = document.getElementById('productRegexBayar').value;
+            const regexCek = document.getElementById('productRegexCek').value;
             const createdAt = document.getElementById('productCreatedAt').value;
             const region = document.getElementById('productRegion').value;
             const wilayah = document.getElementById('productWilayah').value;
@@ -1439,6 +1504,20 @@
                 };
                 
                 path = `${type}/${category}/${menu}/${name}`;
+            } else if (type === 'POSTPAID_BILL') {
+                // POSTPAID_BILL product
+                productData = {
+                    ImageUrl: imageUrl,
+                    Ket: ket,
+                    KodeBayar: kodeBayar,
+                    KodeCek: kodeCek
+                };
+                
+                // Add regex fields if they exist
+                if (regexBayar) productData.RegexBayar = regexBayar;
+                if (regexCek) productData.RegexCek = regexCek;
+                
+                path = `${type}/${category}/${menu}/${name}`;
             } else if (type === 'VOUCHER_AKTIVATION') {
                 // Voucher activation product
                 productData = {
@@ -1452,12 +1531,12 @@
                 // Other product types
                 productData = {
                     ImageUrl: imageUrl,
-                    Ket: ket,
-                    KodeBayar: kodeBayar,
-                    KodeCek: kodeCek
+                    Ket: ket
                 };
                 
                 if (code) productData.Code = code;
+                if (kodeBayar) productData.KodeBayar = kodeBayar;
+                if (kodeCek) productData.KodeCek = kodeCek;
                 
                 path = `${type}/${category}/${menu}/${name}`;
             }
