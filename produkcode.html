@@ -891,12 +891,12 @@
                     <input type="text" id="productKodeCek" class="form-control" placeholder="Masukkan kode cek">
                 </div>
                 
-                <div class="form-group" id="regexBayarGroup">
+                <div class="form-group" id="regexBayarGroup" style="display: none;">
                     <label for="productRegexBayar">Regex Bayar</label>
                     <textarea id="productRegexBayar" class="form-control regex-field" placeholder="Masukkan regex untuk pembayaran" rows="3"></textarea>
                 </div>
                 
-                <div class="form-group" id="regexCekGroup">
+                <div class="form-group" id="regexCekGroup" style="display: none;">
                     <label for="productRegexCek">Regex Cek</label>
                     <textarea id="productRegexCek" class="form-control regex-field" placeholder="Masukkan regex untuk pengecekan" rows="3"></textarea>
                 </div>
@@ -1000,7 +1000,7 @@
             if (firebaseConnected) {
                 const categoriesRef = database.ref('AsiaPayment/MenuDinamis/category');
                 
-                categoriesRef.on('value', (snapshot) {
+                categoriesRef.on('value', (snapshot) => {
                     categories = [];
                     const data = snapshot.val();
                     
@@ -1149,7 +1149,7 @@
                                                             menu,
                                                             name: product,
                                                             ...productData,
-                                                            path: `${type}/${category/${menu}/${product}`
+                                                            path: `${type}/${category}/${menu}/${product}`
                                                         });
                                                     });
                                                 }
@@ -1208,7 +1208,7 @@
                     ImageUrl: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgjPBbVezOv9SUT2ep3bjC6NX96ddP-rNQa-V5cWpsjDkdQW9bLl0MOkymFPhOx908Xi5J5ZyFE4IitsrV_sssAyBbwrQONwmr4l1hy3lqSl8V6VczXMZe2UBgO3WgNRQLTjte-8KjydQbPn340-KAXHnPD5p8tx5EanGfc1Us9UFJ3zMVe6qhQyiofPO0/s320/bpjs.png',
                     Ket: 'BPJS Kesehatan',
                     RegexBayar: "^#\\d+##\\s+CEKBPJS\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Nama\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
-                    RegexCek: "^#\\d+##\\s+CEKBPJS\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Nama\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
+                    RegexCek: "^#\\d+##\\s+CEKBPJS\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Name\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
                     path: 'POSTPAID_BILL/Tagihan/BPJS/BPJS Kesehatan'
                 }
             ];
@@ -1322,14 +1322,14 @@
             document.getElementById('wilayahGroup').style.display = 'none';
             document.getElementById('jenisGroup').style.display = 'none';
             document.getElementById('urlGroup').style.display = 'none';
+            document.getElementById('regexBayarGroup').style.display = 'none';
+            document.getElementById('regexCekGroup').style.display = 'none';
             document.getElementById('createdAtGroup').style.display = 'none';
             
             // Show all standard fields
             document.getElementById('codeGroup').style.display = 'block';
             document.getElementById('kodeBayarGroup').style.display = 'block';
             document.getElementById('kodeCekGroup').style.display = 'block';
-            document.getElementById('regexBayarGroup').style.display = 'block';
-            document.getElementById('regexCekGroup').style.display = 'block';
             document.getElementById('menuGroup').style.display = 'block';
             
             document.getElementById('productModal').style.display = 'block';
@@ -1349,6 +1349,8 @@
             document.getElementById('wilayahGroup').style.display = 'none';
             document.getElementById('jenisGroup').style.display = 'none';
             document.getElementById('urlGroup').style.display = 'none';
+            document.getElementById('regexBayarGroup').style.display = 'none';
+            document.getElementById('regexCekGroup').style.display = 'none';
             document.getElementById('createdAtGroup').style.display = 'none';
             
             // Show/hide fields based on type
@@ -1362,24 +1364,18 @@
                 document.getElementById('urlGroup').style.display = 'block';
                 document.getElementById('codeGroup').style.display = 'none';
             } else if (type === 'POSTPAID_BILL') {
-                document.getElementById('codeGroup').style.display = 'none';
-                document.getElementById('kodeBayarGroup').style.display = 'block';
-                document.getElementById('kodeCekGroup').style.display = 'block';
                 document.getElementById('regexBayarGroup').style.display = 'block';
                 document.getElementById('regexCekGroup').style.display = 'block';
+                document.getElementById('codeGroup').style.display = 'none';
             } else if (type === 'VOUCHER_AKTIVATION') {
                 document.getElementById('codeGroup').style.display = 'block';
                 document.getElementById('kodeBayarGroup').style.display = 'none';
                 document.getElementById('kodeCekGroup').style.display = 'none';
-                document.getElementById('regexBayarGroup').style.display = 'none';
-                document.getElementById('regexCekGroup').style.display = 'none';
             } else {
                 // For other types, show standard fields
                 document.getElementById('codeGroup').style.display = 'block';
                 document.getElementById('kodeBayarGroup').style.display = 'block';
                 document.getElementById('kodeCekGroup').style.display = 'block';
-                document.getElementById('regexBayarGroup').style.display = 'none';
-                document.getElementById('regexCekGroup').style.display = 'none';
             }
         }
         
