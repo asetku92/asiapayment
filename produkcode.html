@@ -578,6 +578,10 @@
             font-size: 14px;
         }
         
+        .text-center {
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .logo h1 {
                 font-size: 20px;
@@ -1210,6 +1214,29 @@
                     RegexBayar: "^#\\d+##\\s+CEKBPJS\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Nama\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
                     RegexCek: "^#\\d+##\\s+CEKBPJS\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Name\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
                     path: 'POSTPAID_BILL/Tagihan/BPJS/BPJS Kesehatan'
+                },
+                {
+                    type: 'DYNAMIC_PRODUCT_ON_NUMBER',
+                    category: 'Pulsa',
+                    menu: 'Telkomsel',
+                    name: 'Telkomsel 5.000',
+                    KodeBayar: 'BYRTSEL5',
+                    KodeCek: 'CEKTSEL5',
+                    ImageUrl: 'https://example.com/tsel.png',
+                    Ket: 'Pulsa Telkomsel 5.000',
+                    RegexBayar: "^#\\d+##\\s+CEKTSEL5\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Nama\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
+                    RegexCek: "^#\\d+##\\s+CEKTSEL5\\.(?<id>\\d+)\\s+(?<status>\\w+)\\.\\s+SN/Ref:\\s+(?<nama>.+?)\\s+untuk\\s+(?<jml_bulan>\\d+)\\s+periode\\s+(?<periode>\\d+)\\s+SN\\s+Jumlah\\s+Peserta:\\s+(?<peserta>\\d+)\\s+Name\\s+Cabang\\s+(?<cabang>.+?)\\s+Hrg=(?<hrg>\\d+)\\s+Tagihan=(?<tagihan>\\d+)\\s+Admin=(?<admin>\\d+)\\s+Total\\s+Tagihan=(?<ttag>\\d+)",
+                    path: 'DYNAMIC_PRODUCT_ON_NUMBER/Pulsa/Telkomsel/Telkomsel 5.000'
+                },
+                {
+                    type: 'PROVIDER_BASED',
+                    category: 'Pulsa',
+                    menu: 'All Operator',
+                    name: 'Tri',
+                    Code: 'TRI',
+                    ImageUrl: 'https://example.com/tri.png',
+                    Ket: 'Pulsa Tri',
+                    path: 'PROVIDER_BASED/Pulsa/All Operator/Tri'
                 }
             ];
             
@@ -1354,28 +1381,57 @@
             document.getElementById('createdAtGroup').style.display = 'none';
             
             // Show/hide fields based on type
-            if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
+            if (type === 'DYNAMIC_PRODUCT_ON_NUMBER') {
+                document.getElementById('codeGroup').style.display = 'none';
+                document.getElementById('regexBayarGroup').style.display = 'block';
+                document.getElementById('regexCekGroup').style.display = 'block';
+                document.getElementById('kodeBayarGroup').style.display = 'block';
+                document.getElementById('kodeCekGroup').style.display = 'block';
+                document.getElementById('menuGroup').style.display = 'block';
+            } else if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
                 document.getElementById('regionGroup').style.display = 'block';
                 document.getElementById('wilayahGroup').style.display = 'block';
-            } else if (type === 'PROVIDER_BASED') {
-                document.getElementById('jenisGroup').style.display = 'block';
-                document.getElementById('menuGroup').style.display = 'none';
-            } else if (type === 'URL') {
-                document.getElementById('urlGroup').style.display = 'block';
                 document.getElementById('codeGroup').style.display = 'none';
+                document.getElementById('regexBayarGroup').style.display = 'block';
+                document.getElementById('regexCekGroup').style.display = 'block';
+                document.getElementById('kodeBayarGroup').style.display = 'block';
+                document.getElementById('kodeCekGroup').style.display = 'block';
+                document.getElementById('menuGroup').style.display = 'block';
             } else if (type === 'POSTPAID_BILL') {
                 document.getElementById('regexBayarGroup').style.display = 'block';
                 document.getElementById('regexCekGroup').style.display = 'block';
                 document.getElementById('codeGroup').style.display = 'none';
+                document.getElementById('kodeBayarGroup').style.display = 'block';
+                document.getElementById('kodeCekGroup').style.display = 'block';
+                document.getElementById('menuGroup').style.display = 'block';
+            } else if (type === 'PROVIDER_BASED') {
+                document.getElementById('jenisGroup').style.display = 'block';
+                document.getElementById('menuGroup').style.display = 'none';
+                document.getElementById('codeGroup').style.display = 'block';
+                document.getElementById('kodeBayarGroup').style.display = 'none';
+                document.getElementById('kodeCekGroup').style.display = 'none';
+            } else if (type === 'STATIC_PRODUCT') {
+                document.getElementById('codeGroup').style.display = 'block';
+                document.getElementById('kodeBayarGroup').style.display = 'none';
+                document.getElementById('kodeCekGroup').style.display = 'none';
+                document.getElementById('menuGroup').style.display = 'block';
+            } else if (type === 'URL') {
+                document.getElementById('urlGroup').style.display = 'block';
+                document.getElementById('codeGroup').style.display = 'none';
+                document.getElementById('kodeBayarGroup').style.display = 'none';
+                document.getElementById('kodeCekGroup').style.display = 'none';
+                document.getElementById('menuGroup').style.display = 'block';
             } else if (type === 'VOUCHER_AKTIVATION') {
                 document.getElementById('codeGroup').style.display = 'block';
                 document.getElementById('kodeBayarGroup').style.display = 'none';
                 document.getElementById('kodeCekGroup').style.display = 'none';
+                document.getElementById('menuGroup').style.display = 'block';
             } else {
                 // For other types, show standard fields
                 document.getElementById('codeGroup').style.display = 'block';
                 document.getElementById('kodeBayarGroup').style.display = 'block';
                 document.getElementById('kodeCekGroup').style.display = 'block';
+                document.getElementById('menuGroup').style.display = 'block';
             }
         }
         
@@ -1482,10 +1538,24 @@
                     ImageUrl: imageUrl,
                     Ket: ket,
                     KodeBayar: kodeBayar,
-                    KodeCek: kodeCek
+                    KodeCek: kodeCek,
+                    RegexBayar: regexBayar,
+                    RegexCek: regexCek
                 };
                 
                 path = `${type}/${category}/${menu}/${region}/Wilayah/${wilayah || name}`;
+            } else if (type === 'DYNAMIC_PRODUCT_ON_NUMBER') {
+                // Dynamic product on number
+                productData = {
+                    ImageUrl: imageUrl,
+                    Ket: ket,
+                    KodeBayar: kodeBayar,
+                    KodeCek: kodeCek,
+                    RegexBayar: regexBayar,
+                    RegexCek: regexCek
+                };
+                
+                path = `${type}/${category}/${menu}/${name}`;
             } else if (type === 'PROVIDER_BASED') {
                 // Provider-based product
                 productData = {
@@ -1520,6 +1590,15 @@
                 path = `${type}/${category}/${menu}/${name}`;
             } else if (type === 'VOUCHER_AKTIVATION') {
                 // Voucher activation product
+                productData = {
+                    Code: code,
+                    ImageUrl: imageUrl,
+                    Ket: ket
+                };
+                
+                path = `${type}/${category}/${menu}/${name}`;
+            } else if (type === 'STATIC_PRODUCT') {
+                // Static product
                 productData = {
                     Code: code,
                     ImageUrl: imageUrl,
