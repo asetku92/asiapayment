@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
+        /* Styles remain the same as in your original code */
         :root {
             --primary: #0055ff;
             --secondary: #00aaff;
@@ -582,6 +583,13 @@
             text-align: center;
         }
         
+        .form-error {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .logo h1 {
                 font-size: 20px;
@@ -785,6 +793,7 @@
                                             <th>Tipe</th>
                                             <th>Kategori</th>
                                             <th>Menu</th>
+                                            <th>Provider</th>
                                             <th>Kode</th>
                                             <th>Aksi</th>
                                         </tr>
@@ -829,6 +838,7 @@
                         <option value="URL">URL</option>
                         <option value="VOUCHER_AKTIVATION">VOUCHER_AKTIVATION</option>
                     </select>
+                    <div id="productTypeError" class="form-error">Tipe produk harus dipilih</div>
                 </div>
                 
                 <div class="form-group">
@@ -836,33 +846,41 @@
                     <select id="productCategory" class="form-control" required onchange="loadMenusForCategory()">
                         <option value="">Pilih Kategori</option>
                     </select>
+                    <div id="productCategoryError" class="form-error">Kategori harus dipilih</div>
                 </div>
                 
                 <div class="form-group" id="menuGroup">
                     <label for="productMenu">Menu</label>
-                    <select id="productMenu" class="form-control" required>
+                    <select id="productMenu" class="form-control">
                         <option value="">Pilih Menu</option>
                     </select>
+                    <div id="productMenuError" class="form-error">Menu harus dipilih</div>
+                </div>
+                
+                <div class="form-group" id="providerGroup" style="display: none;">
+                    <label for="productProvider">Provider</label>
+                    <select id="productProvider" class="form-control">
+                        <option value="">Pilih Provider</option>
+                    </select>
+                    <div id="productProviderError" class="form-error">Provider harus dipilih</div>
                 </div>
                 
                 <div class="form-group" id="regionGroup" style="display: none;">
                     <label for="productRegion">Daerah</label>
                     <input type="text" id="productRegion" class="form-control" placeholder="Masukkan nama daerah">
+                    <div id="productRegionError" class="form-error">Daerah harus diisi</div>
                 </div>
                 
                 <div class="form-group" id="wilayahGroup" style="display: none;">
                     <label for="productWilayah">Wilayah</label>
                     <input type="text" id="productWilayah" class="form-control" placeholder="Masukkan nama wilayah">
-                </div>
-                
-                <div class="form-group" id="jenisGroup" style="display: none;">
-                    <label for="productJenis">Jenis</label>
-                    <input type="text" id="productJenis" class="form-control" placeholder="Masukkan jenis produk">
+                    <div id="productWilayahError" class="form-error">Wilayah harus diisi</div>
                 </div>
                 
                 <div class="form-group">
                     <label for="productName">Nama Produk</label>
                     <input type="text" id="productName" class="form-control" placeholder="Masukkan nama produk" required>
+                    <div id="productNameError" class="form-error">Nama produk harus diisi</div>
                 </div>
                 
                 <div class="form-group" id="codeGroup">
@@ -883,6 +901,7 @@
                 <div class="form-group" id="urlGroup" style="display: none;">
                     <label for="productUrl">URL</label>
                     <input type="text" id="productUrl" class="form-control" placeholder="Masukkan URL">
+                    <div id="productUrlError" class="form-error">URL harus diisi</div>
                 </div>
                 
                 <div class="form-group" id="kodeBayarGroup">
@@ -950,6 +969,7 @@
         let categories = [];
         let menus = [];
         let products = [];
+        let providers = [];
         let currentType = '';
         let currentCategory = '';
         let currentMenu = '';
@@ -975,6 +995,7 @@
                 currentUser = JSON.parse(loggedInUser);
                 document.getElementById('userName').textContent = currentUser.username;
                 loadCategories();
+                loadProviders();
                 loadAllProducts();
             } else {
                 window.location.href = 'login.html';
@@ -989,8 +1010,140 @@
             // Form submission
             document.getElementById('productForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                saveProduct();
+                if (validateForm()) {
+                    saveProduct();
+                }
             });
+        }
+        
+        // Load providers from Firebase
+        function loadProviders() {
+            if (firebaseConnected) {
+                const providersRef = database.ref('AsiaPayment/prefikTujuan');
+                
+                providersRef.once('value', (snapshot) => {
+                    const data = snapshot.val();
+                    providers = [];
+                    
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            providers.push({
+                                id: key,
+                                name: key
+                            });
+                        });
+                        
+                        // Populate provider dropdown
+                        const providerDropdown = document.getElementById('productProvider');
+                        providerDropdown.innerHTML = '<option value="">Pilih Provider</option>';
+                        
+                        providers.forEach(provider => {
+                            providerDropdown.innerHTML += `<option value="${provider.id}">${provider.name}</option>`;
+                        });
+                    }
+                }, (error) => {
+                    console.error('Firebase error loading providers:', error);
+                    // Use sample providers if Firebase fails
+                    providers = [
+                        { id: 'Axis', name: 'Axis' },
+                        { id: 'BYU', name: 'BYU' },
+                        { id: 'Indosat', name: 'Indosat' },
+                        { id: 'Smartfren', name: 'Smartfren' },
+                        { id: 'Telkomsel', name: 'Telkomsel' },
+                        { id: 'Three', name: 'Three' },
+                        { id: 'XL', name: 'XL' }
+                    ];
+                    
+                    // Populate provider dropdown
+                    const providerDropdown = document.getElementById('productProvider');
+                    providerDropdown.innerHTML = '<option value="">Pilih Provider</option>';
+                    
+                    providers.forEach(provider => {
+                        providerDropdown.innerHTML += `<option value="${provider.id}">${provider.name}</option>`;
+                    });
+                });
+            } else {
+                // Use sample providers if Firebase is not connected
+                providers = [
+                    { id: 'Axis', name: 'Axis' },
+                    { id: 'BYU', name: 'BYU' },
+                    { id: 'Indosat', name: 'Indosat' },
+                    { id: 'Smartfren', name: 'Smartfren' },
+                    { id: 'Telkomsel', name: 'Telkomsel' },
+                    { id: 'Three', name: 'Three' },
+                    { id: 'XL', name: 'XL' }
+                ];
+                
+                // Populate provider dropdown
+                const providerDropdown = document.getElementById('productProvider');
+                providerDropdown.innerHTML = '<option value="">Pilih Provider</option>';
+                
+                providers.forEach(provider => {
+                    providerDropdown.innerHTML += `<option value="${provider.id}">${provider.name}</option>`;
+                });
+            }
+        }
+        
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+            const type = document.getElementById('productType').value;
+            
+            // Reset error messages
+            const errorElements = document.querySelectorAll('.form-error');
+            errorElements.forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Validate required fields
+            if (!document.getElementById('productType').value) {
+                document.getElementById('productTypeError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!document.getElementById('productCategory').value) {
+                document.getElementById('productCategoryError').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!document.getElementById('productName').value) {
+                document.getElementById('productNameError').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate type-specific fields
+            if (type === 'PROVIDER_BASED') {
+                if (!document.getElementById('productProvider').value) {
+                    document.getElementById('productProviderError').style.display = 'block';
+                    isValid = false;
+                }
+                if (!document.getElementById('productMenu').value) {
+                    document.getElementById('productMenuError').style.display = 'block';
+                    isValid = false;
+                }
+            } else if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
+                if (!document.getElementById('productRegion').value) {
+                    document.getElementById('productRegionError').style.display = 'block';
+                    isValid = false;
+                }
+                if (!document.getElementById('productWilayah').value) {
+                    document.getElementById('productWilayahError').style.display = 'block';
+                    isValid = false;
+                }
+            } else if (type === 'URL') {
+                if (!document.getElementById('productUrl').value) {
+                    document.getElementById('productUrlError').style.display = 'block';
+                    isValid = false;
+                }
+            } else {
+                // For other types, validate menu
+                if (!document.getElementById('productMenu').value) {
+                    document.getElementById('productMenuError').style.display = 'block';
+                    isValid = false;
+                }
+            }
+            
+            return isValid;
         }
         
         // Logout function
@@ -1088,7 +1241,7 @@
         // Load all products from Firebase
         function loadAllProducts() {
             const tableBody = document.getElementById('productsTableBody');
-            tableBody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
             
             if (firebaseConnected) {
                 const productsRef = database.ref('AsiaPayment/MenuDinamis/ItemsCode');
@@ -1103,11 +1256,38 @@
                             // Process each category in the type
                             if (data[type]) {
                                 Object.keys(data[type]).forEach(category => {
-                                    // Process each menu in the category
-                                    if (data[type][category]) {
-                                        Object.keys(data[type][category]).forEach(menu => {
-                                            // For region-based products, we have an additional level
-                                            if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
+                                    // For PROVIDER_BASED, the structure is different
+                                    if (type === 'PROVIDER_BASED') {
+                                        // Process each menu in the category
+                                        if (data[type][category]) {
+                                            Object.keys(data[type][category]).forEach(namMenu => {
+                                                // Process each provider in the menu
+                                                if (data[type][category][namMenu]) {
+                                                    Object.keys(data[type][category][namMenu]).forEach(jenisProvider => {
+                                                        // Process each product in the provider
+                                                        if (data[type][category][namMenu][jenisProvider]) {
+                                                            Object.keys(data[type][category][namMenu][jenisProvider]).forEach(product => {
+                                                                const productData = data[type][category][namMenu][jenisProvider][product];
+                                                                products.push({
+                                                                    type,
+                                                                    category,
+                                                                    menu: namMenu,
+                                                                    provider: jenisProvider,
+                                                                    name: product,
+                                                                    ...productData,
+                                                                    path: `${type}/${category}/${namMenu}/${jenisProvider}/${product}`
+                                                                });
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    } else if (type === 'DYNAMIC_PRODUCT_BASED_ON_REGION') {
+                                        // Process each menu in the category for region-based products
+                                        if (data[type][category]) {
+                                            Object.keys(data[type][category]).forEach(menu => {
+                                                // For region-based products, we have an additional level
                                                 if (data[type][category][menu]) {
                                                     Object.keys(data[type][category][menu]).forEach(region => {
                                                         if (data[type][category][menu][region]) {
@@ -1142,7 +1322,12 @@
                                                         }
                                                     });
                                                 }
-                                            } else {
+                                            });
+                                        }
+                                    } else {
+                                        // Process each menu in the category for other types
+                                        if (data[type][category]) {
+                                            Object.keys(data[type][category]).forEach(menu => {
                                                 // For other types, process each product
                                                 if (data[type][category][menu]) {
                                                     Object.keys(data[type][category][menu]).forEach(product => {
@@ -1157,8 +1342,8 @@
                                                         });
                                                     });
                                                 }
-                                            }
-                                        });
+                                            });
+                                        }
                                     }
                                 });
                             }
@@ -1167,7 +1352,7 @@
                         displayProducts();
                         updateStats();
                     } else {
-                        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Tidak ada data produk</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data produk</td></tr>';
                     }
                 }, (error) => {
                     console.error('Firebase error:', error);
@@ -1231,12 +1416,13 @@
                 {
                     type: 'PROVIDER_BASED',
                     category: 'Pulsa',
-                    menu: 'All Operator',
-                    name: 'Tri',
-                    Code: 'TRI',
-                    ImageUrl: 'https://example.com/tri.png',
-                    Ket: 'Pulsa Tri',
-                    path: 'PROVIDER_BASED/Pulsa/All Operator/Tri'
+                    menu: 'Telkomsel',
+                    provider: 'Telkomsel',
+                    name: 'Telkomsel 10.000',
+                    Code: 'TSEL10',
+                    ImageUrl: 'https://example.com/tsel.png',
+                    Ket: 'Pulsa Telkomsel 10.000',
+                    path: 'PROVIDER_BASED/Pulsa/Telkomsel/Telkomsel/Telkomsel 10.000'
                 }
             ];
             
@@ -1286,6 +1472,7 @@
                         <td>${product.type}</td>
                         <td>${product.category}</td>
                         <td>${product.menu}</td>
+                        <td>${product.provider || '-'}</td>
                         <td>${codeDisplay}</td>
                         <td>
                             <div class="action-buttons">
@@ -1302,7 +1489,7 @@
                     tableBody.appendChild(row);
                 });
             } else {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Tidak ada data produk</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data produk</td></tr>';
             }
         }
         
@@ -1347,7 +1534,7 @@
             // Reset all optional fields
             document.getElementById('regionGroup').style.display = 'none';
             document.getElementById('wilayahGroup').style.display = 'none';
-            document.getElementById('jenisGroup').style.display = 'none';
+            document.getElementById('providerGroup').style.display = 'none';
             document.getElementById('urlGroup').style.display = 'none';
             document.getElementById('regexBayarGroup').style.display = 'none';
             document.getElementById('regexCekGroup').style.display = 'none';
@@ -1374,7 +1561,7 @@
             // Reset all optional fields
             document.getElementById('regionGroup').style.display = 'none';
             document.getElementById('wilayahGroup').style.display = 'none';
-            document.getElementById('jenisGroup').style.display = 'none';
+            document.getElementById('providerGroup').style.display = 'none';
             document.getElementById('urlGroup').style.display = 'none';
             document.getElementById('regexBayarGroup').style.display = 'none';
             document.getElementById('regexCekGroup').style.display = 'none';
@@ -1405,8 +1592,8 @@
                 document.getElementById('kodeCekGroup').style.display = 'block';
                 document.getElementById('menuGroup').style.display = 'block';
             } else if (type === 'PROVIDER_BASED') {
-                document.getElementById('jenisGroup').style.display = 'block';
-                document.getElementById('menuGroup').style.display = 'none';
+                document.getElementById('providerGroup').style.display = 'block';
+                document.getElementById('menuGroup').style.display = 'block';
                 document.getElementById('codeGroup').style.display = 'block';
                 document.getElementById('kodeBayarGroup').style.display = 'none';
                 document.getElementById('kodeCekGroup').style.display = 'none';
@@ -1465,9 +1652,9 @@
                     document.getElementById('productWilayah').value = product.wilayah || '';
                 }
                 
-                // Set jenis if applicable
+                // Set provider if applicable
                 if (product.type === 'PROVIDER_BASED') {
-                    document.getElementById('productJenis').value = product.menu || '';
+                    document.getElementById('productProvider').value = product.provider || '';
                 }
                 
                 // Toggle fields based on type
@@ -1511,6 +1698,7 @@
             const type = document.getElementById('productType').value;
             const category = document.getElementById('productCategory').value;
             const menu = document.getElementById('productMenu').value;
+            const provider = document.getElementById('productProvider').value;
             const name = document.getElementById('productName').value;
             const code = document.getElementById('productCode').value;
             const imageUrl = document.getElementById('productImageUrl').value;
@@ -1523,7 +1711,6 @@
             const createdAt = document.getElementById('productCreatedAt').value;
             const region = document.getElementById('productRegion').value;
             const wilayah = document.getElementById('productWilayah').value;
-            const jenis = document.getElementById('productJenis').value;
             
             const originalPath = document.getElementById('originalPath').value;
             
@@ -1557,14 +1744,14 @@
                 
                 path = `${type}/${category}/${menu}/${name}`;
             } else if (type === 'PROVIDER_BASED') {
-                // Provider-based product
+                // Provider-based product - path format: PROVIDER_BASED/{category}/{namMenu}/{jenisProvider}/{name}
                 productData = {
                     Code: code,
                     ImageUrl: imageUrl,
                     Ket: ket
                 };
                 
-                path = `${type}/${category}/${jenis}/${name}`;
+                path = `${type}/${category}/${menu}/${provider}/${name}`;
             } else if (type === 'URL') {
                 // URL product
                 productData = {
