@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ASIA PAYMENT</title>
     <style>
+        /* CSS tetap sama seperti sebelumnya */
         :root {
             --primary: #0055ff;
             --secondary: #00aaff;
@@ -225,9 +226,32 @@
         .retry-button:hover {
             background: #e04a00;
         }
+        
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1001;
+        }
+        
+        .connection-status.connected {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .connection-status.disconnected {
+            background-color: var(--danger);
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <div id="connectionStatus" class="connection-status" style="display: none;">Status Koneksi</div>
+    
     <div class="container">
         <div class="header">
             <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo ASIA PAYMENT">
@@ -272,6 +296,28 @@
         let firebaseDataUrl = '';
         let appName = 'ASIA PAYMENT';
         let apiBaseUrl = ''; // Variabel untuk base URL API
+        let isOnline = false;
+
+        // Fungsi untuk menampilkan status koneksi
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            isOnline = connected;
+            
+            if (connected) {
+                statusElement.textContent = 'Terhubung ke Server';
+                statusElement.className = 'connection-status connected';
+                statusElement.style.display = 'block';
+                
+                // Sembunyikan status setelah 3 detik
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                }, 3000);
+            } else {
+                statusElement.textContent = 'Tidak Terhubung ke Server';
+                statusElement.className = 'connection-status disconnected';
+                statusElement.style.display = 'block';
+            }
+        }
 
         // Fungsi untuk menampilkan loading popup
         function showLoading() {
@@ -305,9 +351,37 @@
         }
 
         // Fungsi untuk menentukan base URL API
-function determineApiBaseUrl() {
-    return "https://91.99.163.28:8080"; 
-}
+        function determineApiBaseUrl() {
+            // Gunakan HTTPS jika halaman diakses via HTTPS,否则 gunakan HTTP
+            if (window.location.protocol === 'https:') {
+                return "https://91.99.163.28:8080";
+            } else {
+                return "http://91.99.163.28:8080";
+            }
+        }
+
+        // Fungsi untuk memeriksa koneksi ke server
+        async function checkServerConnection() {
+            try {
+                apiBaseUrl = determineApiBaseUrl();
+                const response = await fetch(`${apiBaseUrl}/api/config`, {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok) {
+                    updateConnectionStatus(true);
+                    return true;
+                } else {
+                    updateConnectionStatus(false);
+                    return false;
+                }
+            } catch (error) {
+                console.error("Koneksi server gagal:", error);
+                updateConnectionStatus(false);
+                return false;
+            }
+        }
 
         // Fungsi untuk mengambil konfigurasi dari server
         async function fetchConfig() {
@@ -338,12 +412,14 @@ function determineApiBaseUrl() {
                 }
                 
                 console.log("Konfigurasi berhasil diambil dari server");
+                updateConnectionStatus(true);
                 return true;
             } catch (error) {
                 console.warn("Gagal mengambil konfigurasi dari server:", error.message);
                 // Fallback ke default jika gagal
                 firebaseDataUrl = "https://steady-fin-368617-default-rtdb.firebaseio.com/AsiaPayment.json";
                 localStorage.setItem("firebaseUrl", firebaseDataUrl);
+                updateConnectionStatus(false);
                 return false;
             }
         }
@@ -401,8 +477,8 @@ function determineApiBaseUrl() {
             if (data.Color && data.Color.BackgroundGradient) {
                 const gradients = data.Color.BackgroundGradient.filter(g => g);
                 if (gradients.length > 0) {
-                    document.body.style.background = `linear-gradient(135deg, ${gradients.join(', ')})`;
-                    document.querySelector('.header').style.background = `linear-gradient(135deg, ${gradients.join(', ')})`;
+                    document.body.style.background = `linear-gradient(135deg, ${gradients.join(', ')}`;
+                    document.querySelector('.header').style.background = `linear-gradient(135deg, ${gradients.join(', ')}`;
                 }
             }
         }
@@ -481,6 +557,12 @@ function determineApiBaseUrl() {
             
             // Log info: tombol login diklik
             console.log("tombol_login_diklik");
+            
+            // Periksa koneksi sebelum mengirim form
+            if (!isOnline) {
+                showError("Tidak terhubung ke server. Silakan coba lagi.");
+                return;
+            }
             
             // Ambil nilai dari form dan terapkan trim()
             let kode = document.getElementById('kode').value.trim().toUpperCase();
@@ -615,10 +697,17 @@ function determineApiBaseUrl() {
             showLoading();
             
             try {
-                // Ambil konfigurasi dari server terlebih dahulu
-                await fetchConfig();
-                // Kemudian ambil data Firebase
-                await fetchFirebaseData();
+                // Periksa koneksi server terlebih dahulu
+                const isConnected = await checkServerConnection();
+                
+                if (isConnected) {
+                    // Ambil konfigurasi dari server
+                    await fetchConfig();
+                    // Kemudian ambil data Firebase
+                    await fetchFirebaseData();
+                } else {
+                    showError("Tidak dapat terhubung ke server. Silakan periksa koneksi internet Anda.", true);
+                }
             } catch (error) {
                 console.error("Gagal inisialisasi aplikasi:", error);
                 showError("Gagal memuat konfigurasi aplikasi", true);
@@ -630,6 +719,9 @@ function determineApiBaseUrl() {
         // Jalankan inisialisasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
+            
+            // Periksa koneksi secara berkala
+            setInterval(checkServerConnection, 30000); // Setiap 30 detik
         });
     </script>
 </body>
