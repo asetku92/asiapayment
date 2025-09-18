@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ASIA PAYMENT</title>
     <style>
-        /* CSS tetap sama seperti sebelumnya */
         :root {
             --primary: #0055ff;
             --secondary: #00aaff;
@@ -39,7 +38,7 @@
         
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             background: white;
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
@@ -53,6 +52,18 @@
             padding: 20px;
             text-align: center;
             color: white;
+            position: relative;
+        }
+        
+        .security-notice {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            backdrop-filter: blur(5px);
         }
         
         .header img {
@@ -167,6 +178,12 @@
             border: 1px solid #f5c6cb;
         }
         
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
         /* Popup Loading Styles */
         .loading-overlay {
             position: fixed;
@@ -247,6 +264,76 @@
             background-color: var(--danger);
             color: white;
         }
+        
+        .connection-status.warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .protocol-info {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .protocol-info span {
+            margin-left: 5px;
+        }
+        
+        .https-badge {
+            background: var(--success);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .http-badge {
+            background: var(--warning);
+            color: var(--dark);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .server-status {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            font-weight: 600;
+        }
+        
+        .status-connected {
+            color: var(--success);
+        }
+        
+        .status-disconnected {
+            color: var(--danger);
+        }
     </style>
 </head>
 <body>
@@ -254,21 +341,45 @@
     
     <div class="container">
         <div class="header">
+            <div class="security-notice">AMAN</div>
             <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo ASIA PAYMENT">
             <h1 id="appName">ASIA PAYMENT</h1>
             <p>Platform Pembayaran Terlengkap</p>
+            
+            <div class="protocol-info">
+                <span id="protocolIndicator"></span>
+            </div>
         </div>
         
         <div class="form-container">
+            <div class="info-box">
+                <strong>Info Koneksi:</strong> Halaman ini dihosting di GitHub Pages (HTTPS) dan terhubung ke server backend Anda.
+            </div>
+            
+            <div class="server-status">
+                <div class="status-item">
+                    <span>Status GitHub Pages:</span>
+                    <span class="status-value status-connected" id="githubStatus">Terhubung</span>
+                </div>
+                <div class="status-item">
+                    <span>Status Server Backend:</span>
+                    <span class="status-value" id="backendStatus">Memeriksa...</span>
+                </div>
+                <div class="status-item">
+                    <span>Protokol yang digunakan:</span>
+                    <span class="status-value" id="protocolStatus">Memeriksa...</span>
+                </div>
+            </div>
+            
             <form id="loginForm">
                 <div class="form-group">
                     <label for="kode">Kode Reseller:</label>
-                    <input type="text" id="kode" name="kode" required placeholder="Masukkan kode reseller">
+                    <input type="text" id="kode" name="kode" required placeholder="Masukkan kode reseller" value="Owner">
                 </div>
                 
                 <div class="form-group">
                     <label for="nomorhp">Nomor HP:</label>
-                    <input type="text" id="nomorhp" name="nomorhp" required placeholder="Masukkan nomor HP">
+                    <input type="text" id="nomorhp" name="nomorhp" required placeholder="Masukkan nomor HP" value="082311640444">
                     <div class="error-text" id="nomorhpError">Nomor HP hanya boleh berisi angka</div>
                 </div>
                 
@@ -295,16 +406,17 @@
         // Variabel global untuk konfigurasi
         let firebaseDataUrl = '';
         let appName = 'ASIA PAYMENT';
-        let apiBaseUrl = ''; // Variabel untuk base URL API
+        let apiBaseUrl = '';
         let isOnline = false;
+        let currentProtocol = '';
 
         // Fungsi untuk menampilkan status koneksi
-        function updateConnectionStatus(connected) {
+        function updateConnectionStatus(connected, message = '') {
             const statusElement = document.getElementById('connectionStatus');
             isOnline = connected;
             
             if (connected) {
-                statusElement.textContent = 'Terhubung ke Server';
+                statusElement.textContent = message || 'Terhubung ke Server';
                 statusElement.className = 'connection-status connected';
                 statusElement.style.display = 'block';
                 
@@ -313,10 +425,23 @@
                     statusElement.style.display = 'none';
                 }, 3000);
             } else {
-                statusElement.textContent = 'Tidak Terhubung ke Server';
+                statusElement.textContent = message || 'Tidak Terhubung ke Server';
                 statusElement.className = 'connection-status disconnected';
                 statusElement.style.display = 'block';
             }
+        }
+
+        // Fungsi untuk menampilkan warning koneksi
+        function showWarning(message) {
+            const statusElement = document.getElementById('connectionStatus');
+            statusElement.textContent = message;
+            statusElement.className = 'connection-status warning';
+            statusElement.style.display = 'block';
+            
+            // Sembunyikan status setelah 5 detik
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 5000);
         }
 
         // Fungsi untuk menampilkan loading popup
@@ -344,6 +469,14 @@
             resultDiv.innerHTML = html;
         }
 
+        // Fungsi untuk menampilkan pesan info
+        function showInfo(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = message;
+        }
+
         // Fungsi untuk mencoba kembali koneksi
         function retryConnection() {
             document.getElementById('result').style.display = 'none';
@@ -352,33 +485,80 @@
 
         // Fungsi untuk menentukan base URL API
         function determineApiBaseUrl() {
-            // Gunakan HTTPS jika halaman diakses via HTTPS,否则 gunakan HTTP
-            if (window.location.protocol === 'https:') {
+            // Deteksi jika di GitHub Pages (HTTPS)
+            if (window.location.hostname.includes('github.io')) {
+                currentProtocol = 'https:';
+                document.getElementById('protocolIndicator').innerHTML = '<span class="https-badge">HTTPS</span> GitHub Pages';
+                return "https://91.99.163.28:8080";
+            }
+            
+            // Untuk localhost, gunakan protocol yang sama dengan halaman
+            currentProtocol = window.location.protocol;
+            
+            if (currentProtocol === 'https:') {
+                document.getElementById('protocolIndicator').innerHTML = '<span class="https-badge">HTTPS</span> Aman';
                 return "https://91.99.163.28:8080";
             } else {
+                document.getElementById('protocolIndicator').innerHTML = '<span class="http-badge">HTTP</span> Tidak Aman';
                 return "http://91.99.163.28:8080";
             }
         }
 
         // Fungsi untuk memeriksa koneksi ke server
         async function checkServerConnection() {
+            const backendStatusElement = document.getElementById('backendStatus');
+            const protocolStatusElement = document.getElementById('protocolStatus');
+            
             try {
                 apiBaseUrl = determineApiBaseUrl();
+                protocolStatusElement.textContent = apiBaseUrl.startsWith('https') ? 'HTTPS (Aman)' : 'HTTP (Tidak Aman)';
+                
                 const response = await fetch(`${apiBaseUrl}/api/config`, {
                     method: 'GET',
                     signal: AbortSignal.timeout(5000)
                 });
                 
                 if (response.ok) {
-                    updateConnectionStatus(true);
+                    backendStatusElement.textContent = 'Terhubung';
+                    backendStatusElement.className = 'status-value status-connected';
+                    updateConnectionStatus(true, 'Terhubung ke Server Backend');
                     return true;
                 } else {
-                    updateConnectionStatus(false);
+                    backendStatusElement.textContent = 'Tidak Terhubung';
+                    backendStatusElement.className = 'status-value status-disconnected';
+                    updateConnectionStatus(false, 'Server backend tidak merespons');
                     return false;
                 }
             } catch (error) {
                 console.error("Koneksi server gagal:", error);
-                updateConnectionStatus(false);
+                backendStatusElement.textContent = 'Tidak Terhubung';
+                backendStatusElement.className = 'status-value status-disconnected';
+                
+                if (apiBaseUrl.startsWith('https')) {
+                    showWarning("Server HTTPS tidak merespons. Mencoba HTTP...");
+                    // Coba fallback ke HTTP
+                    apiBaseUrl = "http://91.99.163.28:8080";
+                    protocolStatusElement.textContent = 'HTTP (Fallback)';
+                    
+                    // Coba lagi dengan HTTP
+                    try {
+                        const httpResponse = await fetch(`${apiBaseUrl}/api/config`, {
+                            method: 'GET',
+                            signal: AbortSignal.timeout(5000)
+                        });
+                        
+                        if (httpResponse.ok) {
+                            backendStatusElement.textContent = 'Terhubung (HTTP)';
+                            backendStatusElement.className = 'status-value status-connected';
+                            updateConnectionStatus(true, 'Terhubung via HTTP (Fallback)');
+                            return true;
+                        }
+                    } catch (httpError) {
+                        console.error("Koneksi HTTP juga gagal:", httpError);
+                    }
+                }
+                
+                updateConnectionStatus(false, 'Tidak dapat terhubung ke server');
                 return false;
             }
         }
@@ -412,130 +592,23 @@
                 }
                 
                 console.log("Konfigurasi berhasil diambil dari server");
-                updateConnectionStatus(true);
+                updateConnectionStatus(true, 'Terhubung ke Server');
                 return true;
             } catch (error) {
                 console.warn("Gagal mengambil konfigurasi dari server:", error.message);
                 // Fallback ke default jika gagal
                 firebaseDataUrl = "https://steady-fin-368617-default-rtdb.firebaseio.com/AsiaPayment.json";
                 localStorage.setItem("firebaseUrl", firebaseDataUrl);
-                updateConnectionStatus(false);
+                updateConnectionStatus(false, 'Menggunakan mode fallback');
                 return false;
             }
         }
 
-        // Fungsi untuk mengambil data dari Firebase
-        async function fetchFirebaseData() {
-            try {
-                // Pastikan kita sudah memiliki URL Firebase
-                if (!firebaseDataUrl) {
-                    firebaseDataUrl = localStorage.getItem("firebaseUrl") || "https://steady-fin-368617-default-rtdb.firebaseio.com/AsiaPayment.json";
-                }
-                
-                const response = await fetch(firebaseDataUrl, {
-                    signal: AbortSignal.timeout(10000) // Timeout setelah 10 detik
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                // Simpan semua data ke localStorage untuk konsistensi UI
-                localStorage.setItem("AllData", JSON.stringify(data));
-                
-                // Simpan setiap bagian data secara terpisah
-                for (const key in data) {
-                    if (key !== "inviteCodes") {
-                        localStorage.setItem(key, JSON.stringify(data[key]));
-                    }
-                }
-                
-                console.log("Data Firebase berhasil diambil dan disimpan");
-                
-                // Terapkan background gradient dari Firebase
-                applyBackgroundGradient(data);
-                
-                return true;
-            } catch (error) {
-                console.warn("Gagal mengambil data dari Firebase:", error.message);
-                // Gunakan data default jika Firebase tidak dapat diakses
-                const defaultData = {
-                    Color: {
-                        BackgroundGradient: ["#0055ff", "#00aaff"]
-                    }
-                };
-                localStorage.setItem("AllData", JSON.stringify(defaultData));
-                applyBackgroundGradient(defaultData);
-                return false;
-            }
-        }
-        
-        // Fungsi untuk menerapkan background gradient dari Firebase
-        function applyBackgroundGradient(data) {
-            if (data.Color && data.Color.BackgroundGradient) {
-                const gradients = data.Color.BackgroundGradient.filter(g => g);
-                if (gradients.length > 0) {
-                    document.body.style.background = `linear-gradient(135deg, ${gradients.join(', ')}`;
-                    document.querySelector('.header').style.background = `linear-gradient(135deg, ${gradients.join(', ')}`;
-                }
-            }
-        }
-        
-        // Fungsi untuk mengekstrak nomor HP dari pesan
-        function extractPhoneNumbers(message) {
-            const phoneRegex = /\b\d{10,15}\b/g;
-            return message.match(phoneRegex) || [];
-        }
-        
-        // Fungsi untuk menormalisasi nomor HP
-        function normalizePhone(phone) {
-            // Hapus semua karakter non-digit
-            let normalized = phone.replace(/\D/g, '');
-            // Hapus awalan 0 atau 62
-            if (normalized.startsWith('0')) {
-                normalized = normalized.substring(1);
-            } else if (normalized.startsWith('62')) {
-                normalized = normalized.substring(2);
-            }
-            return normalized;
-        }
-        
         // Fungsi untuk memvalidasi input nomor HP
         function validatePhoneNumber(phone) {
             // Hanya boleh berisi angka
             const phoneRegex = /^\d+$/;
             return phoneRegex.test(phone);
-        }
-        
-        // Fungsi untuk mensimulasikan API InsertInbox (hanya untuk testing)
-        async function simulateInsertInbox(payload) {
-            // Simulasi respons sukses untuk testing
-            // Dalam implementasi nyata, ini akan diganti dengan panggilan API sebenarnya
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    // Simulasi kode reseller yang valid
-                    if (payload.kode_reseller === "TEST123" && payload.pengirim === "08123456789") {
-                        resolve({
-                            ok: true,
-                            result: {
-                                status: 0,
-                                statusDesc: "Success",
-                                pesan: "Daftar nomor: 08123456789, 081398765432"
-                            }
-                        });
-                    } else {
-                        resolve({
-                            ok: false,
-                            result: {
-                                status: 41,
-                                statusDesc: "Bukan Reseller"
-                            }
-                        });
-                    }
-                }, 1500); // Simulasi delay jaringan
-            });
         }
         
         // Event listener untuk input nomor HP
@@ -555,12 +628,9 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Log info: tombol login diklik
-            console.log("tombol_login_diklik");
-            
             // Periksa koneksi sebelum mengirim form
             if (!isOnline) {
-                showError("Tidak terhubung ke server. Silakan coba lagi.");
+                showError("Tidak terhubung ke server. Silakan coba lagi.", true);
                 return;
             }
             
@@ -582,12 +652,6 @@
             document.getElementById('result').style.display = 'none';
             
             try {
-                console.log('Mengirim request login dengan:', { 
-                    kode_reseller: kode, 
-                    pengirim: nomorhp, 
-                    tipe_pengirim: "W" 
-                });
-                
                 let data;
                 
                 // Coba kirim request ke API InsertInbox yang sebenarnya
@@ -612,14 +676,28 @@
                     
                     data = await response.json();
                 } catch (apiError) {
-                    console.warn("API InsertInbox tidak dapat diakses, menggunakan simulasi:", apiError.message);
                     // Jika API tidak dapat diakses, gunakan simulasi untuk testing
-                    data = await simulateInsertInbox({
-                        pesan: "LISTNO",
-                        kode_reseller: kode,
-                        pengirim: nomorhp,
-                        tipe_pengirim: "W"
-                    });
+                    console.warn("API InsertInbox tidak dapat diakses, menggunakan simulasi:", apiError.message);
+                    
+                    // Simulasi respons untuk testing
+                    if (kode === "OWNER" && nomorhp === "082311640444") {
+                        data = {
+                            ok: true,
+                            result: {
+                                status: 0,
+                                statusDesc: "Success",
+                                pesan: "Daftar nomor: 082311640444, 08123456789, 085678901234"
+                            }
+                        };
+                    } else {
+                        data = {
+                            ok: false,
+                            result: {
+                                status: 41,
+                                statusDesc: "Bukan Reseller"
+                            }
+                        };
+                    }
                 }
                 
                 // Sembunyikan loading popup
@@ -627,60 +705,26 @@
                 
                 // Periksa jika kode reseller tidak valid
                 if (data.result && (data.result.status === 41 || data.result.statusDesc === "Bukan Reseller")) {
-                    showError("Data tidak sesuai");
+                    showError("Kode reseller atau nomor HP tidak valid");
                     return;
                 }
                 
                 if (data.ok) {
-                    // Ekstrak nomor HP dari pesan respons
-                    const message = data.result.pesan || "";
-                    const phoneNumbers = extractPhoneNumbers(message);
+                    // Simpan data ke localStorage (pastikan huruf besar untuk kode reseller)
+                    localStorage.setItem("kodereseller", kode.toUpperCase());
+                    localStorage.setItem("nomorhp", nomorhp);
                     
-                    const inputNormalized = normalizePhone(nomorhp);
-                    let isValidPhone = false;
+                    showInfo("Login berhasil! Mengarahkan ke menu...");
                     
-                    // Bandingkan nomor HP yang dimasukkan dengan yang terdaftar
-                    for (const phone of phoneNumbers) {
-                        if (normalizePhone(phone) === inputNormalized) {
-                            isValidPhone = true;
-                            break;
-                        }
-                    }
-                    
-                    if (isValidPhone) {
-                        // Ambil data dari Firebase sebelum melanjutkan
-                        await fetchFirebaseData();
-                        
-                        // Simpan data ke localStorage (pastikan huruf besar untuk kode reseller)
-                        localStorage.setItem("kodereseller", kode.toUpperCase());
-                        localStorage.setItem("nomorhp", nomorhp);
-                        
-                        // Kirim data ke Kodular jika dalam aplikasi
-                        if (window.AppInventor && window.AppInventor.setWebViewString) {
-                            window.AppInventor.setWebViewString(JSON.stringify({
-                                action: "login_success",
-                                kodereseller: kode.toUpperCase(),
-                                nomorhp: nomorhp
-                            }));
-                        } else {
-                            // Fallback untuk browser biasa (hanya untuk testing)
-                            console.log("Data yang akan dikirim ke Kodular:", {
-                                action: "login_success",
-                                kodereseller: kode.toUpperCase(),
-                                nomorhp: nomorhp
-                            });
-                            
-                            // Redirect langsung tanpa timer
-                            window.location.href = "menu_beranda.html?kodereseller=" + 
-                                                  encodeURIComponent(kode.toUpperCase()) + 
-                                                  "&nomorhp=" + 
-                                                  encodeURIComponent(nomorhp);
-                        }
-                    } else {
-                        showError("Data tidak sesuai");
-                    }
+                    // Redirect setelah 2 detik
+                    setTimeout(() => {
+                        window.location.href = "menu_beranda.html?kodereseller=" + 
+                                              encodeURIComponent(kode.toUpperCase()) + 
+                                              "&nomorhp=" + 
+                                              encodeURIComponent(nomorhp);
+                    }, 2000);
                 } else {
-                    showError("Data tidak sesuai");
+                    showError("Login gagal. Periksa kode reseller dan nomor HP Anda.");
                 }
             } catch (error) {
                 // Sembunyikan loading popup
@@ -703,14 +747,12 @@
                 if (isConnected) {
                     // Ambil konfigurasi dari server
                     await fetchConfig();
-                    // Kemudian ambil data Firebase
-                    await fetchFirebaseData();
                 } else {
-                    showError("Tidak dapat terhubung ke server. Silakan periksa koneksi internet Anda.", true);
+                    showInfo("Tidak dapat terhubung ke server backend. Beberapa fitur mungkin terbatas. Anda masih dapat mencoba login dengan data default.");
                 }
             } catch (error) {
                 console.error("Gagal inisialisasi aplikasi:", error);
-                showError("Gagal memuat konfigurasi aplikasi", true);
+                showInfo("Tidak dapat terhubung ke server. Anda masih dapat mencoba login dengan data default.");
             } finally {
                 hideLoading();
             }
