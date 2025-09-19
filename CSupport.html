@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Support Panel</title>
+<style>
+  :root {
+    --primary: #0055ff;
+    --secondary: #00aaff;
+    --accent: #ff5500;
+    --light: #ffffff;
+    --dark: #212121;
+    --success: #28a745;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --bg-gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+    --wa-green: #128C7E;
+    --wa-chat-bg: #e5ddd5;
+    --wa-customer-bubble: #DCF8C6;
+    --wa-admin-bubble: #ffffff;
+  }
+  
+  * { box-sizing: border-box; }
+  body, html {
+    margin:0;
+    padding:0;
+    height:100%;
+    width:100%;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+  }
+  
+  /* Header */
+  .admin-header {
+    background: var(--bg-gradient);
+    color: var(--light);
+    padding:12px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .admin-header h3 {
+    margin:0; 
+    font-size:16px; 
+  }
+  .admin-header button {
+    background: transparent;
+    border:none;
+    color:#fff;
+    padding:8px;
+    border-radius:50%;
+    cursor:pointer;
+    font-weight: bold;
+    font-size: 18px;
+  }
+  .admin-header button:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  
+  /* Layout */
+  .admin-container {
+    display: flex;
+    height: calc(100vh - 60px);
+    margin-top: 60px;
+  }
+  
+  /* Sidebar */
+  .admin-sidebar {
+    width: 300px;
+    background: white;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  
+  .admin-tabs {
+    display: flex;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .admin-tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .admin-tab.active {
+    border-bottom: 2px solid var(--primary);
+    color: var(--primary);
+    font-weight: bold;
+  }
+  
+  .queue-list, .active-chats {
+    margin-top: 16px;
+  }
+  
+  .queue-item, .chat-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .queue-item:hover, .chat-item:hover {
+    background: #efefef;
+  }
+  
+  .queue-item.selected, .chat-item.selected {
+    background: #e3f2fd;
+    border-left: 4px solid var(--primary);
+  }
+  
+  .queue-info, .chat-info {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+  }
+  
+  /* Main Content */
+  .admin-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+  }
+  
+  .chat-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+  }
+  
+  .chat-topic {
+    font-weight: bold;
+  }
+  
+  .customer-id {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  /* Chat messages area */
+  #adminMessages {
+    flex:1;
+    overflow-y:auto;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    background: var(--wa-chat-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23aaaaaa' fill-opacity='0.1'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  .message {
+    max-width:70%;
+    margin:4px 0;
+    padding:8px 12px;
+    border-radius:8px;
+    word-wrap:break-word;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .customer { 
+    align-self:flex-start; 
+    background: var(--wa-customer-bubble);
+    border-bottom-right-radius: 2px;
+  }
+  
+  .admin { 
+    align-self:flex-end; 
+    background: var(--wa-admin-bubble); 
+    border-bottom-left-radius: 2px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  }
+  
+  /* Input area */
+  .input-area {
+    display:flex;
+    padding:10px 16px;
+    background: rgba(240,240,240,0.9);
+    border-top: 1px solid #ddd;
+  }
+  
+  .input-area input {
+    flex:1;
+    padding:12px 16px;
+    border-radius:20px;
+    border:1px solid #ddd;
+    background: #fff;
+    font-size: 14px;
+  }
+  
+  .input-area input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  .input-area button {
+    margin-left:8px;
+    padding:12px 16px;
+    border:none;
+    border-radius:50%;
+    background: var(--primary);
+    color:#fff;
+    cursor:pointer;
+    transition: background 0.3s;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .input-area button:hover {
+    background: #0044cc;
+  }
+  
+  /* Timestamp style */
+  .timestamp {
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+    margin-top: 2px;
+  }
+  
+  .customer .timestamp {
+    text-align: left;
+  }
+  
+  .no-chat-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+  }
+  
+  .no-chat-selected i {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  
+  /* Status indicator */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .status-online {
+    background: var(--success);
+  }
+  
+  .status-offline {
+    background: var(--danger);
+  }
+  
+  .status-busy {
+    background: var(--warning);
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="admin-header">
+  <h3>Panel Admin Dukungan Pelanggan</h3>
+  <div>
+    <span id="adminStatusIndicator" class="status-indicator status-online"></span>
+    <span id="adminStatusText">Online</span>
+    <button onclick="toggleAdminStatus()" title="Ubah Status">🔄</button>
+    <button onclick="logout()" title="Keluar">⇥</button>
+  </div>
+</div>
+
+<div class="admin-container">
+  <!-- Sidebar -->
+  <div class="admin-sidebar">
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="switchTab('queue')">Antrian</div>
+      <div class="admin-tab" onclick="switchTab('active')">Chat Aktif</div>
+    </div>
+    
+    <div id="queueList" class="queue-list">
+      <h4>Antrian Menunggu</h4>
+      <div id="queueItems">
+        <!-- Daftar antrian akan dimuat di sini -->
+      </div>
+    </div>
+    
+    <div id="activeChats" class="active-chats" style="display: none;">
+      <h4>Chat Aktif</h4>
+      <div id="activeChatItems">
+        <!-- Daftar chat aktif akan dimuat di sini -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="admin-main">
+    <div id="chatHeader" class="chat-header" style="display: none;">
+      <div>
+        <div class="chat-topic" id="currentChatTopic">Topik Pembicaraan</div>
+        <div class="customer-id" id="currentCustomerID">ID: -</div>
+      </div>
+      <div>
+        <button onclick="endChat()" title="Akhiri Chat">⏹️</button>
+      </div>
+    </div>
+    
+    <div id="adminMessages" style="display: none;">
+      <!-- Pesan akan dimuat di sini -->
+    </div>
+    
+    <div id="inputArea" class="input-area" style="display: none;">
+      <input type="text" id="adminMessage" placeholder="Ketik pesan..." onkeypress="handleKeyPress(event)">
+      <button onclick="sendMessage()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div id="noChatSelected" class="no-chat-selected">
+      <div>💬</div>
+      <p>Pilih chat dari antrian untuk memulai percakapan</p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  // ====== Firebase Config ======
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com/",
+    projectId: "steady-fin-368617",
+    storageBucket: "YOUR_BUCKET",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  
+  // Variabel global
+  let currentChatId = null;
+  let queueListener = null;
+  let chatsListener = null;
+  let messagesListener = null;
+  let adminStatusListener = null;
+  let isAdminActive = true;
+  
+  // ====== Inisialisasi ======
+  document.addEventListener('DOMContentLoaded', function() {
+    initAdminPanel();
+  });
+  
+  function initAdminPanel() {
+    // Set status admin aktif
+    updateAdminStatus(true);
+    
+    // Listen untuk perubahan pada antrian
+    listenToQueue();
+    
+    // Listen untuk perubahan pada chat aktif
+    listenToActiveChats();
+    
+    // Listen untuk perubahan status admin lainnya
+    listenToOtherAdmins();
+  }
+  
+  // ====== Status Admin ======
+  function toggleAdminStatus() {
+    isAdminActive = !isAdminActive;
+    updateAdminStatus(isAdminActive);
+  }
+  
+  function updateAdminStatus(active) {
+    isAdminActive = active;
+    
+    const statusIndicator = document.getElementById('adminStatusIndicator');
+    const statusText = document.getElementById('adminStatusText');
+    
+    if (active) {
+      statusIndicator.className = 'status-indicator status-online';
+      statusText.textContent = 'Online';
+      
+      // Update status di Firebase
+      db.ref('adminStatus/admin1').set({
+        isActive: true,
+        name: 'Admin 1',
+        lastActive: Date.now()
+      });
+    } else {
+      statusIndicator.className = 'status-indicator status-offline';
+      statusText.textContent = 'Offline';
+      
+      // Jika sedang dalam chat, lepaskan chat tersebut
+      if (currentChatId) {
+        endChat(true); // true berarti hanya melepaskan tanpa menutup chat
+      }
+      
+      // Update status di Firebase
+      db.ref('adminStatus/admin1').set({
+        isActive: false,
+        name: 'Admin 1',
+        lastActive: Date.now()
+      });
+    }
+  }
+  
+  // ====== Tab Management ======
+  function switchTab(tab) {
+    const queueTab = document.querySelector('.admin-tab:nth-child(1)');
+    const activeTab = document.querySelector('.admin-tab:nth-child(2)');
+    
+    const queueList = document.getElementById('queueList');
+    const activeChats = document.getElementById('activeChats');
+    
+    if (tab === 'queue') {
+      queueTab.classList.add('active');
+      activeTab.classList.remove('active');
+      queueList.style.display = 'block';
+      activeChats.style.display = 'none';
+    } else {
+      queueTab.classList.remove('active');
+      activeTab.classList.add('active');
+      queueList.style.display = 'none';
+      activeChats.style.display = 'block';
+    }
+  }
+  
+  // ====== Queue Management ======
+  function listenToQueue() {
+    queueListener = db.ref('queue').on('value', (snapshot) => {
+      const queue = snapshot.val();
+      const queueItems = document.getElementById('queueItems');
+      queueItems.innerHTML = '';
+      
+      if (queue) {
+        Object.entries(queue).forEach(([key, value]) => {
+          const queueItem = document.createElement('div');
+          queueItem.className = 'queue-item';
+          queueItem.dataset.id = key;
+          queueItem.dataset.chatId = value.chatID;
+          queueItem.innerHTML = `
+            <div><strong>${value.topic}</strong></div>
+            <div class="queue-info">Customer: ${value.customerID}</div>
+            <div class="queue-info">Menunggu: ${formatTimeSince(value.joinedAt)}</div>
+          `;
+          
+          queueItem.addEventListener('click', () => {
+            selectChatFromQueue(key, value.chatID, value.topic, value.customerID);
+          });
+          
+          queueItems.appendChild(queueItem);
+        });
+      } else {
+        queueItems.innerHTML = '<p>Tidak ada antrian</p>';
+      }
+    });
+  }
+  
+  function selectChatFromQueue(queueId, chatId, topic, customerId) {
+    // Hapus dari antrian
+    db.ref('queue/' + queueId).remove();
+    
+    // Set status admin sedang melayani chat ini
+    db.ref('adminStatus/admin1').update({
+      currentChat: chatId,
+      customerID: customerId,
+      topic: topic,
+      startedAt: Date.now()
+    });
+    
+    // Update status chat menjadi aktif
+    db.ref('chats/' + chatId).update({
+      status: 'active',
+      admin: 'admin1',
+      startedAt: Date.now()
+    });
+    
+    // Mulai chat session
+    startChatSession(chatId, topic, customerId);
+  }
+  
+  // ====== Active Chats Management ======
+  function listenToActiveChats() {
+    chatsListener = db.ref('chats').orderByChild('status').equalTo('active').on('value', (snapshot) => {
+      const chats = snapshot.val();
+      const activeChatItems = document.getElementById('activeChatItems');
+      activeChatItems.innerHTML = '';
+      
+      if (chats) {
+        Object.entries(chats).forEach(([key, value]) => {
+          // Jangan tampilkan chat yang sedang dilayani admin lain
+          if (value.admin && value.admin !== 'admin1') return;
+          
+          const chatItem = document.createElement('div');
+          chatItem.className = 'chat-item';
+          if (key === currentChatId) {
+            chatItem.classList.add('selected');
+          }
+          
+          chatItem.dataset.id = key;
+          chatItem.innerHTML = `
+            <div><strong>${value.topic}</strong></div>
+            <div class="chat-info">Customer: ${value.customerID}</div>
+            <div class="chat-info">Dimulai: ${formatTimeSince(value.startedAt || value.createdAt)}</div>
+          `;
+          
+          chatItem.addEventListener('click', () => {
+            startChatSession(key, value.topic, value.customerID);
+          });
+          
+          activeChatItems.appendChild(chatItem);
+        });
+      } else {
+        activeChatItems.innerHTML = '<p>Tidak ada chat aktif</p>';
+      }
+    });
+  }
+  
+  // ====== Chat Session ======
+  function startChatSession(chatId, topic, customerId) {
+    // Hentikan listener pesan sebelumnya jika ada
+    if (messagesListener) {
+      db.ref('chats/' + currentChatId + '/messages').off('child_added', messagesListener);
+    }
+    
+    currentChatId = chatId;
+    
+    // Update UI
+    document.getElementById('currentChatTopic').textContent = topic;
+    document.getElementById('currentCustomerID').textContent = `ID: ${customerId}`;
+    
+    document.getElementById('chatHeader').style.display = 'flex';
+    document.getElementById('adminMessages').style.display = 'flex';
+    document.getElementById('inputArea').style.display = 'flex';
+    document.getElementById('noChatSelected').style.display = 'none';
+    
+    // Load pesan sebelumnya
+    loadChatMessages(chatId);
+    
+    // Listen untuk pesan baru
+    messagesListener = db.ref('chats/' + chatId + '/messages').on('child_added', (snapshot) => {
+      const msg = snapshot.val();
+      addMessage(msg.sender, msg.text, msg.timestamp);
+    });
+    
+    // Update daftar chat aktif untuk menandai yang aktif
+    const chatItems = document.querySelectorAll('.chat-item');
+    chatItems.forEach(item => {
+      if (item.dataset.id === chatId) {
+        item.classList.add('selected');
+      } else {
+        item.classList.remove('selected');
+      }
+    });
+  }
+  
+  function loadChatMessages(chatId) {
+    const messagesDiv = document.getElementById('adminMessages');
+    messagesDiv.innerHTML = '';
+    
+    db.ref('chats/' + chatId + '/messages').once('value').then((snapshot) => {
+      const messages = snapshot.val();
+      
+      if (messages) {
+        Object.values(messages).forEach(msg => {
+          addMessage(msg.sender, msg.text, msg.timestamp);
+        });
+      }
+    });
+  }
+  
+  function addMessage(sender, text, timestamp) {
+    const messagesDiv = document.getElementById('adminMessages');
+    const div = document.createElement('div');
+    
+    div.classList.add('message');
+    div.classList.add(sender === 'customer' ? 'customer' : 'admin');
+    
+    div.innerText = text;
+    
+    // Add timestamp
+    const time = document.createElement('div');
+    time.classList.add('timestamp');
+    const date = new Date(timestamp);
+    time.innerText = date.getHours().toString().padStart(2, '0') + ':' + 
+                     date.getMinutes().toString().padStart(2, '0');
+    
+    div.appendChild(time);
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+  
+  function sendMessage() {
+    if (!currentChatId) return;
+    
+    const input = document.getElementById('adminMessage');
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    // Kirim pesan
+    db.ref('chats/' + currentChatId + '/messages').push({
+      sender: 'admin',
+      text: text,
+      timestamp: Date.now()
+    });
+    
+    input.value = '';
+  }
+  
+  function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+      sendMessage();
+    }
+  }
+  
+  function endChat(keepActive = false) {
+    if (!currentChatId) return;
+    
+    // Update status chat
+    db.ref('chats/' + currentChatId).update({
+      status: 'closed',
+      closedAt: Date.now(),
+      closedBy: 'admin'
+    });
+    
+    // Reset status admin jika tidak menjaga status aktif
+    if (!keepActive) {
+      db.ref('adminStatus/admin1').update({
+        currentChat: null,
+        customerID: null,
+        topic: null
+      });
+    }
+    
+    // Hentikan listener pesan
+    if (messagesListener) {
+      db.ref('chats/' + currentChatId + '/messages').off('child_added', messagesListener);
+      messagesListener = null;
+    }
+    
+    // Reset UI
+    document.getElementById('chatHeader').style.display = 'none';
+    document.getElementById('adminMessages').style.display = 'none';
+    document.getElementById('inputArea').style.display = 'none';
+    document.getElementById('noChatSelected').style.display = 'flex';
+    
+    document.getElementById('adminMessages').innerHTML = '';
+    document.getElementById('adminMessage').value = '';
+    
+    currentChatId = null;
+  }
+  
+  // ====== Other Admins ======
+  function listenToOtherAdmins() {
+    adminStatusListener = db.ref('adminStatus').on('value', (snapshot) => {
+      const admins = snapshot.val();
+      // Di sini Anda bisa menambahkan logika untuk menampilkan status admin lain
+    });
+  }
+  
+  // ====== Utility Functions ======
+  function formatTimeSince(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    
+    if (minutes < 1) return 'Baru saja';
+    if (minutes < 60) return `${minutes} menit lalu`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} jam lalu`;
+    
+    const days = Math.floor(hours / 24);
+    return `${days} hari lalu`;
+  }
+  
+  function logout() {
+    // Hentikan semua listener
+    if (queueListener) db.ref('queue').off('value', queueListener);
+    if (chatsListener) db.ref('chats').off('value', chatsListener);
+    if (messagesListener && currentChatId) {
+      db.ref('chats/' + currentChatId + '/messages').off('child_added', messagesListener);
+    }
+    if (adminStatusListener) db.ref('adminStatus').off('value', adminStatusListener);
+    
+    // Update status admin
+    db.ref('adminStatus/admin1').set({
+      isActive: false,
+      name: 'Admin 1',
+      lastActive: Date.now(),
+      currentChat: null
+    });
+    
+    // Redirect atau tutup halaman
+    window.close();
+  }
+</script>
+
+</body>
+</html>
