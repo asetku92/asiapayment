@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ASIA PAYMENT</title>
+    
+    <!-- Firebase App + Messaging SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+    
     <style>
         :root {
             --primary: #0055ff;
@@ -272,6 +277,111 @@
         let firebaseDataUrl = '';
         let appName = 'ASIA PAYMENT';
         let apiBaseUrl = ''; // Variabel untuk base URL API
+        
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
+            authDomain: "steady-fin-368617.firebaseapp.com",
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+            projectId: "steady-fin-368617",
+            storageBucket: "steady-fin-368617.firebasestorage.app",
+            messagingSenderId: "626971902484",
+            appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
+            measurementId: "G-70D3LR995Y"
+        };
+
+        // Inisialisasi Firebase
+        let messaging = null;
+        function initializeFirebase() {
+            try {
+                if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                    messaging = firebase.messaging();
+                    console.log("Firebase initialized successfully");
+                    
+                    // Request permission for notifications
+                    requestNotificationPermission();
+                } else if (firebase.apps.length > 0) {
+                    messaging = firebase.messaging();
+                    console.log("Firebase already initialized");
+                }
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+            }
+        }
+        
+        // Meminta izin notifikasi
+        async function requestNotificationPermission() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    console.log('Notification permission granted.');
+                    // Get FCM token setelah izin diberikan
+                    await getFCMToken();
+                } else {
+                    console.log('Unable to get permission to notify.');
+                }
+            } catch (error) {
+                console.error('Error requesting notification permission:', error);
+            }
+        }
+        
+        // Mendapatkan FCM token
+        async function getFCMToken() {
+            try {
+                if (!messaging) return null;
+                
+                const currentToken = await messaging.getToken({ 
+                    vapidKey: "BJHhLkbKo-j_K-FGFPHprCBduDrzsHS02xass8ejg6gw8nJNFnkXz5-aBTo5Ki_g_c_9UG8Ve8i-VlRAEov_4rY" 
+                });
+                
+                if (currentToken) {
+                    console.log('FCM Token:', currentToken);
+                    localStorage.setItem('fcmToken', currentToken);
+                    return currentToken;
+                } else {
+                    console.log('No registration token available. Request permission to generate one.');
+                    return null;
+                }
+            } catch (error) {
+                console.error('An error occurred while retrieving token:', error);
+                return null;
+            }
+        }
+        
+        // Mengirim token FCM ke server
+        async function sendFCMTokenToServer(kodeReseller) {
+            try {
+                const token = localStorage.getItem('fcmToken') || await getFCMToken();
+                
+                if (!token) {
+                    console.log('No FCM token available to send to server.');
+                    return false;
+                }
+                
+                const response = await fetch('https://91.99.163.28:8443/save-fcm-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        kodeReseller: kodeReseller,
+                        token: token
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('FCM token successfully sent to server');
+                    return true;
+                } else {
+                    console.error('Failed to send FCM token to server');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error sending FCM token to server:', error);
+                return false;
+            }
+        }
 
         // Fungsi untuk menampilkan loading popup
         function showLoading() {
@@ -305,9 +415,9 @@
         }
 
         // Fungsi untuk menentukan base URL API
-function determineApiBaseUrl() {
-    return "https://91.99.163.28:8080"; 
-}
+        function determineApiBaseUrl() {
+            return "http://91.99.163.28:8080"; 
+        }
 
         // Fungsi untuk mengambil konfigurasi dari server
         async function fetchConfig() {
@@ -573,26 +683,33 @@ function determineApiBaseUrl() {
                         localStorage.setItem("kodereseller", kode.toUpperCase());
                         localStorage.setItem("nomorhp", nomorhp);
                         
+                        // Kirim token FCM ke server (tanpa menunggu hasilnya)
+                        sendFCMTokenToServer(kode.toUpperCase()).catch(error => {
+                            console.error("Gagal mengirim token FCM:", error);
+                        });
+                        
                         // Kirim data ke Kodular jika dalam aplikasi
                         if (window.AppInventor && window.AppInventor.setWebViewString) {
                             window.AppInventor.setWebViewString(JSON.stringify({
                                 action: "login_success",
                                 kodereseller: kode.toUpperCase(),
-                                nomorhp: nomorhp
+                                nomorhp: nomorhp,
+                                firebaseUrl: localStorage.getItem("firebaseUrl") // Ambil URL dari localStorage
                             }));
                         } else {
                             // Fallback untuk browser biasa (hanya untuk testing)
                             console.log("Data yang akan dikirim ke Kodular:", {
                                 action: "login_success",
                                 kodereseller: kode.toUpperCase(),
-                                nomorhp: nomorhp
+                                nomorhp: nomorhp,
+                                firebaseUrl: localStorage.getItem("firebaseUrl") // Tambahkan juga di log console
                             });
                             
                             // Redirect langsung tanpa timer
                             window.location.href = "menu_beranda.html?kodereseller=" + 
-                                                  encodeURIComponent(kode.toUpperCase()) + 
-                                                  "&nomorhp=" + 
-                                                  encodeURIComponent(nomorhp);
+                                                encodeURIComponent(kode.toUpperCase()) + 
+                                                "&nomorhp=" + 
+                                                encodeURIComponent(nomorhp);
                         }
                     } else {
                         showError("Data tidak sesuai");
@@ -619,6 +736,8 @@ function determineApiBaseUrl() {
                 await fetchConfig();
                 // Kemudian ambil data Firebase
                 await fetchFirebaseData();
+                // Inisialisasi Firebase
+                initializeFirebase();
             } catch (error) {
                 console.error("Gagal inisialisasi aplikasi:", error);
                 showError("Gagal memuat konfigurasi aplikasi", true);
