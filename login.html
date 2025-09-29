@@ -1,755 +1,166 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ASIA PAYMENT</title>
-    
-    <!-- Firebase App + Messaging SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
-    
-    <style>
-        :root {
-            --primary: #0055ff;
-            --secondary: #00aaff;
-            --accent: #ff5500;
-            --light: #ffffff;
-            --dark: #212121;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --bg-gradient: linear-gradient(135deg, #0055ff, #00aaff);
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            margin: 0;
-            background: var(--bg-gradient);
-            color: var(--dark);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            transition: background 0.5s ease;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 400px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .header {
-            background: var(--bg-gradient);
-            padding: 20px;
-            text-align: center;
-            color: white;
-        }
-        
-        .header img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            border: 3px solid white;
-        }
-        
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .form-container {
-            padding: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
-        }
-        
-        .form-group input.error {
-            border-color: var(--danger);
-        }
-        
-        .error-text {
-            color: var(--danger);
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        button:hover {
-            background: #0044cc;
-        }
-        
-        .switch-form {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        
-        .switch-form a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .switch-form a:hover {
-            text-decoration: underline;
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        /* Popup Loading Styles */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .loading-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .loading-popup {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            min-width: 250px;
-        }
-        
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            font-size: 16px;
-            color: var(--dark);
-        }
-
-        .retry-button {
-            margin-top: 10px;
-            background: var(--accent);
-        }
-        
-        .retry-button:hover {
-            background: #e04a00;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login - ASIA PAYMENT</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{
+      --primary:#0055ff;
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --danger:#dc3545;
+      --muted:#6c757d;
+    }
+    *{box-sizing:border-box;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif}
+    body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;height:100vh;padding:20px}
+    .card{width:100%;max-width:420px;background:var(--card);border-radius:12px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,0.08)}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .form-group{margin-bottom:14px}
+    label{display:block;margin-bottom:6px;font-weight:600;font-size:14px}
+    input[type="text"],input[type="password"]{
+      width:100%;padding:10px 12px;border:1px solid #e3e6ea;border-radius:8px;font-size:15px
+    }
+    .actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+    button.btn{padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    button.btn-primary{background:var(--primary);color:white}
+    button.btn-ghost{background:transparent;border:1px solid #e3e6ea}
+    .note{margin-top:12px;font-size:13px;color:var(--muted)}
+    .error{color:var(--danger);font-size:13px;margin-top:8px;display:none}
+    .hint{margin-top:10px;font-size:13px;color:#333;background:#f1f5ff;padding:10px;border-radius:8px;border:1px solid rgba(0,85,255,0.08)}
+    .show-pass{cursor:pointer;margin-left:8px;color:var(--muted)}
+    .center{display:flex;gap:8px;align-items:center}
+    .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .logo img{height:44px;border-radius:8px}
+    footer{margin-top:18px;text-align:center;font-size:13px;color:var(--muted)}
+    @media (max-width:420px){.card{padding:20px}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo ASIA PAYMENT">
-            <h1 id="appName">ASIA PAYMENT</h1>
-            <p>Platform Pembayaran Terlengkap</p>
-        </div>
-        
-        <div class="form-container">
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="kode">Kode Reseller:</label>
-                    <input type="text" id="kode" name="kode" required placeholder="Masukkan kode reseller">
-                </div>
-                
-                <div class="form-group">
-                    <label for="nomorhp">Nomor HP:</label>
-                    <input type="text" id="nomorhp" name="nomorhp" required placeholder="Masukkan nomor HP">
-                    <div class="error-text" id="nomorhpError">Nomor HP hanya boleh berisi angka</div>
-                </div>
-                
-                <button type="submit">Login</button>
-            </form>
-            
-            <div class="switch-form">
-                Belum punya akun? <a href="daftar.html">Daftar di sini</a>
-            </div>
-            
-            <div id="result" class="result"></div>
-        </div>
+  <div class="card" role="main">
+    <div class="logo">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="logo">
+      <div>
+        <h1>ASIA PAYMENT Console</h1>
+        <p class="lead">Silakan login untuk melanjutkan ke dashboard</p>
+      </div>
     </div>
 
-    <!-- Popup Loading -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-popup">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Memverifikasi login...</div>
-        </div>
-    </div>
+    <form id="loginForm" autocomplete="off" aria-label="form login">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" type="text" value="admin" required />
+      </div>
 
-    <script>
-        // Variabel global untuk konfigurasi
-        let firebaseDataUrl = '';
-        let appName = 'ASIA PAYMENT';
-        let apiBaseUrl = ''; // Variabel untuk base URL API
-        
-        // Konfigurasi Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
-            authDomain: "steady-fin-368617.firebaseapp.com",
-            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
-            projectId: "steady-fin-368617",
-            storageBucket: "steady-fin-368617.firebasestorage.app",
-            messagingSenderId: "626971902484",
-            appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
-            measurementId: "G-70D3LR995Y"
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="password" type="password" value="1234" required />
+          <span id="togglePass" class="show-pass" title="Tampilkan/ Sembunyikan password">
+            <i class="fas fa-eye"></i>
+          </span>
+        </div>
+      </div>
+
+      <div class="error" id="errorMsg">Username atau password salah.</div>
+
+      <div class="actions">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="remember" type="checkbox" />
+          <label for="remember" style="font-size:13px;color:var(--muted);margin:0">Ingat saya</label>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn btn-ghost" id="btnDemo">Isi Demo</button>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+      </div>
+
+      <div class="hint">
+        Default credentials — <strong>username:</strong> <code>admin</code> &nbsp; <strong>password:</strong> <code>1234</code>
+      </div>
+
+      <footer>
+        <small>&copy; 2023 ASIA PAYMENT</small>
+      </footer>
+    </form>
+  </div>
+
+  <script>
+    // Default credentials (sesuai permintaan)
+    const DEFAULT_USERNAME = 'admin';
+    const DEFAULT_PASSWORD = '1234';
+
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorMsg = document.getElementById('errorMsg');
+    const togglePass = document.getElementById('togglePass');
+    const btnDemo = document.getElementById('btnDemo');
+
+    // Jika sudah login, langsung redirect ke dashboard
+    (function checkAlreadyLoggedIn(){
+      try {
+        const logged = localStorage.getItem('adminUser');
+        if (logged) {
+          // Pastikan file dashboard.html ada di lokasi yang sama
+          window.location.href = 'dashboard.html';
+        }
+      } catch(e) {
+        console.warn('LocalStorage tidak tersedia:', e);
+      }
+    })();
+
+    // Toggle show/hide password
+    togglePass.addEventListener('click', () => {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePass.innerHTML = '<i class="fas fa-eye-slash"></i>';
+      } else {
+        passwordInput.type = 'password';
+        togglePass.innerHTML = '<i class="fas fa-eye"></i>';
+      }
+    });
+
+    // Tombol demo untuk cepat mengisi form
+    btnDemo.addEventListener('click', () => {
+      usernameInput.value = DEFAULT_USERNAME;
+      passwordInput.value = DEFAULT_PASSWORD;
+      errorMsg.style.display = 'none';
+    });
+
+    // Fungsi login
+    loginForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+
+      const username = (usernameInput.value || '').trim();
+      const password = (passwordInput.value || '').trim();
+
+      // Cek kredensial
+      if (username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD) {
+        // Simpan ke localStorage sebagai objek adminUser
+        const adminUser = {
+          username: username,
+          loginAt: new Date().toISOString()
         };
 
-        // Inisialisasi Firebase
-        let messaging = null;
-        function initializeFirebase() {
-            try {
-                if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
-                    firebase.initializeApp(firebaseConfig);
-                    messaging = firebase.messaging();
-                    console.log("Firebase initialized successfully");
-                    
-                    // Request permission for notifications
-                    requestNotificationPermission();
-                } else if (firebase.apps.length > 0) {
-                    messaging = firebase.messaging();
-                    console.log("Firebase already initialized");
-                }
-            } catch (error) {
-                console.error("Firebase initialization error:", error);
-            }
-        }
-        
-        // Meminta izin notifikasi
-        async function requestNotificationPermission() {
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    console.log('Notification permission granted.');
-                    // Get FCM token setelah izin diberikan
-                    await getFCMToken();
-                } else {
-                    console.log('Unable to get permission to notify.');
-                }
-            } catch (error) {
-                console.error('Error requesting notification permission:', error);
-            }
-        }
-        
-        // Mendapatkan FCM token
-        async function getFCMToken() {
-            try {
-                if (!messaging) return null;
-                
-                const currentToken = await messaging.getToken({ 
-                    vapidKey: "BJHhLkbKo-j_K-FGFPHprCBduDrzsHS02xass8ejg6gw8nJNFnkXz5-aBTo5Ki_g_c_9UG8Ve8i-VlRAEov_4rY" 
-                });
-                
-                if (currentToken) {
-                    console.log('FCM Token:', currentToken);
-                    localStorage.setItem('fcmToken', currentToken);
-                    return currentToken;
-                } else {
-                    console.log('No registration token available. Request permission to generate one.');
-                    return null;
-                }
-            } catch (error) {
-                console.error('An error occurred while retrieving token:', error);
-                return null;
-            }
-        }
-        
-        // Mengirim token FCM ke server
-        async function sendFCMTokenToServer(kodeReseller) {
-            try {
-                const token = localStorage.getItem('fcmToken') || await getFCMToken();
-                
-                if (!token) {
-                    console.log('No FCM token available to send to server.');
-                    return false;
-                }
-                
-                const response = await fetch('https://91.99.163.28:8443/save-fcm-token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        kodeReseller: kodeReseller,
-                        token: token
-                    })
-                });
-                
-                if (response.ok) {
-                    console.log('FCM token successfully sent to server');
-                    return true;
-                } else {
-                    console.error('Failed to send FCM token to server');
-                    return false;
-                }
-            } catch (error) {
-                console.error('Error sending FCM token to server:', error);
-                return false;
-            }
+        try {
+          localStorage.setItem('adminUser', JSON.stringify(adminUser));
+        } catch (err) {
+          console.warn('Gagal menyimpan ke localStorage:', err);
         }
 
-        // Fungsi untuk menampilkan loading popup
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('active');
-        }
-
-        // Fungsi untuk menyembunyikan loading popup
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-        }
-
-        // Fungsi untuk menampilkan pesan error
-        function showError(message, isRetryable = false) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'result error';
-            
-            let html = `<strong>Error:</strong> ${message}`;
-            
-            if (isRetryable) {
-                html += `<br><button class="retry-button" onclick="retryConnection()">Coba Lagi</button>`;
-            }
-            
-            resultDiv.innerHTML = html;
-        }
-
-        // Fungsi untuk mencoba kembali koneksi
-        function retryConnection() {
-            document.getElementById('result').style.display = 'none';
-            initializeApp();
-        }
-
-        // Fungsi untuk menentukan base URL API
-        function determineApiBaseUrl() {
-            return "https://91.99.163.28:8080"; 
-        }
-
-        // Fungsi untuk mengambil konfigurasi dari server
-        async function fetchConfig() {
-            try {
-                // Tentukan base URL API
-                apiBaseUrl = determineApiBaseUrl();
-                console.log("Mencoba mengakses API di:", apiBaseUrl);
-                
-                const response = await fetch(`${apiBaseUrl}/api/config`, {
-                    signal: AbortSignal.timeout(10000) // Timeout setelah 10 detik
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const config = await response.json();
-                
-                if (config.firebaseDataUrl) {
-                    firebaseDataUrl = config.firebaseDataUrl;
-                    localStorage.setItem("firebaseUrl", firebaseDataUrl);
-                }
-                
-                if (config.appName) {
-                    appName = config.appName;
-                    document.title = appName + " - Login";
-                    document.getElementById('appName').textContent = appName;
-                }
-                
-                console.log("Konfigurasi berhasil diambil dari server");
-                return true;
-            } catch (error) {
-                console.warn("Gagal mengambil konfigurasi dari server:", error.message);
-                // Fallback ke default jika gagal
-                firebaseDataUrl = "https://steady-fin-368617-default-rtdb.firebaseio.com/AsiaPayment.json";
-                localStorage.setItem("firebaseUrl", firebaseDataUrl);
-                return false;
-            }
-        }
-
-        // Fungsi untuk mengambil data dari Firebase
-        async function fetchFirebaseData() {
-            try {
-                // Pastikan kita sudah memiliki URL Firebase
-                if (!firebaseDataUrl) {
-                    firebaseDataUrl = localStorage.getItem("firebaseUrl") || "https://steady-fin-368617-default-rtdb.firebaseio.com/AsiaPayment.json";
-                }
-                
-                const response = await fetch(firebaseDataUrl, {
-                    signal: AbortSignal.timeout(10000) // Timeout setelah 10 detik
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                // Simpan semua data ke localStorage untuk konsistensi UI
-                localStorage.setItem("AllData", JSON.stringify(data));
-                
-                // Simpan setiap bagian data secara terpisah
-                for (const key in data) {
-                    if (key !== "inviteCodes") {
-                        localStorage.setItem(key, JSON.stringify(data[key]));
-                    }
-                }
-                
-                console.log("Data Firebase berhasil diambil dan disimpan");
-                
-                // Terapkan background gradient dari Firebase
-                applyBackgroundGradient(data);
-                
-                return true;
-            } catch (error) {
-                console.warn("Gagal mengambil data dari Firebase:", error.message);
-                // Gunakan data default jika Firebase tidak dapat diakses
-                const defaultData = {
-                    Color: {
-                        BackgroundGradient: ["#0055ff", "#00aaff"]
-                    }
-                };
-                localStorage.setItem("AllData", JSON.stringify(defaultData));
-                applyBackgroundGradient(defaultData);
-                return false;
-            }
-        }
-        
-        // Fungsi untuk menerapkan background gradient dari Firebase
-        function applyBackgroundGradient(data) {
-            if (data.Color && data.Color.BackgroundGradient) {
-                const gradients = data.Color.BackgroundGradient.filter(g => g);
-                if (gradients.length > 0) {
-                    document.body.style.background = `linear-gradient(135deg, ${gradients.join(', ')})`;
-                    document.querySelector('.header').style.background = `linear-gradient(135deg, ${gradients.join(', ')})`;
-                }
-            }
-        }
-        
-        // Fungsi untuk mengekstrak nomor HP dari pesan
-        function extractPhoneNumbers(message) {
-            const phoneRegex = /\b\d{10,15}\b/g;
-            return message.match(phoneRegex) || [];
-        }
-        
-        // Fungsi untuk menormalisasi nomor HP
-        function normalizePhone(phone) {
-            // Hapus semua karakter non-digit
-            let normalized = phone.replace(/\D/g, '');
-            // Hapus awalan 0 atau 62
-            if (normalized.startsWith('0')) {
-                normalized = normalized.substring(1);
-            } else if (normalized.startsWith('62')) {
-                normalized = normalized.substring(2);
-            }
-            return normalized;
-        }
-        
-        // Fungsi untuk memvalidasi input nomor HP
-        function validatePhoneNumber(phone) {
-            // Hanya boleh berisi angka
-            const phoneRegex = /^\d+$/;
-            return phoneRegex.test(phone);
-        }
-        
-        // Fungsi untuk mensimulasikan API InsertInbox (hanya untuk testing)
-        async function simulateInsertInbox(payload) {
-            // Simulasi respons sukses untuk testing
-            // Dalam implementasi nyata, ini akan diganti dengan panggilan API sebenarnya
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    // Simulasi kode reseller yang valid
-                    if (payload.kode_reseller === "TEST123" && payload.pengirim === "08123456789") {
-                        resolve({
-                            ok: true,
-                            result: {
-                                status: 0,
-                                statusDesc: "Success",
-                                pesan: "Daftar nomor: 08123456789, 081398765432"
-                            }
-                        });
-                    } else {
-                        resolve({
-                            ok: false,
-                            result: {
-                                status: 41,
-                                statusDesc: "Bukan Reseller"
-                            }
-                        });
-                    }
-                }, 1500); // Simulasi delay jaringan
-            });
-        }
-        
-        // Event listener untuk input nomor HP
-        document.getElementById('nomorhp').addEventListener('input', function(e) {
-            const input = e.target;
-            const errorElement = document.getElementById('nomorhpError');
-            
-            if (!validatePhoneNumber(input.value)) {
-                input.classList.add('error');
-                errorElement.style.display = 'block';
-            } else {
-                input.classList.remove('error');
-                errorElement.style.display = 'none';
-            }
-        });
-        
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Log info: tombol login diklik
-            console.log("tombol_login_diklik");
-            
-            // Ambil nilai dari form dan terapkan trim()
-            let kode = document.getElementById('kode').value.trim().toUpperCase();
-            let nomorhp = document.getElementById('nomorhp').value.trim();
-            
-            // Validasi nomor HP
-            if (!validatePhoneNumber(nomorhp)) {
-                showError("Nomor HP hanya boleh berisi angka");
-                return;
-            }
-            
-            // Normalisasi nomor HP (hapus karakter non-digit)
-            nomorhp = nomorhp.replace(/\D/g, '');
-            
-            // Tampilkan loading popup
-            showLoading();
-            document.getElementById('result').style.display = 'none';
-            
-            try {
-                console.log('Mengirim request login dengan:', { 
-                    kode_reseller: kode, 
-                    pengirim: nomorhp, 
-                    tipe_pengirim: "W" 
-                });
-                
-                let data;
-                
-                // Coba kirim request ke API InsertInbox yang sebenarnya
-                try {
-                    const response = await fetch(`${apiBaseUrl}/api/InsertInbox`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            pesan: "LISTNO",
-                            kode_reseller: kode,
-                            pengirim: nomorhp,
-                            tipe_pengirim: "W"
-                        }),
-                        signal: AbortSignal.timeout(15000) // Timeout setelah 15 detik
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    data = await response.json();
-                } catch (apiError) {
-                    console.warn("API InsertInbox tidak dapat diakses, menggunakan simulasi:", apiError.message);
-                    // Jika API tidak dapat diakses, gunakan simulasi untuk testing
-                    data = await simulateInsertInbox({
-                        pesan: "LISTNO",
-                        kode_reseller: kode,
-                        pengirim: nomorhp,
-                        tipe_pengirim: "W"
-                    });
-                }
-                
-                // Sembunyikan loading popup
-                hideLoading();
-                
-                // Periksa jika kode reseller tidak valid
-                if (data.result && (data.result.status === 41 || data.result.statusDesc === "Bukan Reseller")) {
-                    showError("Data tidak sesuai");
-                    return;
-                }
-                
-                if (data.ok) {
-                    // Ekstrak nomor HP dari pesan respons
-                    const message = data.result.pesan || "";
-                    const phoneNumbers = extractPhoneNumbers(message);
-                    
-                    const inputNormalized = normalizePhone(nomorhp);
-                    let isValidPhone = false;
-                    
-                    // Bandingkan nomor HP yang dimasukkan dengan yang terdaftar
-                    for (const phone of phoneNumbers) {
-                        if (normalizePhone(phone) === inputNormalized) {
-                            isValidPhone = true;
-                            break;
-                        }
-                    }
-                    
-                    if (isValidPhone) {
-                        // Ambil data dari Firebase sebelum melanjutkan
-                        await fetchFirebaseData();
-                        
-                        // Simpan data ke localStorage (pastikan huruf besar untuk kode reseller)
-                        localStorage.setItem("kodereseller", kode.toUpperCase());
-                        localStorage.setItem("nomorhp", nomorhp);
-                        
-                        // Kirim token FCM ke server (tanpa menunggu hasilnya)
-                        sendFCMTokenToServer(kode.toUpperCase()).catch(error => {
-                            console.error("Gagal mengirim token FCM:", error);
-                        });
-                        
-                        // Kirim data ke Kodular jika dalam aplikasi
-                        if (window.AppInventor && window.AppInventor.setWebViewString) {
-                            window.AppInventor.setWebViewString(JSON.stringify({
-                                action: "login_success",
-                                kodereseller: kode.toUpperCase(),
-                                nomorhp: nomorhp,
-                                firebaseUrl: localStorage.getItem("firebaseUrl") // Ambil URL dari localStorage
-                            }));
-                        } else {
-                            // Fallback untuk browser biasa (hanya untuk testing)
-                            console.log("Data yang akan dikirim ke Kodular:", {
-                                action: "login_success",
-                                kodereseller: kode.toUpperCase(),
-                                nomorhp: nomorhp,
-                                firebaseUrl: localStorage.getItem("firebaseUrl") // Tambahkan juga di log console
-                            });
-                            
-                            // Redirect langsung tanpa timer
-                            window.location.href = "menu_beranda.html?kodereseller=" + 
-                                                encodeURIComponent(kode.toUpperCase()) + 
-                                                "&nomorhp=" + 
-                                                encodeURIComponent(nomorhp);
-                        }
-                    } else {
-                        showError("Data tidak sesuai");
-                    }
-                } else {
-                    showError("Data tidak sesuai");
-                }
-            } catch (error) {
-                // Sembunyikan loading popup
-                hideLoading();
-                
-                // Tampilkan error dengan opsi retry
-                showError(`Gagal terhubung ke server. Pastikan Anda terhubung ke internet. Detail: ${error.message}`, true);
-                console.error('Error:', error);
-            }
-        });
-        
-        // Inisialisasi aplikasi
-        async function initializeApp() {
-            showLoading();
-            
-            try {
-                // Ambil konfigurasi dari server terlebih dahulu
-                await fetchConfig();
-                // Kemudian ambil data Firebase
-                await fetchFirebaseData();
-                // Inisialisasi Firebase
-                initializeFirebase();
-            } catch (error) {
-                console.error("Gagal inisialisasi aplikasi:", error);
-                showError("Gagal memuat konfigurasi aplikasi", true);
-            } finally {
-                hideLoading();
-            }
-        }
-        
-        // Jalankan inisialisasi saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
-    </script>
+        // Redirect ke dashboard
+        window.location.href = 'dashboard.html';
+      } else {
+        // Tampilkan pesan error
+        errorMsg.textContent = 'Username atau password salah.';
+        errorMsg.style.display = 'block';
+      }
+    });
+  </script>
 </body>
 </html>
