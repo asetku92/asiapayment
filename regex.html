@@ -525,21 +525,36 @@
             min-width: 200px;
         }
         
-        .regex-category {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
             font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
         }
         
-        .category-FormatKunciTransaksi {
-            background: rgba(0, 85, 255, 0.1);
+        .tab.active {
             color: var(--primary);
+            border-bottom: 3px solid var(--primary);
         }
         
-        .category-Other {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success);
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         .regex-pattern {
@@ -554,16 +569,16 @@
             white-space: nowrap;
         }
         
-        .regex-preview {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 10px;
-            margin-top: 5px;
+        .format-pattern {
             font-family: monospace;
+            background: rgba(0, 85, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 14px;
-            max-height: 150px;
-            overflow-y: auto;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         @media (max-width: 768px) {
@@ -595,6 +610,20 @@
             
             .filter-select {
                 width: 100%;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-bottom: 1px solid var(--border);
+                border-left: 3px solid transparent;
+            }
+            
+            .tab.active {
+                border-left: 3px solid var(--primary);
+                border-bottom: 1px solid var(--border);
             }
         }
     </style>
@@ -691,42 +720,90 @@
                         <span id="firebaseStatusText">Status Firebase</span>
                     </div>
                     
-                    <!-- Regex Section -->
-                    <div class="section">
-                        <div class="section-title">
-                            <h2><i class="fas fa-code"></i> RegexExtractor</h2>
-                            <button class="btn btn-primary" onclick="openRegexForm()">
-                                <i class="fas fa-plus"></i> Tambah Regex
-                            </button>
+                    <!-- Tab Container -->
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="regex">RegexExtractor</div>
+                            <div class="tab" data-tab="format">Format Kunci Transaksi</div>
                         </div>
                         
-                        <div class="filter-section">
-                            <div class="form-group">
-                                <label for="categoryFilter">Filter Kategori:</label>
-                                <select id="categoryFilter" class="filter-select" onchange="filterRegex()">
-                                    <option value="">Semua Kategori</option>
-                                    <option value="FormatKunciTransaksi">FormatKunciTransaksi</option>
-                                    <option value="Other">Lainnya</option>
-                                </select>
+                        <!-- RegexExtractor Tab -->
+                        <div id="regex-tab" class="tab-content active">
+                            <div class="section-title">
+                                <h2><i class="fas fa-code"></i> RegexExtractor</h2>
+                                <button class="btn btn-primary" onclick="openRegexForm()">
+                                    <i class="fas fa-plus"></i> Tambah Regex
+                                </button>
+                            </div>
+                            
+                            <div class="filter-section">
+                                <div class="form-group">
+                                    <label for="regexFilter">Filter Regex:</label>
+                                    <select id="regexFilter" class="filter-select" onchange="filterRegex()">
+                                        <option value="">Semua Regex</option>
+                                        <option value="extractPhone">Extract Phone</option>
+                                        <option value="extractEmail">Extract Email</option>
+                                        <option value="extractNumber">Extract Number</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="table-container">
+                                    <table id="regexTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Regex</th>
+                                                <th>Pattern</th>
+                                                <th>Deskripsi</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="regexTableBody">
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="card">
-                            <div class="table-container">
-                                <table id="regexTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama Regex</th>
-                                            <th>Kategori</th>
-                                            <th>Pattern</th>
-                                            <th>Deskripsi</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="regexTableBody">
-                                        <!-- Data will be populated here -->
-                                    </tbody>
-                                </table>
+                        <!-- Format Kunci Transaksi Tab -->
+                        <div id="format-tab" class="tab-content">
+                            <div class="section-title">
+                                <h2><i class="fas fa-key"></i> Format Kunci Transaksi</h2>
+                                <button class="btn btn-primary" onclick="openFormatForm()">
+                                    <i class="fas fa-plus"></i> Tambah Format
+                                </button>
+                            </div>
+                            
+                            <div class="filter-section">
+                                <div class="form-group">
+                                    <label for="formatFilter">Filter Format:</label>
+                                    <select id="formatFilter" class="filter-select" onchange="filterFormats()">
+                                        <option value="">Semua Format</option>
+                                        <option value="pulsa">Pulsa</option>
+                                        <option value="data">Data</option>
+                                        <option value="ewallet">E-Wallet</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="table-container">
+                                    <table id="formatTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Format</th>
+                                                <th>Pattern</th>
+                                                <th>Deskripsi</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="formatTableBody">
+                                            <!-- Data will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -743,23 +820,13 @@
     <div id="regexModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-code"></i> <span id="modalTitle">Tambah Regex</span></h3>
-                <span class="close" onclick="closeModal()">&times;</span>
+                <h3><i class="fas fa-code"></i> <span id="modalRegexTitle">Tambah Regex</span></h3>
+                <span class="close" onclick="closeRegexModal()">&times;</span>
             </div>
             
             <form id="regexForm">
                 <input type="hidden" id="regexId">
-                <input type="hidden" id="originalCategory">
-                <input type="hidden" id="originalName">
-                
-                <div class="form-group">
-                    <label for="regexCategory">Kategori</label>
-                    <select id="regexCategory" class="form-control" required>
-                        <option value="">Pilih Kategori</option>
-                        <option value="FormatKunciTransaksi">FormatKunciTransaksi</option>
-                        <option value="Other">Lainnya</option>
-                    </select>
-                </div>
+                <input type="hidden" id="originalRegexName">
                 
                 <div class="form-group">
                     <label for="regexName">Nama Regex</label>
@@ -782,7 +849,47 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" onclick="closeModal()">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="closeRegexModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Form for Add/Edit Format Kunci Transaksi -->
+    <div id="formatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> <span id="modalFormatTitle">Tambah Format Kunci Transaksi</span></h3>
+                <span class="close" onclick="closeFormatModal()">&times;</span>
+            </div>
+            
+            <form id="formatForm">
+                <input type="hidden" id="formatId">
+                <input type="hidden" id="originalFormatName">
+                
+                <div class="form-group">
+                    <label for="formatName">Nama Format</label>
+                    <input type="text" id="formatName" class="form-control" placeholder="Masukkan nama format" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="formatPattern">Pattern Format</label>
+                    <textarea id="formatPattern" class="form-control form-textarea" placeholder="Masukkan pattern format" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="formatDescription">Deskripsi</label>
+                    <textarea id="formatDescription" class="form-control form-textarea" placeholder="Masukkan deskripsi format"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="formatExample">Contoh Penggunaan</label>
+                    <textarea id="formatExample" class="form-control form-textarea" placeholder="Masukkan contoh penggunaan format"></textarea>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeFormatModal()">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
@@ -819,7 +926,9 @@
         // Global variables
         let currentUser = null;
         let regexList = [];
+        let formatList = [];
         let filteredRegex = [];
+        let filteredFormats = [];
         
         // Update Firebase status
         function updateFirebaseStatus(message, status) {
@@ -842,6 +951,7 @@
                 currentUser = JSON.parse(loggedInUser);
                 document.getElementById('userName').textContent = currentUser.username;
                 loadRegex();
+                loadFormats();
             } else {
                 window.location.href = 'login.html';
             }
@@ -852,11 +962,39 @@
         
         // Setup event listeners
         function setupEventListeners() {
-            // Form submission
+            // Form submissions
             document.getElementById('regexForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveRegex();
             });
+            
+            document.getElementById('formatForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveFormat();
+            });
+            
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+        }
+        
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Update active content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabId}-tab`).classList.add('active');
         }
         
         // Logout function
@@ -868,7 +1006,7 @@
         // Load regex from Firebase
         function loadRegex() {
             const tableBody = document.getElementById('regexTableBody');
-            tableBody.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="4" class="loading"><div class="spinner"></div> Memuat data regex...</td></tr>';
             
             if (firebaseConnected) {
                 const regexRef = database.ref('AsiaPayment/RegexExtractor');
@@ -878,34 +1016,15 @@
                     const data = snapshot.val();
                     
                     if (data) {
-                        // FormatKunciTransaksi
-                        if (data.FormatKunciTransaksi) {
-                            Object.keys(data.FormatKunciTransaksi).forEach(key => {
-                                regexList.push({
-                                    id: key,
-                                    name: key,
-                                    category: 'FormatKunciTransaksi',
-                                    ...data.FormatKunciTransaksi[key]
-                                });
+                        Object.keys(data).forEach(key => {
+                            regexList.push({
+                                id: key,
+                                name: key,
+                                ...data[key]
                             });
-                        }
-                        
-                        // Other categories
-                        Object.keys(data).forEach(category => {
-                            if (category !== 'FormatKunciTransaksi' && data[category]) {
-                                Object.keys(data[category]).forEach(key => {
-                                    regexList.push({
-                                        id: key,
-                                        name: key,
-                                        category: category,
-                                        ...data[category][key]
-                                    });
-                                });
-                            }
                         });
                         
                         filteredRegex = [...regexList];
-                        
                         renderRegex();
                     } else {
                         useSampleRegex();
@@ -920,21 +1039,47 @@
             }
         }
         
+        // Load formats from Firebase
+        function loadFormats() {
+            const tableBody = document.getElementById('formatTableBody');
+            tableBody.innerHTML = '<tr><td colspan="4" class="loading"><div class="spinner"></div> Memuat data format...</td></tr>';
+            
+            if (firebaseConnected) {
+                const formatRef = database.ref('AsiaPayment/FormatKunciTransaksi');
+                
+                formatRef.on('value', (snapshot) => {
+                    formatList = [];
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            formatList.push({
+                                id: key,
+                                name: key,
+                                ...data[key]
+                            });
+                        });
+                        
+                        filteredFormats = [...formatList];
+                        renderFormats();
+                    } else {
+                        useSampleFormats();
+                    }
+                }, (error) => {
+                    console.error('Firebase error:', error);
+                    useSampleFormats();
+                });
+            } else {
+                useSampleFormats();
+            }
+        }
+        
         // Use sample regex when Firebase is not available
         function useSampleRegex() {
             regexList = [
                 { 
-                    id: 'extractTransactionId', 
-                    name: 'Extract Transaction ID', 
-                    category: 'FormatKunciTransaksi', 
-                    pattern: 'TRX-\\d{8}', 
-                    description: 'Regex untuk mengekstrak ID transaksi dari teks',
-                    example: 'Contoh: TRX-20230401'
-                },
-                { 
                     id: 'extractPhoneNumber', 
                     name: 'Extract Phone Number', 
-                    category: 'FormatKunciTransaksi', 
                     pattern: '\\+?[\\d\\s-()]{10,}', 
                     description: 'Regex untuk mengekstrak nomor telepon',
                     example: 'Contoh: +62 812-3456-7890'
@@ -942,10 +1087,16 @@
                 { 
                     id: 'extractEmail', 
                     name: 'Extract Email', 
-                    category: 'Other', 
                     pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', 
                     description: 'Regex untuk mengekstrak alamat email',
                     example: 'Contoh: user@example.com'
+                },
+                { 
+                    id: 'extractTransactionId', 
+                    name: 'Extract Transaction ID', 
+                    pattern: 'TRX-\\d{8}', 
+                    description: 'Regex untuk mengekstrak ID transaksi',
+                    example: 'Contoh: TRX-20230401'
                 }
             ];
             
@@ -954,12 +1105,45 @@
             showNotification('Menggunakan data simulasi karena tidak dapat terhubung ke Firebase', 'info');
         }
         
-        // Filter regex based on selected category
-        function filterRegex() {
-            const categoryFilter = document.getElementById('categoryFilter').value;
+        // Use sample formats when Firebase is not available
+        function useSampleFormats() {
+            formatList = [
+                { 
+                    id: 'pulsaFormat', 
+                    name: 'Format Pulsa', 
+                    pattern: 'PULSA{nomor}{provider}{nominal}', 
+                    description: 'Format untuk transaksi pulsa',
+                    example: 'Contoh: PULSA08123456789TELKOMSEL50000'
+                },
+                { 
+                    id: 'dataFormat', 
+                    name: 'Format Data', 
+                    pattern: 'DATA{nomor}{provider}{paket}', 
+                    description: 'Format untuk transaksi data',
+                    example: 'Contoh: DATA08123456789XL10GB'
+                },
+                { 
+                    id: 'ewalletFormat', 
+                    name: 'Format E-Wallet', 
+                    pattern: 'EWALLET{provider}{nomor}{nominal}', 
+                    description: 'Format untuk transaksi e-wallet',
+                    example: 'Contoh: EWALLETGOPAY08123456789100000'
+                }
+            ];
             
-            if (categoryFilter) {
-                filteredRegex = regexList.filter(regex => regex.category === categoryFilter);
+            filteredFormats = [...formatList];
+            renderFormats();
+        }
+        
+        // Filter regex
+        function filterRegex() {
+            const filterValue = document.getElementById('regexFilter').value.toLowerCase();
+            
+            if (filterValue) {
+                filteredRegex = regexList.filter(regex => 
+                    regex.name.toLowerCase().includes(filterValue) || 
+                    regex.description.toLowerCase().includes(filterValue)
+                );
             } else {
                 filteredRegex = [...regexList];
             }
@@ -967,12 +1151,28 @@
             renderRegex();
         }
         
+        // Filter formats
+        function filterFormats() {
+            const filterValue = document.getElementById('formatFilter').value.toLowerCase();
+            
+            if (filterValue) {
+                filteredFormats = formatList.filter(format => 
+                    format.name.toLowerCase().includes(filterValue) || 
+                    format.description.toLowerCase().includes(filterValue)
+                );
+            } else {
+                filteredFormats = [...formatList];
+            }
+            
+            renderFormats();
+        }
+        
         // Render regex to table
         function renderRegex() {
             const tableBody = document.getElementById('regexTableBody');
             
             if (filteredRegex.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">Tidak ada data regex</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">Tidak ada data regex</td></tr>';
                 return;
             }
             
@@ -981,16 +1181,48 @@
                 html += `
                     <tr>
                         <td>${regex.name}</td>
-                        <td><span class="regex-category category-${regex.category}">${regex.category}</span></td>
                         <td>
                             <div class="regex-pattern" title="${regex.pattern}">${regex.pattern}</div>
                         </td>
                         <td>${regex.description || '-'}</td>
                         <td class="action-buttons">
-                            <button class="btn btn-sm btn-edit" onclick="editRegex('${regex.category}', '${regex.id}')">
+                            <button class="btn btn-sm btn-edit" onclick="editRegex('${regex.id}')">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn btn-sm btn-delete" onclick="deleteRegex('${regex.category}', '${regex.id}', '${regex.name}')">
+                            <button class="btn btn-sm btn-delete" onclick="deleteRegex('${regex.id}', '${regex.name}')">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+        
+        // Render formats to table
+        function renderFormats() {
+            const tableBody = document.getElementById('formatTableBody');
+            
+            if (filteredFormats.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">Tidak ada data format</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            filteredFormats.forEach(format => {
+                html += `
+                    <tr>
+                        <td>${format.name}</td>
+                        <td>
+                            <div class="format-pattern" title="${format.pattern}">${format.pattern}</div>
+                        </td>
+                        <td>${format.description || '-'}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-edit" onclick="editFormat('${format.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-delete" onclick="deleteFormat('${format.id}', '${format.name}')">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
                         </td>
@@ -1003,11 +1235,9 @@
         
         // Open regex form modal
         function openRegexForm() {
-            document.getElementById('modalTitle').textContent = 'Tambah Regex';
+            document.getElementById('modalRegexTitle').textContent = 'Tambah Regex';
             document.getElementById('regexId').value = '';
-            document.getElementById('originalCategory').value = '';
-            document.getElementById('originalName').value = '';
-            document.getElementById('regexCategory').value = '';
+            document.getElementById('originalRegexName').value = '';
             document.getElementById('regexName').value = '';
             document.getElementById('regexPattern').value = '';
             document.getElementById('regexDescription').value = '';
@@ -1015,21 +1245,36 @@
             document.getElementById('regexModal').style.display = 'block';
         }
         
-        // Close modal
-        function closeModal() {
+        // Open format form modal
+        function openFormatForm() {
+            document.getElementById('modalFormatTitle').textContent = 'Tambah Format Kunci Transaksi';
+            document.getElementById('formatId').value = '';
+            document.getElementById('originalFormatName').value = '';
+            document.getElementById('formatName').value = '';
+            document.getElementById('formatPattern').value = '';
+            document.getElementById('formatDescription').value = '';
+            document.getElementById('formatExample').value = '';
+            document.getElementById('formatModal').style.display = 'block';
+        }
+        
+        // Close regex modal
+        function closeRegexModal() {
             document.getElementById('regexModal').style.display = 'none';
         }
         
+        // Close format modal
+        function closeFormatModal() {
+            document.getElementById('formatModal').style.display = 'none';
+        }
+        
         // Edit regex
-        function editRegex(category, id) {
-            const regex = regexList.find(r => r.category === category && r.id === id);
+        function editRegex(id) {
+            const regex = regexList.find(r => r.id === id);
             
             if (regex) {
-                document.getElementById('modalTitle').textContent = 'Edit Regex';
+                document.getElementById('modalRegexTitle').textContent = 'Edit Regex';
                 document.getElementById('regexId').value = regex.id;
-                document.getElementById('originalCategory').value = regex.category;
-                document.getElementById('originalName').value = regex.name;
-                document.getElementById('regexCategory').value = regex.category;
+                document.getElementById('originalRegexName').value = regex.name;
                 document.getElementById('regexName').value = regex.name;
                 document.getElementById('regexPattern').value = regex.pattern;
                 document.getElementById('regexDescription').value = regex.description || '';
@@ -1038,19 +1283,33 @@
             }
         }
         
+        // Edit format
+        function editFormat(id) {
+            const format = formatList.find(f => f.id === id);
+            
+            if (format) {
+                document.getElementById('modalFormatTitle').textContent = 'Edit Format Kunci Transaksi';
+                document.getElementById('formatId').value = format.id;
+                document.getElementById('originalFormatName').value = format.name;
+                document.getElementById('formatName').value = format.name;
+                document.getElementById('formatPattern').value = format.pattern;
+                document.getElementById('formatDescription').value = format.description || '';
+                document.getElementById('formatExample').value = format.example || '';
+                document.getElementById('formatModal').style.display = 'block';
+            }
+        }
+        
         // Save regex to Firebase or local storage
         function saveRegex() {
             const id = document.getElementById('regexId').value;
-            const originalCategory = document.getElementById('originalCategory').value;
-            const originalName = document.getElementById('originalName').value;
-            const category = document.getElementById('regexCategory').value;
+            const originalName = document.getElementById('originalRegexName').value;
             const name = document.getElementById('regexName').value;
             const pattern = document.getElementById('regexPattern').value;
             const description = document.getElementById('regexDescription').value;
             const example = document.getElementById('regexExample').value;
             
-            if (!category || !name || !pattern) {
-                showNotification('Kategori, nama, dan pattern harus diisi', 'error');
+            if (!name || !pattern) {
+                showNotification('Nama dan pattern harus diisi', 'error');
                 return;
             }
             
@@ -1061,20 +1320,20 @@
             };
             
             if (firebaseConnected) {
-                const regexRef = database.ref(`AsiaPayment/RegexExtractor/${category}/${name}`);
+                const regexRef = database.ref(`AsiaPayment/RegexExtractor/${name}`);
                 
                 if (id) {
                     // Update existing regex
-                    if (originalCategory !== category || originalName !== name) {
-                        // Category or name changed, delete old and create new
-                        const oldRef = database.ref(`AsiaPayment/RegexExtractor/${originalCategory}/${originalName}`);
+                    if (originalName !== name) {
+                        // Name changed, delete old and create new
+                        const oldRef = database.ref(`AsiaPayment/RegexExtractor/${originalName}`);
                         
                         oldRef.remove()
                             .then(() => {
                                 regexRef.set(regexData)
                                     .then(() => {
                                         showNotification('Regex berhasil diperbarui', 'success');
-                                        closeModal();
+                                        closeRegexModal();
                                     })
                                     .catch((error) => {
                                         showNotification('Gagal memperbarui regex: ' + error.message, 'error');
@@ -1088,7 +1347,7 @@
                         regexRef.update(regexData)
                             .then(() => {
                                 showNotification('Regex berhasil diperbarui', 'success');
-                                closeModal();
+                                closeRegexModal();
                             })
                             .catch((error) => {
                                 showNotification('Gagal memperbarui regex: ' + error.message, 'error');
@@ -1099,7 +1358,7 @@
                     regexRef.set(regexData)
                         .then(() => {
                             showNotification('Regex berhasil ditambahkan', 'success');
-                            closeModal();
+                            closeRegexModal();
                         })
                         .catch((error) => {
                             showNotification('Gagal menambahkan regex: ' + error.message, 'error');
@@ -1109,16 +1368,15 @@
                 // Save to local storage if Firebase is not connected
                 if (id) {
                     // Update existing regex
-                    const index = regexList.findIndex(r => r.category === originalCategory && r.id === id);
+                    const index = regexList.findIndex(r => r.id === id);
                     if (index !== -1) {
-                        if (originalCategory !== category || originalName !== name) {
+                        if (originalName !== name) {
                             // Remove old and add new
-                            regexList = regexList.filter(r => !(r.category === originalCategory && r.id === id));
+                            regexList = regexList.filter(r => r.id !== id);
                             
                             regexList.push({
                                 id: name,
                                 name: name,
-                                category: category,
                                 pattern: pattern,
                                 description: description,
                                 example: example
@@ -1137,7 +1395,6 @@
                     const newRegex = {
                         id: name,
                         name: name,
-                        category: category,
                         pattern: pattern,
                         description: description,
                         example: example
@@ -1149,15 +1406,126 @@
                 
                 filteredRegex = [...regexList];
                 renderRegex();
-                closeModal();
+                closeRegexModal();
+            }
+        }
+        
+        // Save format to Firebase or local storage
+        function saveFormat() {
+            const id = document.getElementById('formatId').value;
+            const originalName = document.getElementById('originalFormatName').value;
+            const name = document.getElementById('formatName').value;
+            const pattern = document.getElementById('formatPattern').value;
+            const description = document.getElementById('formatDescription').value;
+            const example = document.getElementById('formatExample').value;
+            
+            if (!name || !pattern) {
+                showNotification('Nama dan pattern harus diisi', 'error');
+                return;
+            }
+            
+            const formatData = {
+                pattern: pattern,
+                description: description || '',
+                example: example || ''
+            };
+            
+            if (firebaseConnected) {
+                const formatRef = database.ref(`AsiaPayment/FormatKunciTransaksi/${name}`);
+                
+                if (id) {
+                    // Update existing format
+                    if (originalName !== name) {
+                        // Name changed, delete old and create new
+                        const oldRef = database.ref(`AsiaPayment/FormatKunciTransaksi/${originalName}`);
+                        
+                        oldRef.remove()
+                            .then(() => {
+                                formatRef.set(formatData)
+                                    .then(() => {
+                                        showNotification('Format berhasil diperbarui', 'success');
+                                        closeFormatModal();
+                                    })
+                                    .catch((error) => {
+                                        showNotification('Gagal memperbarui format: ' + error.message, 'error');
+                                    });
+                            })
+                            .catch((error) => {
+                                showNotification('Gagal memperbarui format: ' + error.message, 'error');
+                            });
+                    } else {
+                        // Just update the existing format
+                        formatRef.update(formatData)
+                            .then(() => {
+                                showNotification('Format berhasil diperbarui', 'success');
+                                closeFormatModal();
+                            })
+                            .catch((error) => {
+                                showNotification('Gagal memperbarui format: ' + error.message, 'error');
+                            });
+                    }
+                } else {
+                    // Add new format
+                    formatRef.set(formatData)
+                        .then(() => {
+                            showNotification('Format berhasil ditambahkan', 'success');
+                            closeFormatModal();
+                        })
+                        .catch((error) => {
+                            showNotification('Gagal menambahkan format: ' + error.message, 'error');
+                        });
+                }
+            } else {
+                // Save to local storage if Firebase is not connected
+                if (id) {
+                    // Update existing format
+                    const index = formatList.findIndex(f => f.id === id);
+                    if (index !== -1) {
+                        if (originalName !== name) {
+                            // Remove old and add new
+                            formatList = formatList.filter(f => f.id !== id);
+                            
+                            formatList.push({
+                                id: name,
+                                name: name,
+                                pattern: pattern,
+                                description: description,
+                                example: example
+                            });
+                        } else {
+                            // Update in place
+                            formatList[index].pattern = pattern;
+                            formatList[index].description = description;
+                            formatList[index].example = example;
+                        }
+                        
+                        showNotification('Format berhasil diperbarui (data lokal)', 'success');
+                    }
+                } else {
+                    // Add new format
+                    const newFormat = {
+                        id: name,
+                        name: name,
+                        pattern: pattern,
+                        description: description,
+                        example: example
+                    };
+                    
+                    formatList.push(newFormat);
+                    showNotification('Format berhasil ditambahkan (data lokal)', 'success');
+                }
+                
+                filteredFormats = [...formatList];
+                renderFormats();
+                closeFormatModal();
             }
         }
         
         // Delete regex
-        function deleteRegex(category, id, name) {
+        function deleteRegex(id, name) {
             if (confirm(`Apakah Anda yakin ingin menghapus regex "${name}"?`)) {
                 if (firebaseConnected) {
-                    const regexRef = database.ref(`AsiaPayment/RegexExtractor/${category}/${id}`);
+                    const regexRef = database.ref(`AsiaPayment/RegexExtractor/${id}`);
                     
                     regexRef.remove()
                         .then(() => {
@@ -1168,10 +1536,33 @@
                         });
                 } else {
                     // Remove from local array
-                    regexList = regexList.filter(r => !(r.category === category && r.id === id));
+                    regexList = regexList.filter(r => r.id !== id);
                     filteredRegex = [...regexList];
                     renderRegex();
                     showNotification('Regex berhasil dihapus (data lokal)', 'success');
+                }
+            }
+        }
+        
+        // Delete format
+        function deleteFormat(id, name) {
+            if (confirm(`Apakah Anda yakin ingin menghapus format "${name}"?`)) {
+                if (firebaseConnected) {
+                    const formatRef = database.ref(`AsiaPayment/FormatKunciTransaksi/${id}`);
+                    
+                    formatRef.remove()
+                        .then(() => {
+                            showNotification('Format berhasil dihapus', 'success');
+                        })
+                        .catch((error) => {
+                            showNotification('Gagal menghapus format: ' + error.message, 'error');
+                        });
+                } else {
+                    // Remove from local array
+                    formatList = formatList.filter(f => f.id !== id);
+                    filteredFormats = [...formatList];
+                    renderFormats();
+                    showNotification('Format berhasil dihapus (data lokal)', 'success');
                 }
             }
         }
@@ -1188,11 +1579,16 @@
             }, 3000);
         }
         
-        // Close modal when clicking outside
+        // Close modals when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('regexModal');
-            if (event.target === modal) {
-                closeModal();
+            const regexModal = document.getElementById('regexModal');
+            const formatModal = document.getElementById('formatModal');
+            
+            if (event.target === regexModal) {
+                closeRegexModal();
+            }
+            if (event.target === formatModal) {
+                closeFormatModal();
             }
         };
         
