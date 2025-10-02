@@ -558,6 +558,57 @@
             border: 1px solid rgba(220, 53, 69, 0.2);
         }
         
+        /* Table Badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-primary {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .badge-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+        
+        /* Pesan Cell */
+        .pesan-cell {
+            max-width: 200px;
+        }
+        
+        .pesan-content {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: help;
+        }
+        
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 40px !important;
+            color: var(--gray);
+        }
+        
+        .loading .spinner {
+            margin: 0 auto 15px auto;
+        }
+        
         @media (max-width: 768px) {
             .logo h1 {
                 font-size: 20px;
@@ -774,6 +825,42 @@
                             </div>
                         </div>
                         
+                        <!-- Riwayat Transaksi -->
+                        <div class="section-title">
+                            <h2><i class="fas fa-list-alt"></i> Riwayat Transaksi</h2>
+                            <button class="btn btn-primary" onclick="refreshTransactions()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="table-container">
+                                <table id="transactionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>TRX ID</th>
+                                            <th>Client IP</th>
+                                            <th>Member ID</th>
+                                            <th>Transaction Header</th>
+                                            <th>Status</th>
+                                            <th>Price</th>
+                                            <th>Pesan</th>
+                                            <th>Remark</th>
+                                            <th>Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactionsBody">
+                                        <tr>
+                                            <td colspan="9" class="loading">
+                                                <div class="spinner"></div>
+                                                <span>Memuat data transaksi...</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
                         <!-- Recent Activity -->
                         <div class="section-title">
                             <h2><i class="fas fa-history"></i> Aktivitas Terbaru</h2>
@@ -897,17 +984,19 @@
         // Load dashboard data
         function loadDashboardData() {
             if (firebaseConnected) {
-                // Load data from Firebase
+                // Load data dari Firebase
                 loadDataFromFirebase();
+                loadTransactionsData();
             } else {
                 // Use sample data if Firebase is not connected
                 useSampleData();
+                useSampleTransactions();
             }
         }
         
-        // Load data from Firebase
+        // Load data dari Firebase untuk statistik
         function loadDataFromFirebase() {
-            // Show loading state
+            // Show loading state untuk statistik
             document.getElementById('totalTransactions').textContent = '...';
             document.getElementById('successTransactions').textContent = '...';
             document.getElementById('totalUsers').textContent = '...';
@@ -931,6 +1020,159 @@
                 
                 showNotification('Data dashboard berhasil dimuat', 'success');
             }, 1500);
+        }
+        
+        // Load data transaksi dari Firebase
+        async function loadTransactionsData() {
+            try {
+                showNotification('Memuat data transaksi...', 'info');
+                
+                const response = await fetch('https://steady-fin-368617-default-rtdb.firebaseio.com/AsiaPayment/Notification.json');
+                const data = await response.json();
+                
+                // Filter data - exclude ListDownline dan RiwayatNonTransaksi
+                const transactions = [];
+                
+                // Loop melalui semua key di level utama Notification
+                Object.keys(data).forEach(key => {
+                    // Skip ListDownline dan RiwayatNonTransaksi
+                    if (key === 'ListDownline' || key === 'RiwayatNonTransaksi') {
+                        return;
+                    }
+                    
+                    // Key lainnya dianggap sebagai kodereseller (OWNER, dll)
+                    const resellerData = data[key];
+                    
+                    // Loop melalui transaksi di setiap kodereseller
+                    Object.keys(resellerData).forEach(trxKey => {
+                        const transaction = resellerData[trxKey];
+                        
+                        // Pastikan ini adalah transaksi (ada trxid)
+                        if (transaction && transaction.trxid) {
+                            transactions.push({
+                                trxid: transaction.trxid,
+                                clientIp: transaction.clientIp || '',
+                                memberId: transaction.memberId || '',
+                                trxHeader: transaction.trxHeader || '',
+                                status_desc: transaction.status_desc || '',
+                                price: transaction.price || 0,
+                                pesan: transaction.pesan || '',
+                                remark: transaction.remarks || '',
+                                timestamp: transaction.timestamp || ''
+                            });
+                        }
+                    });
+                });
+                
+                // Urutkan berdasarkan timestamp descending (terbaru di atas)
+                transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                // Tampilkan di tabel
+                displayTransactions(transactions);
+                
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                showNotification('Gagal memuat data transaksi', 'error');
+                useSampleTransactions();
+            }
+        }
+        
+        // Display transactions in table
+        function displayTransactions(transactions) {
+            const tbody = document.getElementById('transactionsBody');
+            
+            if (transactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--gray);">
+                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                            <p>Belum ada data transaksi</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            transactions.forEach(transaction => {
+                // Format price to currency
+                const priceFormatted = transaction.price !== undefined ? 
+                    `Rp ${transaction.price.toLocaleString()}` : 'Rp 0';
+                
+                // Format status dengan badge
+                const statusClass = transaction.status_desc === 'Sukses' ? 'success' : 
+                                   transaction.status_desc === 'Gagal' ? 'danger' : 'warning';
+                
+                html += `
+                    <tr>
+                        <td><strong>${transaction.trxid}</strong></td>
+                        <td>${transaction.clientIp}</td>
+                        <td>
+                            <span class="badge badge-primary">${transaction.memberId}</span>
+                        </td>
+                        <td>
+                            <code>${transaction.trxHeader}</code>
+                        </td>
+                        <td>
+                            <span class="badge badge-${statusClass}">
+                                ${transaction.status_desc}
+                            </span>
+                        </td>
+                        <td><strong>${priceFormatted}</strong></td>
+                        <td class="pesan-cell">
+                            <div class="pesan-content" title="${transaction.pesan}">
+                                ${transaction.pesan.substring(0, 50)}${transaction.pesan.length > 50 ? '...' : ''}
+                            </div>
+                        </td>
+                        <td>${transaction.remark || '-'}</td>
+                        <td>
+                            <small>${formatTimestamp(transaction.timestamp)}</small>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '-';
+            
+            const date = new Date(timestamp);
+            return date.toLocaleString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Refresh transactions
+        function refreshTransactions() {
+            loadTransactionsData();
+        }
+        
+        // Sample data for transactions (fallback)
+        function useSampleTransactions() {
+            const sampleTransactions = [
+                {
+                    trxid: "651",
+                    clientIp: "91.99.163.28",
+                    memberId: "OWNER",
+                    trxHeader: "CEKDANA.082151861149",
+                    status_desc: "Sukses",
+                    price: 6,
+                    pesan: "#651## CEKDANA.082151861149 SUKSES. SN/Ref: WARXX YUSXX. Saldo 938,932-6=938,926 @01/10 16:47:07 R# #Transaksi lancar",
+                    remark: "",
+                    timestamp: "2025-10-01 16:47:08"
+                }
+            ];
+            
+            displayTransactions(sampleTransactions);
+            showNotification('Menggunakan data sample transaksi', 'info');
         }
         
         // Use sample data when Firebase is not available
