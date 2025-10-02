@@ -188,6 +188,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
         
         .content {
@@ -509,19 +510,18 @@
             border: 1px solid rgba(220, 53, 69, 0.2);
         }
         
-        /* Statistik Cards - STICKY BOTTOM */
+        /* Statistik Cards - STICKY BOTTOM YANG DIPERBAIKI */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-top: 20px;
-            flex-shrink: 0;
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid var(--border);
             position: sticky;
             bottom: 0;
-            background: white;
-            padding: 15px;
-            border-top: 1px solid var(--border);
             z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         }
         
         .stat-card {
@@ -577,6 +577,27 @@
             color: var(--danger);
         }
         
+        /* Layout baru untuk memastikan statistik tetap di bawah */
+        .dashboard-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .scrollable-content {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+        
+        .fixed-stats {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            z-index: 100;
+        }
+        
         @media (max-width: 768px) {
             .logo h1 {
                 font-size: 18px;
@@ -587,6 +608,10 @@
             }
             
             .content {
+                padding: 15px;
+            }
+            
+            .scrollable-content {
                 padding: 15px;
             }
             
@@ -601,6 +626,7 @@
             
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
+                padding: 15px;
             }
         }
         
@@ -629,6 +655,7 @@
             
             .stats-container {
                 grid-template-columns: 1fr;
+                padding: 10px;
             }
         }
     </style>
@@ -716,119 +743,123 @@
             </div>
             
             <div class="main-content">
-                <div class="content">
-                    <!-- Notification -->
-                    <div id="notification" class="notification"></div>
-                    
-                    <!-- Firebase Status -->
-                    <div id="firebaseStatus" class="firebase-status hidden">
-                        <i class="fas fa-circle"></i>
-                        <span id="firebaseStatusText">Status Firebase</span>
+                <div class="dashboard-content">
+                    <div class="scrollable-content">
+                        <!-- Notification -->
+                        <div id="notification" class="notification"></div>
+                        
+                        <!-- Firebase Status -->
+                        <div id="firebaseStatus" class="firebase-status hidden">
+                            <i class="fas fa-circle"></i>
+                            <span id="firebaseStatusText">Status Firebase</span>
+                        </div>
+                        
+                        <!-- Riwayat Transaksi -->
+                        <div class="section-title">
+                            <h2><i class="fas fa-list-alt"></i> Stream Transaksi</h2>
+                            <button class="btn btn-primary" onclick="refreshTransactions()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <!-- Search Box -->
+                            <div class="search-container">
+                                <input type="text" id="searchInput" class="search-box" placeholder="Cari TrxID / Kode / Tujuan / Status / SN / Pengirim...">
+                            </div>
+                            
+                            <div class="table-container">
+                                <table id="transactionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>TrxID
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Client IP
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Kode Reseller
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Kode & Tujuan
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Status
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Harga
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Pesan
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>SN
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Keterangan
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Waktu
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th>Pengirim
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactionsBody">
+                                        <tr>
+                                            <td colspan="11" class="loading">
+                                                <div class="spinner"></div>
+                                                <span>Memuat data transaksi...</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     
-                    <!-- Riwayat Transaksi -->
-                    <div class="section-title">
-                        <h2><i class="fas fa-list-alt"></i> Stream Transaksi</h2>
-                        <button class="btn btn-primary" onclick="refreshTransactions()">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                    </div>
-                    
-                    <div class="card">
-                        <!-- Search Box -->
-                        <div class="search-container">
-                            <input type="text" id="searchInput" class="search-box" placeholder="Cari TrxID / Kode / Tujuan / Status / SN / Pengirim...">
-                        </div>
-                        
-                        <div class="table-container">
-                            <table id="transactionsTable">
-                                <thead>
-                                    <tr>
-                                        <th>TrxID
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Client IP
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Kode Reseller
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Kode & Tujuan
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Status
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Harga
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Pesan
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>SN
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Keterangan
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Waktu
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Pengirim
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody id="transactionsBody">
-                                    <tr>
-                                        <td colspan="11" class="loading">
-                                            <div class="spinner"></div>
-                                            <span>Memuat data transaksi...</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Statistik Transaksi -->
-                    <div class="stats-container" id="statsContainer">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: rgba(0, 85, 255, 0.1); color: var(--primary);">
-                                <i class="fas fa-shopping-cart"></i>
+                    <!-- Statistik Transaksi - FIXED BOTTOM -->
+                    <div class="fixed-stats">
+                        <div class="stats-container" id="statsContainer">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background: rgba(0, 85, 255, 0.1); color: var(--primary);">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="stat-value" id="totalTransactions">0</div>
+                                <div class="stat-label">Total Transaksi</div>
                             </div>
-                            <div class="stat-value" id="totalTransactions">0</div>
-                            <div class="stat-label">Total Transaksi</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--success);">
-                                <i class="fas fa-check-circle"></i>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--success);">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-value" id="successTransactions">0</div>
+                                <div class="stat-label">Transaksi Sukses</div>
+                                <div class="stat-trend">
+                                    <span id="successAmount">Rp 0</span>
+                                </div>
                             </div>
-                            <div class="stat-value" id="successTransactions">0</div>
-                            <div class="stat-label">Transaksi Sukses</div>
-                            <div class="stat-trend">
-                                <span id="successAmount">Rp 0</span>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background: rgba(220, 53, 69, 0.1); color: var(--danger);">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div class="stat-value" id="failedTransactions">0</div>
+                                <div class="stat-label">Transaksi Gagal</div>
+                                <div class="stat-trend">
+                                    <span id="failedAmount">Rp 0</span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: rgba(220, 53, 69, 0.1); color: var(--danger);">
-                                <i class="fas fa-times-circle"></i>
+                            
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background: rgba(111, 66, 193, 0.1); color: #6f42c1;">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="stat-value" id="successRate">0%</div>
+                                <div class="stat-label">Success Rate</div>
                             </div>
-                            <div class="stat-value" id="failedTransactions">0</div>
-                            <div class="stat-label">Transaksi Gagal</div>
-                            <div class="stat-trend">
-                                <span id="failedAmount">Rp 0</span>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: rgba(111, 66, 193, 0.1); color: #6f42c1;">
-                                <i class="fas fa-percentage"></i>
-                            </div>
-                            <div class="stat-value" id="successRate">0%</div>
-                            <div class="stat-label">Success Rate</div>
                         </div>
                     </div>
                 </div>
