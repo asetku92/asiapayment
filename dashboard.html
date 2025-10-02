@@ -715,22 +715,22 @@
                             <table id="transactionsTable">
                                 <thead>
                                     <tr>
-                                        <th>TRX ID
+                                        <th>TrxID
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Client IP
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Member ID
+                                        <th>Kode Reseller
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Transaction Header
+                                        <th>Kode & Tujuan
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Status
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Price
+                                        <th>Harga
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Pesan
@@ -742,7 +742,7 @@
                                         <th>Keterangan
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Timestamp
+                                        <th>Waktu
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Pengirim
@@ -832,7 +832,7 @@
             firebase.initializeApp(firebaseConfig);
             database = firebase.database();
             firebaseConnected = true;
-            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
+            updateFirebaseStatus('Monitoring Transaksi Live', 'connected');
         } catch (error) {
             console.error('Firebase initialization error:', error);
             firebaseConnected = false;
