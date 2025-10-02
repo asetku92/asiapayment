@@ -3,163 +3,605 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Login - ASIA PAYMENT</title>
+  <title>Login - ASIA PAYMENT Console</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
   <style>
-    :root{
-      --primary:#0055ff;
-      --bg:#f5f7fb;
-      --card:#ffffff;
-      --danger:#dc3545;
-      --muted:#6c757d;
+    :root {
+      --primary: #0055ff;
+      --primary-dark: #0044cc;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --danger: #dc3545;
+      --success: #28a745;
+      --muted: #6c757d;
+      --border: #e3e6ea;
+      --shadow: rgba(0, 0, 0, 0.08);
     }
-    *{box-sizing:border-box;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif}
-    body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;height:100vh;padding:20px}
-    .card{width:100%;max-width:420px;background:var(--card);border-radius:12px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,0.08)}
-    h1{margin:0 0 6px;font-size:20px}
-    p.lead{margin:0 0 18px;color:var(--muted)}
-    .form-group{margin-bottom:14px}
-    label{display:block;margin-bottom:6px;font-weight:600;font-size:14px}
-    input[type="text"],input[type="password"]{
-      width:100%;padding:10px 12px;border:1px solid #e3e6ea;border-radius:8px;font-size:15px
+    
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
     }
-    .actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
-    button.btn{padding:10px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
-    button.btn-primary{background:var(--primary);color:white}
-    button.btn-ghost{background:transparent;border:1px solid #e3e6ea}
-    .note{margin-top:12px;font-size:13px;color:var(--muted)}
-    .error{color:var(--danger);font-size:13px;margin-top:8px;display:none}
-    .hint{margin-top:10px;font-size:13px;color:#333;background:#f1f5ff;padding:10px;border-radius:8px;border:1px solid rgba(0,85,255,0.08)}
-    .show-pass{cursor:pointer;margin-left:8px;color:var(--muted)}
-    .center{display:flex;gap:8px;align-items:center}
-    .logo{display:flex;gap:12px;align-items:center;margin-bottom:18px}
-    .logo img{height:44px;border-radius:8px}
-    footer{margin-top:18px;text-align:center;font-size:13px;color:var(--muted)}
-    @media (max-width:420px){.card{padding:20px}}
+    
+    body {
+      margin: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background-image: linear-gradient(135deg, #f5f7fb 0%, #e4edf5 100%);
+    }
+    
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 10px 30px var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    
+    p.lead {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+    }
+    
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background-color: #fafbfc;
+    }
+    
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+      background-color: #fff;
+    }
+    
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    button.btn {
+      padding: 14px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    button.btn-primary {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+    }
+    
+    button.btn-primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    button.btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    
+    button.btn-ghost:hover:not(:disabled) {
+      background: #f8f9fa;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .note {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+    
+    .error {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 12px;
+      display: none;
+      background: rgba(220, 53, 69, 0.05);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid var(--danger);
+    }
+    
+    .success {
+      color: var(--success);
+      font-size: 14px;
+      margin-top: 12px;
+      display: none;
+      background: rgba(40, 167, 69, 0.05);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid var(--success);
+    }
+    
+    .hint {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #333;
+      background: #f1f5ff;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 85, 255, 0.1);
+      line-height: 1.5;
+    }
+    
+    .show-pass {
+      cursor: pointer;
+      margin-left: 8px;
+      color: var(--muted);
+      transition: color 0.3s ease;
+    }
+    
+    .show-pass:hover {
+      color: var(--primary);
+    }
+    
+    .center {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .logo img {
+      height: 50px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo-text {
+      flex: 1;
+    }
+    
+    footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .loader {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 2px solid white;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .remember-me input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .remember-me label {
+      margin: 0;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .password-container input {
+      padding-right: 50px;
+    }
+    
+    .toggle-password {
+      position: absolute;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      .card {
+        padding: 24px;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+      
+      button.btn {
+        width: 100%;
+      }
+    }
+    
+    .firebase-info {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .firebase-info code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
   <div class="card" role="main">
     <div class="logo">
-      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="logo">
-      <div>
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="ASIA PAYMENT Logo">
+      <div class="logo-text">
         <h1>ASIA PAYMENT Console</h1>
-        <p class="lead">Silakan login untuk melanjutkan ke dashboard</p>
+        <p class="lead">Login untuk mengakses dashboard admin</p>
       </div>
     </div>
 
-    <form id="loginForm" autocomplete="off" aria-label="form login">
+    <form id="loginForm" autocomplete="off" aria-label="Form login admin">
       <div class="form-group">
-        <label for="username">Username</label>
-        <input id="username" type="text" value="admin" required />
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="masukkan email admin" required autocomplete="email" />
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input id="password" type="password" value="1234" required />
-          <span id="togglePass" class="show-pass" title="Tampilkan/ Sembunyikan password">
+        <div class="password-container">
+          <input id="password" type="password" placeholder="masukkan password" required autocomplete="current-password" />
+          <button type="button" id="togglePassword" class="toggle-password" aria-label="Tampilkan password">
             <i class="fas fa-eye"></i>
-          </span>
+          </button>
         </div>
       </div>
 
-      <div class="error" id="errorMsg">Username atau password salah.</div>
+      <div class="error" id="errorMsg">
+        <i class="fas fa-exclamation-circle"></i> <span id="errorText">Email atau password salah.</span>
+      </div>
+
+      <div class="success" id="successMsg">
+        <i class="fas fa-check-circle"></i> <span id="successText">Login berhasil!</span>
+      </div>
 
       <div class="actions">
-        <div style="display:flex;gap:8px;align-items:center">
+        <div class="remember-me">
           <input id="remember" type="checkbox" />
-          <label for="remember" style="font-size:13px;color:var(--muted);margin:0">Ingat saya</label>
+          <label for="remember">Ingat saya</label>
         </div>
 
-        <div style="display:flex;gap:8px">
-          <button type="button" class="btn btn-ghost" id="btnDemo">Isi Demo</button>
-          <button type="submit" class="btn btn-primary">Login</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button type="button" class="btn btn-ghost" id="btnDemo">
+            <i class="fas fa-magic"></i> Demo
+          </button>
+          <button type="submit" class="btn btn-primary" id="btnLogin">
+            <span id="loginText">Login</span>
+            <div class="loader" id="loginLoader"></div>
+          </button>
         </div>
       </div>
 
       <div class="hint">
-        Default credentials — <strong>username:</strong> <code>admin</code> &nbsp; <strong>password:</strong> <code>1234</code>
+        <strong>Email admin:</strong> <code>aspaypulsa@gmail.com</code><br>
+        <strong>Password:</strong> <code>123456</code>
+      </div>
+      
+      <div class="firebase-info">
+        <i class="fas fa-database"></i> Terhubung ke Firebase Project: <code>steady-fin-368617</code>
       </div>
 
       <footer>
-        <small>&copy; 2023 ASIA PAYMENT</small>
+        <small>&copy; 2023 ASIA PAYMENT - Admin Console</small>
       </footer>
     </form>
   </div>
 
   <script>
-    // Default credentials (sesuai permintaan)
-    const DEFAULT_USERNAME = 'admin';
-    const DEFAULT_PASSWORD = '1234';
+    // Konfigurasi Firebase - SESUAIKAN DENGAN PROJECT ANDA
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1d5p1Pq4cL9V7Y8q8Z5X7b6JkLmN0oPq", // Ganti dengan API key Anda
+      authDomain: "steady-fin-368617.firebaseapp.com",
+      databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+      projectId: "steady-fin-368617",
+      storageBucket: "steady-fin-368617.appspot.com",
+      messagingSenderId: "123456789", // Ganti dengan sender ID Anda
+      appId: "1:123456789:web:abcdef123456" // Ganti dengan app ID Anda
+    };
 
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Referensi elemen DOM
     const loginForm = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const errorMsg = document.getElementById('errorMsg');
-    const togglePass = document.getElementById('togglePass');
+    const errorText = document.getElementById('errorText');
+    const successMsg = document.getElementById('successMsg');
+    const successText = document.getElementById('successText');
+    const togglePassword = document.getElementById('togglePassword');
     const btnDemo = document.getElementById('btnDemo');
+    const btnLogin = document.getElementById('btnLogin');
+    const loginText = document.getElementById('loginText');
+    const loginLoader = document.getElementById('loginLoader');
+    const rememberCheckbox = document.getElementById('remember');
 
-    // Jika sudah login, langsung redirect ke dashboard
-    (function checkAlreadyLoggedIn(){
-      try {
-        const logged = localStorage.getItem('adminUser');
-        if (logged) {
-          // Pastikan file dashboard.html ada di lokasi yang sama
+    // Kredensial demo
+    const DEMO_EMAIL = 'aspaypulsa@gmail.com';
+    const DEMO_PASSWORD = '123456';
+
+    // Cek status login saat halaman dimuat
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User sudah login, redirect ke dashboard
+        console.log('User sudah login:', user.email);
+        showSuccess('Login valid, mengarahkan ke dashboard...');
+        setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }
-      } catch(e) {
-        console.warn('LocalStorage tidak tersedia:', e);
+        }, 1000);
       }
-    })();
+    });
 
     // Toggle show/hide password
-    togglePass.addEventListener('click', () => {
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        togglePass.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      
+      // Ganti ikon
+      const icon = togglePassword.querySelector('i');
+      if (type === 'text') {
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        togglePassword.setAttribute('aria-label', 'Sembunyikan password');
       } else {
-        passwordInput.type = 'password';
-        togglePass.innerHTML = '<i class="fas fa-eye"></i>';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        togglePassword.setAttribute('aria-label', 'Tampilkan password');
       }
     });
 
-    // Tombol demo untuk cepat mengisi form
+    // Tombol demo untuk mengisi form dengan cepat
     btnDemo.addEventListener('click', () => {
-      usernameInput.value = DEFAULT_USERNAME;
-      passwordInput.value = DEFAULT_PASSWORD;
-      errorMsg.style.display = 'none';
+      emailInput.value = DEMO_EMAIL;
+      passwordInput.value = DEMO_PASSWORD;
+      hideMessages();
     });
 
-    // Fungsi login
-    loginForm.addEventListener('submit', function(e){
-      e.preventDefault();
+    // Fungsi untuk menyembunyikan pesan error/success
+    function hideMessages() {
       errorMsg.style.display = 'none';
+      successMsg.style.display = 'none';
+    }
 
-      const username = (usernameInput.value || '').trim();
+    // Fungsi untuk menampilkan pesan error
+    function showError(message) {
+      errorText.textContent = message;
+      errorMsg.style.display = 'block';
+      successMsg.style.display = 'none';
+    }
+
+    // Fungsi untuk menampilkan pesan success
+    function showSuccess(message) {
+      successText.textContent = message;
+      successMsg.style.display = 'block';
+      errorMsg.style.display = 'none';
+    }
+
+    // Fungsi untuk menampilkan/menyembunyikan loading
+    function setLoading(isLoading) {
+      if (isLoading) {
+        btnLogin.disabled = true;
+        loginText.style.display = 'none';
+        loginLoader.style.display = 'block';
+      } else {
+        btnLogin.disabled = false;
+        loginText.style.display = 'block';
+        loginLoader.style.display = 'none';
+      }
+    }
+
+    // Fungsi login dengan Firebase Authentication
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      hideMessages();
+      setLoading(true);
+      
+      const email = (emailInput.value || '').trim();
       const password = (passwordInput.value || '').trim();
 
-      // Cek kredensial
-      if (username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD) {
-        // Simpan ke localStorage sebagai objek adminUser
-        const adminUser = {
-          username: username,
-          loginAt: new Date().toISOString()
-        };
-
-        try {
-          localStorage.setItem('adminUser', JSON.stringify(adminUser));
-        } catch (err) {
-          console.warn('Gagal menyimpan ke localStorage:', err);
-        }
-
-        // Redirect ke dashboard
-        window.location.href = 'dashboard.html';
-      } else {
-        // Tampilkan pesan error
-        errorMsg.textContent = 'Username atau password salah.';
-        errorMsg.style.display = 'block';
+      // Validasi input
+      if (!email || !password) {
+        showError('Email dan password harus diisi');
+        setLoading(false);
+        return;
       }
+
+      try {
+        // Login dengan Firebase Auth
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Cek apakah email sudah terverifikasi
+        if (!user.emailVerified) {
+          showError('Email belum diverifikasi. Silakan verifikasi email Anda terlebih dahulu.');
+          await auth.signOut();
+          setLoading(false);
+          return;
+        }
+        
+        // Simpan informasi user di localStorage untuk penggunaan di halaman lain
+        localStorage.setItem('firebaseUser', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          emailVerified: user.emailVerified,
+          loginAt: new Date().toISOString()
+        }));
+
+        // Simpan preferensi "Ingat Saya"
+        if (rememberCheckbox.checked) {
+          localStorage.setItem('rememberLogin', 'true');
+        } else {
+          localStorage.removeItem('rememberLogin');
+        }
+        
+        // Tampilkan pesan sukses dan redirect
+        showSuccess('Login berhasil! Mengarahkan ke dashboard...');
+        
+        // Redirect ke dashboard setelah 1.5 detik
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1500);
+        
+      } catch (error) {
+        // Tangani error login
+        setLoading(false);
+        
+        let errorMessage = 'Terjadi kesalahan saat login';
+        
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = 'Email tidak terdaftar.';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = 'Password salah.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Format email tidak valid.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Terlalu banyak percobaan login. Coba lagi nanti.';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = 'Koneksi internet bermasalah. Periksa koneksi Anda.';
+            break;
+          default:
+            errorMessage = `Error: ${error.message}`;
+        }
+        
+        showError(errorMessage);
+      }
+    });
+
+    // Cek apakah ada preferensi "Ingat Saya"
+    window.addEventListener('DOMContentLoaded', () => {
+      const rememberLogin = localStorage.getItem('rememberLogin');
+      if (rememberLogin === 'true') {
+        rememberCheckbox.checked = true;
+        
+        // Cek apakah user sudah login
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          showSuccess('Login valid, mengarahkan ke dashboard...');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        }
+      }
+    });
+
+    // Tambahkan efek interaktif pada input
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+      
+      input.addEventListener('blur', function() {
+        if (!this.value) {
+          this.parentElement.classList.remove('focused');
+        }
+      });
     });
   </script>
 </body>
