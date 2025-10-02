@@ -733,43 +733,45 @@
     </div>
 
     <script>
-        // Firebase configuration - SAMA DENGAN login.html
-        const firebaseConfig = {
-            apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
-            authDomain: "steady-fin-368617.firebaseapp.com",
-            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
-            projectId: "steady-fin-368617",
-            storageBucket: "steady-fin-368617.firebasestorage.app",
-            messagingSenderId: "626971902484",
-            appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
-            measurementId: "G-70D3LR995Y"
-        };
+    // Firebase configuration - HARUS SAMA dengan login.html
+    const firebaseConfig = {
+        apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
+        authDomain: "steady-fin-368617.firebaseapp.com",
+        databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+        projectId: "steady-fin-368617",
+        storageBucket: "steady-fin-368617.firebasestorage.app",
+        messagingSenderId: "626971902484",
+        appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
+        measurementId: "G-70D3LR995Y"
+    };
 
-        // Initialize Firebase
-        let auth, database;
-        let firebaseConnected = false;
+    // Initialize Firebase
+    let auth, database;
+    let firebaseConnected = false;
+    
+    try {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        database = firebase.database();
+        firebaseConnected = true;
+        updateFirebaseStatus('Terhubung ke Firebase', 'connected');
+        console.log('Firebase initialized successfully');
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        firebaseConnected = false;
+        updateFirebaseStatus('Tidak terhubung ke Firebase - Menggunakan data simulasi', 'disconnected');
+    }
+    
+    // Global variables
+    let currentUser = null;
+    let categories = [];
+    
+    // Update Firebase status
+    function updateFirebaseStatus(message, status) {
+        const statusElement = document.getElementById('firebaseStatus');
+        const statusText = document.getElementById('firebaseStatusText');
         
-        try {
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            database = firebase.database();
-            firebaseConnected = true;
-            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
-        } catch (error) {
-            console.error('Firebase initialization error:', error);
-            firebaseConnected = false;
-            updateFirebaseStatus('Tidak terhubung ke Firebase - Menggunakan data simulasi', 'disconnected');
-        }
-        
-        // Global variables
-        let currentUser = null;
-        let categories = [];
-        
-        // Update Firebase status
-        function updateFirebaseStatus(message, status) {
-            const statusElement = document.getElementById('firebaseStatus');
-            const statusText = document.getElementById('firebaseStatusText');
-            
+        if (statusElement && statusText) {
             statusElement.classList.remove('hidden');
             statusElement.classList.remove('connected');
             statusElement.classList.remove('disconnected');
@@ -777,330 +779,304 @@
             statusElement.classList.add(status);
             statusText.textContent = message;
         }
+    }
+    
+    // Initialize the application
+    function initApp() {
+        console.log('Initializing app...');
         
-        // Initialize the application
-        function initApp() {
-            // Check authentication state
-            if (auth) {
-                auth.onAuthStateChanged((user) => {
-                    if (user) {
-                        // User is signed in
-                        currentUser = user;
+        // Check authentication state using Firebase Auth
+        if (auth) {
+            auth.onAuthStateChanged((user) => {
+                console.log('Auth state changed:', user);
+                
+                if (user) {
+                    // User is signed in
+                    currentUser = user;
+                    if (document.getElementById('userEmail')) {
                         document.getElementById('userEmail').textContent = user.email;
-                        
-                        // Show app section, hide login required
+                    }
+                    
+                    // Show app section, hide login required
+                    if (document.getElementById('appSection')) {
                         document.getElementById('appSection').classList.remove('hidden');
+                    }
+                    if (document.getElementById('loginRequired')) {
                         document.getElementById('loginRequired').classList.add('hidden');
-                        
-                        // Load categories
-                        loadCategories();
-                    } else {
-                        // User is signed out
+                    }
+                    
+                    // Load categories
+                    loadCategories();
+                } else {
+                    // User is signed out
+                    console.log('No user signed in');
+                    if (document.getElementById('appSection')) {
                         document.getElementById('appSection').classList.add('hidden');
+                    }
+                    if (document.getElementById('loginRequired')) {
                         document.getElementById('loginRequired').classList.remove('hidden');
                     }
-                }, (error) => {
-                    console.error('Auth state change error:', error);
-                    showNotification('Error memeriksa status login', 'error');
-                });
-            } else {
-                // Firebase not connected
-                showNotification('Firebase tidak terhubung', 'error');
-            }
-            
-            // Setup event listeners
-            setupEventListeners();
+                }
+            }, (error) => {
+                console.error('Auth state change error:', error);
+                showNotification('Error memeriksa status login', 'error');
+            });
+        } else {
+            // Firebase not connected
+            console.error('Firebase auth not available');
+            showNotification('Firebase tidak terhubung', 'error');
         }
         
         // Setup event listeners
-        function setupEventListeners() {
-            // Form submission
-            document.getElementById('categoryForm').addEventListener('submit', function(e) {
+        setupEventListeners();
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+        // Form submission
+        const categoryForm = document.getElementById('categoryForm');
+        if (categoryForm) {
+            categoryForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveCategory();
             });
         }
-        
-        // Redirect to login page
-        function redirectToLogin() {
+    }
+    
+    // Redirect to login page
+    function redirectToLogin() {
+        window.location.href = 'login.html';
+    }
+    
+    // Logout function
+    function logout() {
+        if (auth) {
+            auth.signOut().then(() => {
+                showNotification('Logout berhasil', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }).catch((error) => {
+                console.error('Logout error:', error);
+                showNotification('Error saat logout', 'error');
+            });
+        } else {
             window.location.href = 'login.html';
         }
+    }
+    
+    // Load categories from Firebase
+    function loadCategories() {
+        const tableBody = document.getElementById('categoriesTableBody');
+        if (!tableBody) return;
         
-        // Logout function
-        function logout() {
-            if (auth) {
-                auth.signOut().then(() => {
-                    showNotification('Logout berhasil', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1000);
-                }).catch((error) => {
-                    console.error('Logout error:', error);
-                    showNotification('Error saat logout', 'error');
-                });
-            } else {
-                window.location.href = 'login.html';
-            }
-        }
+        tableBody.innerHTML = '<tr><td colspan="4" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
         
-        // Load categories from Firebase or use sample data
-        function loadCategories() {
-            const tableBody = document.getElementById('categoriesTableBody');
-            tableBody.innerHTML = '<tr><td colspan="4" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
+        if (firebaseConnected && currentUser) {
+            // Reference to categories in Firebase
+            const categoriesRef = database.ref('AsiaPayment/MenuDinamis/category');
             
-            if (firebaseConnected && currentUser) {
-                // Reference to categories in Firebase with the correct path
-                const categoriesRef = database.ref('AsiaPayment/MenuDinamis/category');
+            categoriesRef.on('value', (snapshot) => {
+                categories = [];
+                const data = snapshot.val();
                 
-                categoriesRef.on('value', (snapshot) => {
-                    categories = [];
-                    const data = snapshot.val();
-                    
-                    if (data) {
-                        // Convert object to array
-                        Object.keys(data).forEach(key => {
-                            categories.push({
-                                id: key,
-                                name: key,
-                                ...data[key]
-                            });
+                if (data) {
+                    // Convert object to array
+                    Object.keys(data).forEach(key => {
+                        categories.push({
+                            id: key,
+                            name: key,
+                            ...data[key]
                         });
-                        
-                        // Sort by order
-                        categories.sort((a, b) => a.Urutan - b.Urutan);
-                        
-                        renderCategories();
-                    } else {
-                        // If no data in Firebase, use sample data
-                        useSampleData();
-                    }
-                }, (error) => {
-                    console.error('Firebase error:', error);
-                    updateFirebaseStatus('Error menghubungi Firebase - Menggunakan data simulasi', 'disconnected');
-                    useSampleData();
-                });
-            } else {
-                // Use sample data if Firebase is not connected
-                useSampleData();
-            }
-        }
-        
-        // Use sample data when Firebase is not available
-        function useSampleData() {
-            categories = [
-                { id: 'Pulsa', name: 'Pulsa', Urutan: 1, Icon: 'fa-mobile-alt' },
-                { id: 'Data', name: 'Data', Urutan: 2, Icon: 'fa-wifi' },
-                { id: 'E-Wallet', name: 'E-Wallet', Urutan: 3, Icon: 'fa-wallet' },
-                { id: 'PLN', name: 'PLN', Urutan: 4, Icon: 'fa-bolt' },
-                { id: 'Game', name: 'Game', Urutan: 5, Icon: 'fa-gamepad' }
-            ];
-            
-            renderCategories();
-            showNotification('Menggunakan data simulasi karena tidak dapat terhubung ke Firebase', 'info');
-        }
-        
-        // Render categories to table
-        function renderCategories() {
-            const tableBody = document.getElementById('categoriesTableBody');
-            
-            if (categories.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">Tidak ada data kategori</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            categories.forEach(category => {
-                html += `
-                    <tr>
-                        <td>${category.name}</td>
-                        <td>${category.Urutan}</td>
-                        <td><i class="fas ${category.Icon}"></i> ${category.Icon}</td>
-                        <td class="action-buttons">
-                            <button class="btn btn-sm btn-edit" onclick="editCategory('${category.id}')">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-sm btn-delete" onclick="deleteCategory('${category.id}', '${category.name}')">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
-                        </td>
-                    </tr>
-                `;
+                    });
+                    
+                    // Sort by order
+                    categories.sort((a, b) => a.Urutan - b.Urutan);
+                    
+                    renderCategories();
+                } else {
+                    // If no data in Firebase
+                    renderCategories();
+                }
+            }, (error) => {
+                console.error('Firebase error:', error);
+                updateFirebaseStatus('Error menghubungi Firebase', 'disconnected');
+                renderCategories();
             });
-            
-            tableBody.innerHTML = html;
+        } else {
+            // Firebase not connected
+            renderCategories();
+        }
+    }
+    
+    // Render categories to table
+    function renderCategories() {
+        const tableBody = document.getElementById('categoriesTableBody');
+        if (!tableBody) return;
+        
+        if (categories.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">Tidak ada data kategori</td></tr>';
+            return;
         }
         
-        // Open category form modal
-        function openCategoryForm() {
-            document.getElementById('modalTitle').textContent = 'Tambah Kategori';
-            document.getElementById('categoryId').value = '';
-            document.getElementById('categoryName').value = '';
-            document.getElementById('categoryOrder').value = '';
-            document.getElementById('categoryIcon').value = '';
+        let html = '';
+        categories.forEach(category => {
+            html += `
+                <tr>
+                    <td>${category.name}</td>
+                    <td>${category.Urutan}</td>
+                    <td><i class="fas ${category.Icon}"></i> ${category.Icon}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-edit" onclick="editCategory('${category.id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-delete" onclick="deleteCategory('${category.id}', '${category.name}')">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tableBody.innerHTML = html;
+    }
+    
+    // Open category form modal
+    function openCategoryForm() {
+        document.getElementById('modalTitle').textContent = 'Tambah Kategori';
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categoryOrder').value = '';
+        document.getElementById('categoryIcon').value = '';
+        document.getElementById('categoryModal').style.display = 'block';
+    }
+    
+    // Close modal
+    function closeModal() {
+        document.getElementById('categoryModal').style.display = 'none';
+    }
+    
+    // Edit category
+    function editCategory(id) {
+        const category = categories.find(cat => cat.id === id);
+        
+        if (category) {
+            document.getElementById('modalTitle').textContent = 'Edit Kategori';
+            document.getElementById('categoryId').value = category.id;
+            document.getElementById('categoryName').value = category.name;
+            document.getElementById('categoryOrder').value = category.Urutan;
+            document.getElementById('categoryIcon').value = category.Icon;
             document.getElementById('categoryModal').style.display = 'block';
         }
+    }
+    
+    // Save category to Firebase
+    function saveCategory() {
+        const id = document.getElementById('categoryId').value;
+        const name = document.getElementById('categoryName').value;
+        const order = document.getElementById('categoryOrder').value;
+        const icon = document.getElementById('categoryIcon').value;
         
-        // Close modal
-        function closeModal() {
-            document.getElementById('categoryModal').style.display = 'none';
+        if (!name || !order || !icon) {
+            showNotification('Nama, urutan, dan icon harus diisi', 'error');
+            return;
         }
         
-        // Edit category
-        function editCategory(id) {
-            const category = categories.find(cat => cat.id === id);
-            
-            if (category) {
-                document.getElementById('modalTitle').textContent = 'Edit Kategori';
-                document.getElementById('categoryId').value = category.id;
-                document.getElementById('categoryName').value = category.name;
-                document.getElementById('categoryOrder').value = category.Urutan;
-                document.getElementById('categoryIcon').value = category.Icon;
-                document.getElementById('categoryModal').style.display = 'block';
-            }
-        }
+        const categoryKey = name;
+        const categoryData = {
+            Urutan: parseInt(order),
+            Icon: icon
+        };
         
-        // Save category to Firebase or local storage
-        function saveCategory() {
-            const id = document.getElementById('categoryId').value;
-            const name = document.getElementById('categoryName').value;
-            const order = document.getElementById('categoryOrder').value;
-            const icon = document.getElementById('categoryIcon').value;
+        if (firebaseConnected && currentUser) {
+            const categoriesRef = database.ref('AsiaPayment/MenuDinamis/category');
             
-            if (!name || !order || !icon) {
-                showNotification('Nama, urutan, dan icon harus diisi', 'error');
-                return;
-            }
-            
-            // Use category name as the key in Firebase
-            const categoryKey = name;
-            
-            const categoryData = {
-                Urutan: parseInt(order),
-                Icon: icon
-            };
-            
-            if (firebaseConnected && currentUser) {
-                // Reference to categories in Firebase with the correct path
-                const categoriesRef = database.ref('AsiaPayment/MenuDinamis/category');
-                
-                if (id) {
-                    // Update existing category - if name changed, we need to delete old and create new
-                    if (id !== categoryKey) {
-                        // Name changed, so we need to delete the old entry and create a new one
-                        categoriesRef.child(id).remove()
-                            .then(() => {
-                                categoriesRef.child(categoryKey).set(categoryData)
-                                    .then(() => {
-                                        showNotification('Kategori berhasil diperbarui', 'success');
-                                        closeModal();
-                                    })
-                                    .catch((error) => {
-                                        showNotification('Gagal memperbarui kategori: ' + error.message, 'error');
-                                    });
-                            })
-                            .catch((error) => {
-                                showNotification('Gagal memperbarui kategori: ' + error.message, 'error');
-                            });
-                    } else {
-                        // Just update the existing category
-                        categoriesRef.child(categoryKey).update(categoryData)
-                            .then(() => {
-                                showNotification('Kategori berhasil diperbarui', 'success');
-                                closeModal();
-                            })
-                            .catch((error) => {
-                                showNotification('Gagal memperbarui kategori: ' + error.message, 'error');
-                            });
-                    }
-                } else {
-                    // Add new category
-                    categoriesRef.child(categoryKey).set(categoryData)
+            if (id) {
+                if (id !== categoryKey) {
+                    categoriesRef.child(id).remove()
                         .then(() => {
-                            showNotification('Kategori berhasil ditambahkan', 'success');
+                            categoriesRef.child(categoryKey).set(categoryData)
+                                .then(() => {
+                                    showNotification('Kategori berhasil diperbarui', 'success');
+                                    closeModal();
+                                })
+                                .catch((error) => {
+                                    showNotification('Gagal memperbarui kategori: ' + error.message, 'error');
+                                });
+                        })
+                        .catch((error) => {
+                            showNotification('Gagal memperbarui kategori: ' + error.message, 'error');
+                        });
+                } else {
+                    categoriesRef.child(categoryKey).update(categoryData)
+                        .then(() => {
+                            showNotification('Kategori berhasil diperbarui', 'success');
                             closeModal();
                         })
                         .catch((error) => {
-                            showNotification('Gagal menambahkan kategori: ' + error.message, 'error');
+                            showNotification('Gagal memperbarui kategori: ' + error.message, 'error');
                         });
                 }
             } else {
-                // Save to local storage if Firebase is not connected
-                if (id) {
-                    // Update existing category
-                    const index = categories.findIndex(cat => cat.id === id);
-                    if (index !== -1) {
-                        // If name changed, update the id as well
-                        if (id !== categoryKey) {
-                            categories[index].id = categoryKey;
-                            categories[index].name = categoryKey;
-                        }
-                        categories[index].Urutan = parseInt(order);
-                        categories[index].Icon = icon;
-                        showNotification('Kategori berhasil diperbarui (data lokal)', 'success');
-                    }
-                } else {
-                    // Add new category
-                    const newCategory = {
-                        id: categoryKey,
-                        name: categoryKey,
-                        Urutan: parseInt(order),
-                        Icon: icon
-                    };
-                    
-                    categories.push(newCategory);
-                    showNotification('Kategori berhasil ditambahkan (data lokal)', 'success');
-                }
+                categoriesRef.child(categoryKey).set(categoryData)
+                    .then(() => {
+                        showNotification('Kategori berhasil ditambahkan', 'success');
+                        closeModal();
+                    })
+                    .catch((error) => {
+                        showNotification('Gagal menambahkan kategori: ' + error.message, 'error');
+                    });
+            }
+        } else {
+            showNotification('Tidak terhubung ke Firebase', 'error');
+        }
+    }
+    
+    // Delete category
+    function deleteCategory(id, name) {
+        if (confirm(`Apakah Anda yakin ingin menghapus kategori "${name}"?`)) {
+            if (firebaseConnected && currentUser) {
+                const categoryRef = database.ref('AsiaPayment/MenuDinamis/category').child(id);
                 
-                renderCategories();
-                closeModal();
+                categoryRef.remove()
+                    .then(() => {
+                        showNotification('Kategori berhasil dihapus', 'success');
+                    })
+                    .catch((error) => {
+                        showNotification('Gagal menghapus kategori: ' + error.message, 'error');
+                    });
+            } else {
+                showNotification('Tidak terhubung ke Firebase', 'error');
             }
         }
-        
-        // Delete category
-        function deleteCategory(id, name) {
-            if (confirm(`Apakah Anda yakin ingin menghapus kategori "${name}"?`)) {
-                if (firebaseConnected && currentUser) {
-                    // Reference to the category in Firebase with the correct path
-                    const categoryRef = database.ref('AsiaPayment/MenuDinamis/category').child(id);
-                    
-                    categoryRef.remove()
-                        .then(() => {
-                            showNotification('Kategori berhasil dihapus', 'success');
-                        })
-                        .catch((error) => {
-                            showNotification('Gagal menghapus kategori: ' + error.message, 'error');
-                        });
-                } else {
-                    // Remove from local array
-                    categories = categories.filter(cat => cat.id !== id);
-                    renderCategories();
-                    showNotification('Kategori berhasil dihapus (data lokal)', 'success');
-                }
-            }
-        }
-        
-        // Show notification
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
+    }
+    
+    // Show notification
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        if (notification) {
             notification.textContent = message;
             notification.className = `notification ${type}`;
             
-            // Auto hide after 3 seconds
             setTimeout(() => {
                 notification.className = 'notification';
             }, 3000);
         }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('categoryModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-        
-        // Initialize the app when the page loads
-        window.onload = initApp;
-    </script>
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('categoryModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+    
+    // Initialize the app when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing app...');
+        initApp();
+    });
+</script>
 </body>
 </html>
