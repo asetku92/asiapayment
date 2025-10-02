@@ -383,16 +383,49 @@
             color: var(--warning);
         }
         
-        /* Pesan Cell */
+        /* Pesan Cell - DIPERBAIKI */
         .pesan-cell {
-            max-width: 200px;
+            max-width: 300px;
+            position: relative;
         }
         
         .pesan-content {
-            white-space: nowrap;
+            white-space: normal;
             overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: help;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.4;
+            max-height: 2.8em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pesan-content.expanded {
+            white-space: normal;
+            -webkit-line-clamp: unset;
+            max-height: none;
+            overflow: visible;
+        }
+        
+        .pesan-content:hover {
+            color: var(--primary);
+        }
+        
+        .expand-icon {
+            position: absolute;
+            right: 5px;
+            bottom: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 3px;
+            padding: 2px 5px;
+            font-size: 10px;
+            color: var(--primary);
+            display: none;
+        }
+        
+        .pesan-cell:hover .expand-icon {
+            display: inline;
         }
         
         /* Loading state */
@@ -983,9 +1016,12 @@
                         </td>
                         <td><strong>${priceFormatted}</strong></td>
                         <td class="pesan-cell">
-                            <div class="pesan-content" title="${transaction.pesan}">
-                                ${transaction.pesan.substring(0, 50)}${transaction.pesan.length > 50 ? '...' : ''}
+                            <div class="pesan-content" onclick="togglePesan(this)">
+                                ${transaction.pesan}
                             </div>
+                            <span class="expand-icon" onclick="togglePesan(this.parentNode.querySelector('.pesan-content'))">
+                                <i class="fas fa-expand-alt"></i>
+                            </span>
                         </td>
                         <td>
                             <span class="badge badge-primary">${transaction.sn || '-'}</span>
@@ -1002,6 +1038,17 @@
             });
             
             tbody.innerHTML = html;
+        }
+        
+        // Toggle tampilan pesan (expand/collapse)
+        function togglePesan(element) {
+            element.classList.toggle('expanded');
+            const icon = element.parentNode.querySelector('.expand-icon i');
+            if (element.classList.contains('expanded')) {
+                icon.className = 'fas fa-compress-alt';
+            } else {
+                icon.className = 'fas fa-expand-alt';
+            }
         }
         
         // Update statistics based on transactions
