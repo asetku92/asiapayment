@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RegexExtractor - ASIA PAYMENT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #0055ff;
+            --secondary: #00aaff;
+            --accent: #ff5500;
+            --light: #ffffff;
+            --dark: #212121;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border: #dee2e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(30deg);
+            animation: shine 4s infinite linear;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo img {
+            height: 50px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .auth-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .auth-info button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .auth-info button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 700px;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--light-gray);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: var(--dark);
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+            color: var(--gray);
+        }
+        
+        .nav-item:hover {
+            background: rgba(0, 85, 255, 0.05);
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .nav-item.active i {
+            color: var(--primary);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 30px;
+            background: white;
+            overflow-y: auto;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section-title h2 {
+            font-size: 22px;
+            color: var(--dark);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0044cc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #bd2130;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th {
+            background: var(--light-gray);
+            text-align: left;
+            padding: 15px;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: rgba(0, 85, 255, 0.03);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        
+        .btn-edit {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .btn-edit:hover {
+            background: rgba(0, 85, 255, 0.2);
+        }
+        
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        .btn-delete:hover {
+            background: rgba(220, 53, 69, 0.2);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--gray);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            background: var(--light-gray);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 85, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 800px;
+            animation: modalopen 0.3s;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+        
+        .close {
+            color: var(--gray);
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .notification.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            display: block;
+        }
+        
+        .notification.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            display: block;
+        }
+        
+        .notification.info {
+            background: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.2);
+            display: block;
+        }
+        
+        .firebase-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .firebase-status.connected {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .firebase-status.disconnected {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            min-width: 200px;
+        }
+        
+        .regex-category {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .category-FormatKunciTransaksi {
+            background: rgba(0, 85, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .category-Other {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+        
+        .regex-pattern {
+            font-family: monospace;
+            background: var(--light-gray);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .regex-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            header {
+                padding: 15px 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="appSection">
+            <header>
+                <div class="logo">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoChegZIJ3ZMDbPsF24DjVP68tqUjY-kl2-y_TWpfJuJLt1XHPqKEfQI_oL9-cC8iA8GaALbOP7VsgmqDWsPUaTfHSHxp6e_LOGIMy3op4C8m-12nLPXgbYGIxKeKHPb4lnKzztycM5GNBK6QwYvW0omPYX9fduw8c9K6BGj_dAv9-4acxnU1ZF6en4oA/s512/logo_asia_payment.jpg" alt="Logo">
+                    <h1>ASIA PAYMENT Console</h1>
+                </div>
+                
+                <div class="auth-info">
+                    <span id="userName">Administrator</span>
+                    <button onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </header>
+            
+            <div class="main-content">
+                <div class="sidebar">
+                    <!-- Menu Utama -->
+                    <div class="nav-item" onclick="window.location.href='dashboard.html'">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='index.html'">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Kategori Menu</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='menus.html'">
+                        <i class="fas fa-list"></i>
+                        <span>Menu Dinamis</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='settings.html'">
+                        <i class="fas fa-cog"></i>
+                        <span>Pengaturan</span>
+                    </div>
+                    
+                    <!-- Menu Baru -->
+                    <div class="nav-item" onclick="window.location.href='banner.html'">
+                        <i class="fas fa-image"></i>
+                        <span>Banner</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='color.html'">
+                        <i class="fas fa-palette"></i>
+                        <span>Color</span>
+                    </div>
+                    
+                    <div class="nav-item active">
+                        <i class="fas fa-code"></i>
+                        <span>RegexExtractor</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='textinfo.html'">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Text Information</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='cs.html'">
+                        <i class="fas fa-headset"></i>
+                        <span>Customer Service</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='produkcode.html'">
+                        <i class="fas fa-barcode"></i>
+                        <span>Kode Produk</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='prefix.html'">
+                        <i class="fas fa-list-ol"></i>
+                        <span>Provider Prefik</span>
+                    </div>
+                    
+                    <div class="nav-item" onclick="window.location.href='serverconfig.html'">
+                        <i class="fas fa-server"></i>
+                        <span>Server Config</span>
+                    </div>
+                </div>
+                
+                <div class="content">
+                    <!-- Notification -->
+                    <div id="notification" class="notification"></div>
+                    
+                    <!-- Firebase Status -->
+                    <div id="firebaseStatus" class="firebase-status hidden">
+                        <i class="fas fa-circle"></i>
+                        <span id="firebaseStatusText">Status Firebase</span>
+                    </div>
+                    
+                    <!-- Regex Section -->
+                    <div class="section">
+                        <div class="section-title">
+                            <h2><i class="fas fa-code"></i> RegexExtractor</h2>
+                            <button class="btn btn-primary" onclick="openRegexForm()">
+                                <i class="fas fa-plus"></i> Tambah Regex
+                            </button>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="form-group">
+                                <label for="categoryFilter">Filter Kategori:</label>
+                                <select id="categoryFilter" class="filter-select" onchange="filterRegex()">
+                                    <option value="">Semua Kategori</option>
+                                    <option value="FormatKunciTransaksi">FormatKunciTransaksi</option>
+                                    <option value="Other">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="table-container">
+                                <table id="regexTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Regex</th>
+                                            <th>Kategori</th>
+                                            <th>Pattern</th>
+                                            <th>Deskripsi</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="regexTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer>
+                <p>&copy; 2023 ASIA PAYMENT - Console Admin. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal Form for Add/Edit Regex -->
+    <div id="regexModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-code"></i> <span id="modalTitle">Tambah Regex</span></h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <form id="regexForm">
+                <input type="hidden" id="regexId">
+                <input type="hidden" id="originalCategory">
+                <input type="hidden" id="originalName">
+                
+                <div class="form-group">
+                    <label for="regexCategory">Kategori</label>
+                    <select id="regexCategory" class="form-control" required>
+                        <option value="">Pilih Kategori</option>
+                        <option value="FormatKunciTransaksi">FormatKunciTransaksi</option>
+                        <option value="Other">Lainnya</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regexName">Nama Regex</label>
+                    <input type="text" id="regexName" class="form-control" placeholder="Masukkan nama regex" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regexPattern">Pattern Regex</label>
+                    <textarea id="regexPattern" class="form-control form-textarea" placeholder="Masukkan pattern regex" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regexDescription">Deskripsi</label>
+                    <textarea id="regexDescription" class="form-control form-textarea" placeholder="Masukkan deskripsi regex"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regexExample">Contoh Penggunaan</label>
+                    <textarea id="regexExample" class="form-control form-textarea" placeholder="Masukkan contoh penggunaan regex"></textarea>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3vHdT3pJxN2Y4t8p2ZvV7wQf2XvL5z8M",
+            authDomain: "steady-fin-368617.firebaseapp.com",
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+            projectId: "steady-fin-368617",
+            storageBucket: "steady-fin-368617.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+        
+        // Initialize Firebase
+        let database;
+        let firebaseConnected = false;
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            firebaseConnected = true;
+            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            firebaseConnected = false;
+            updateFirebaseStatus('Tidak terhubung ke Firebase - Menggunakan data simulasi', 'disconnected');
+        }
+        
+        // Global variables
+        let currentUser = null;
+        let regexList = [];
+        let filteredRegex = [];
+        
+        // Update Firebase status
+        function updateFirebaseStatus(message, status) {
+            const statusElement = document.getElementById('firebaseStatus');
+            const statusText = document.getElementById('firebaseStatusText');
+            
+            statusElement.classList.remove('hidden');
+            statusElement.classList.remove('connected');
+            statusElement.classList.remove('disconnected');
+            
+            statusElement.classList.add(status);
+            statusText.textContent = message;
+        }
+        
+        // Initialize the application
+        function initApp() {
+            // Check if user is logged in
+            const loggedInUser = localStorage.getItem('adminUser');
+            if (loggedInUser) {
+                currentUser = JSON.parse(loggedInUser);
+                document.getElementById('userName').textContent = currentUser.username;
+                loadRegex();
+            } else {
+                window.location.href = 'login.html';
+            }
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Form submission
+            document.getElementById('regexForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveRegex();
+            });
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminUser');
+            window.location.href = 'login.html';
+        }
+        
+        // Load regex from Firebase
+        function loadRegex() {
+            const tableBody = document.getElementById('regexTableBody');
+            tableBody.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div> Memuat data...</td></tr>';
+            
+            if (firebaseConnected) {
+                const regexRef = database.ref('AsiaPayment/RegexExtractor');
+                
+                regexRef.on('value', (snapshot) => {
+                    regexList = [];
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        // FormatKunciTransaksi
+                        if (data.FormatKunciTransaksi) {
+                            Object.keys(data.FormatKunciTransaksi).forEach(key => {
+                                regexList.push({
+                                    id: key,
+                                    name: key,
+                                    category: 'FormatKunciTransaksi',
+                                    ...data.FormatKunciTransaksi[key]
+                                });
+                            });
+                        }
+                        
+                        // Other categories
+                        Object.keys(data).forEach(category => {
+                            if (category !== 'FormatKunciTransaksi' && data[category]) {
+                                Object.keys(data[category]).forEach(key => {
+                                    regexList.push({
+                                        id: key,
+                                        name: key,
+                                        category: category,
+                                        ...data[category][key]
+                                    });
+                                });
+                            }
+                        });
+                        
+                        filteredRegex = [...regexList];
+                        
+                        renderRegex();
+                    } else {
+                        useSampleRegex();
+                    }
+                }, (error) => {
+                    console.error('Firebase error:', error);
+                    updateFirebaseStatus('Error menghubungi Firebase - Menggunakan data simulasi', 'disconnected');
+                    useSampleRegex();
+                });
+            } else {
+                useSampleRegex();
+            }
+        }
+        
+        // Use sample regex when Firebase is not available
+        function useSampleRegex() {
+            regexList = [
+                { 
+                    id: 'extractTransactionId', 
+                    name: 'Extract Transaction ID', 
+                    category: 'FormatKunciTransaksi', 
+                    pattern: 'TRX-\\d{8}', 
+                    description: 'Regex untuk mengekstrak ID transaksi dari teks',
+                    example: 'Contoh: TRX-20230401'
+                },
+                { 
+                    id: 'extractPhoneNumber', 
+                    name: 'Extract Phone Number', 
+                    category: 'FormatKunciTransaksi', 
+                    pattern: '\\+?[\\d\\s-()]{10,}', 
+                    description: 'Regex untuk mengekstrak nomor telepon',
+                    example: 'Contoh: +62 812-3456-7890'
+                },
+                { 
+                    id: 'extractEmail', 
+                    name: 'Extract Email', 
+                    category: 'Other', 
+                    pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', 
+                    description: 'Regex untuk mengekstrak alamat email',
+                    example: 'Contoh: user@example.com'
+                }
+            ];
+            
+            filteredRegex = [...regexList];
+            renderRegex();
+            showNotification('Menggunakan data simulasi karena tidak dapat terhubung ke Firebase', 'info');
+        }
+        
+        // Filter regex based on selected category
+        function filterRegex() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            if (categoryFilter) {
+                filteredRegex = regexList.filter(regex => regex.category === categoryFilter);
+            } else {
+                filteredRegex = [...regexList];
+            }
+            
+            renderRegex();
+        }
+        
+        // Render regex to table
+        function renderRegex() {
+            const tableBody = document.getElementById('regexTableBody');
+            
+            if (filteredRegex.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">Tidak ada data regex</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            filteredRegex.forEach(regex => {
+                html += `
+                    <tr>
+                        <td>${regex.name}</td>
+                        <td><span class="regex-category category-${regex.category}">${regex.category}</span></td>
+                        <td>
+                            <div class="regex-pattern" title="${regex.pattern}">${regex.pattern}</div>
+                        </td>
+                        <td>${regex.description || '-'}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-edit" onclick="editRegex('${regex.category}', '${regex.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-delete" onclick="deleteRegex('${regex.category}', '${regex.id}', '${regex.name}')">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+        
+        // Open regex form modal
+        function openRegexForm() {
+            document.getElementById('modalTitle').textContent = 'Tambah Regex';
+            document.getElementById('regexId').value = '';
+            document.getElementById('originalCategory').value = '';
+            document.getElementById('originalName').value = '';
+            document.getElementById('regexCategory').value = '';
+            document.getElementById('regexName').value = '';
+            document.getElementById('regexPattern').value = '';
+            document.getElementById('regexDescription').value = '';
+            document.getElementById('regexExample').value = '';
+            document.getElementById('regexModal').style.display = 'block';
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('regexModal').style.display = 'none';
+        }
+        
+        // Edit regex
+        function editRegex(category, id) {
+            const regex = regexList.find(r => r.category === category && r.id === id);
+            
+            if (regex) {
+                document.getElementById('modalTitle').textContent = 'Edit Regex';
+                document.getElementById('regexId').value = regex.id;
+                document.getElementById('originalCategory').value = regex.category;
+                document.getElementById('originalName').value = regex.name;
+                document.getElementById('regexCategory').value = regex.category;
+                document.getElementById('regexName').value = regex.name;
+                document.getElementById('regexPattern').value = regex.pattern;
+                document.getElementById('regexDescription').value = regex.description || '';
+                document.getElementById('regexExample').value = regex.example || '';
+                document.getElementById('regexModal').style.display = 'block';
+            }
+        }
+        
+        // Save regex to Firebase or local storage
+        function saveRegex() {
+            const id = document.getElementById('regexId').value;
+            const originalCategory = document.getElementById('originalCategory').value;
+            const originalName = document.getElementById('originalName').value;
+            const category = document.getElementById('regexCategory').value;
+            const name = document.getElementById('regexName').value;
+            const pattern = document.getElementById('regexPattern').value;
+            const description = document.getElementById('regexDescription').value;
+            const example = document.getElementById('regexExample').value;
+            
+            if (!category || !name || !pattern) {
+                showNotification('Kategori, nama, dan pattern harus diisi', 'error');
+                return;
+            }
+            
+            const regexData = {
+                pattern: pattern,
+                description: description || '',
+                example: example || ''
+            };
+            
+            if (firebaseConnected) {
+                const regexRef = database.ref(`AsiaPayment/RegexExtractor/${category}/${name}`);
+                
+                if (id) {
+                    // Update existing regex
+                    if (originalCategory !== category || originalName !== name) {
+                        // Category or name changed, delete old and create new
+                        const oldRef = database.ref(`AsiaPayment/RegexExtractor/${originalCategory}/${originalName}`);
+                        
+                        oldRef.remove()
+                            .then(() => {
+                                regexRef.set(regexData)
+                                    .then(() => {
+                                        showNotification('Regex berhasil diperbarui', 'success');
+                                        closeModal();
+                                    })
+                                    .catch((error) => {
+                                        showNotification('Gagal memperbarui regex: ' + error.message, 'error');
+                                    });
+                            })
+                            .catch((error) => {
+                                showNotification('Gagal memperbarui regex: ' + error.message, 'error');
+                            });
+                    } else {
+                        // Just update the existing regex
+                        regexRef.update(regexData)
+                            .then(() => {
+                                showNotification('Regex berhasil diperbarui', 'success');
+                                closeModal();
+                            })
+                            .catch((error) => {
+                                showNotification('Gagal memperbarui regex: ' + error.message, 'error');
+                            });
+                    }
+                } else {
+                    // Add new regex
+                    regexRef.set(regexData)
+                        .then(() => {
+                            showNotification('Regex berhasil ditambahkan', 'success');
+                            closeModal();
+                        })
+                        .catch((error) => {
+                            showNotification('Gagal menambahkan regex: ' + error.message, 'error');
+                        });
+                }
+            } else {
+                // Save to local storage if Firebase is not connected
+                if (id) {
+                    // Update existing regex
+                    const index = regexList.findIndex(r => r.category === originalCategory && r.id === id);
+                    if (index !== -1) {
+                        if (originalCategory !== category || originalName !== name) {
+                            // Remove old and add new
+                            regexList = regexList.filter(r => !(r.category === originalCategory && r.id === id));
+                            
+                            regexList.push({
+                                id: name,
+                                name: name,
+                                category: category,
+                                pattern: pattern,
+                                description: description,
+                                example: example
+                            });
+                        } else {
+                            // Update in place
+                            regexList[index].pattern = pattern;
+                            regexList[index].description = description;
+                            regexList[index].example = example;
+                        }
+                        
+                        showNotification('Regex berhasil diperbarui (data lokal)', 'success');
+                    }
+                } else {
+                    // Add new regex
+                    const newRegex = {
+                        id: name,
+                        name: name,
+                        category: category,
+                        pattern: pattern,
+                        description: description,
+                        example: example
+                    };
+                    
+                    regexList.push(newRegex);
+                    showNotification('Regex berhasil ditambahkan (data lokal)', 'success');
+                }
+                
+                filteredRegex = [...regexList];
+                renderRegex();
+                closeModal();
+            }
+        }
+        
+        // Delete regex
+        function deleteRegex(category, id, name) {
+            if (confirm(`Apakah Anda yakin ingin menghapus regex "${name}"?`)) {
+                if (firebaseConnected) {
+                    const regexRef = database.ref(`AsiaPayment/RegexExtractor/${category}/${id}`);
+                    
+                    regexRef.remove()
+                        .then(() => {
+                            showNotification('Regex berhasil dihapus', 'success');
+                        })
+                        .catch((error) => {
+                            showNotification('Gagal menghapus regex: ' + error.message, 'error');
+                        });
+                } else {
+                    // Remove from local array
+                    regexList = regexList.filter(r => !(r.category === category && r.id === id));
+                    filteredRegex = [...regexList];
+                    renderRegex();
+                    showNotification('Regex berhasil dihapus (data lokal)', 'success');
+                }
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 3000);
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('regexModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+        
+        // Initialize the app when the page loads
+        window.onload = initApp;
+    </script>
+</body>
+</html>
