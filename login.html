@@ -12,6 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   
   <style>
+    /* CSS tetap sama seperti sebelumnya */
     :root {
       --primary: #0055ff;
       --primary-dark: #0044cc;
@@ -388,13 +389,13 @@
   <script>
     // Konfigurasi Firebase - SESUAIKAN DENGAN PROJECT ANDA
     const firebaseConfig = {
-      apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU", // Ganti dengan API key Anda
+      apiKey: "AIzaSyB1d5p1Pq4cL9V7Y8q8Z5X7b6JkLmN0oPq", // Ganti dengan API key Anda
       authDomain: "steady-fin-368617.firebaseapp.com",
       databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
       projectId: "steady-fin-368617",
-      storageBucket: "steady-fin-368617.firebasestorage.app",
-      messagingSenderId: "626971902484", // Ganti dengan sender ID Anda
-      appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01" // Ganti dengan app ID Anda
+      storageBucket: "steady-fin-368617.appspot.com",
+      messagingSenderId: "123456789", // Ganti dengan sender ID Anda
+      appId: "1:123456789:web:abcdef123456" // Ganti dengan app ID Anda
     };
 
     // Inisialisasi Firebase
@@ -512,14 +513,24 @@
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
         
-        // Cek apakah email sudah terverifikasi
+        // CEK APAKAH EMAIL SUDAH DIVERIFIKASI
         if (!user.emailVerified) {
-          showError('Email belum diverifikasi. Silakan verifikasi email Anda terlebih dahulu.');
+          // Kirim email verifikasi jika belum terverifikasi
+          await user.sendEmailVerification();
+          
+          // Logout user karena email belum terverifikasi
           await auth.signOut();
+          
+          // Tampilkan alert
+          alert("Email Anda belum diverifikasi. Link verifikasi sudah dikirim ke inbox/spam.");
+          
+          // Tampilkan pesan error di form
+          showError("Email belum diverifikasi. Silakan cek email Anda untuk link verifikasi.");
           setLoading(false);
-          return;
+          return; // Jangan lanjutkan ke dashboard
         }
         
+        // LANJUTKAN JIKA EMAIL SUDAH TERVERIFIKASI
         // Simpan informasi user di localStorage untuk penggunaan di halaman lain
         localStorage.setItem('firebaseUser', JSON.stringify({
           uid: user.uid,
