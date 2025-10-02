@@ -458,6 +458,68 @@
             border: 1px solid rgba(220, 53, 69, 0.2);
         }
         
+        /* Statistik Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            flex-shrink: 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .trend-up {
+            color: var(--success);
+        }
+        
+        .trend-down {
+            color: var(--danger);
+        }
+        
         @media (max-width: 768px) {
             .logo h1 {
                 font-size: 18px;
@@ -478,6 +540,10 @@
             
             .nav-item i {
                 font-size: 14px;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         
@@ -502,6 +568,10 @@
             
             .section-title h2 {
                 font-size: 18px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -612,22 +682,22 @@
                             <table id="transactionsTable">
                                 <thead>
                                     <tr>
-                                        <th>TrxID
+                                        <th>TRX ID
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Client IP
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Kode Reseller
+                                        <th>Member ID
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Kode & Tujuan
+                                        <th>Transaction Header
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Status
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Harga
+                                        <th>Price
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Pesan
@@ -639,7 +709,7 @@
                                         <th>Keterangan
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Waktu
+                                        <th>Timestamp
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Pengirim
@@ -656,6 +726,47 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistik Transaksi -->
+                    <div class="stats-container" id="statsContainer">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(0, 85, 255, 0.1); color: var(--primary);">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="stat-value" id="totalTransactions">0</div>
+                            <div class="stat-label">Total Transaksi</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--success);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-value" id="successTransactions">0</div>
+                            <div class="stat-label">Transaksi Sukses</div>
+                            <div class="stat-trend">
+                                <span id="successAmount">Rp 0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(220, 53, 69, 0.1); color: var(--danger);">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-value" id="failedTransactions">0</div>
+                            <div class="stat-label">Transaksi Gagal</div>
+                            <div class="stat-trend">
+                                <span id="failedAmount">Rp 0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(111, 66, 193, 0.1); color: #6f42c1;">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-value" id="successRate">0%</div>
+                            <div class="stat-label">Success Rate</div>
                         </div>
                     </div>
                 </div>
@@ -688,7 +799,7 @@
             firebase.initializeApp(firebaseConfig);
             database = firebase.database();
             firebaseConnected = true;
-            updateFirebaseStatus('Monitoring Transaksi Live', 'connected');
+            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
         } catch (error) {
             console.error('Firebase initialization error:', error);
             firebaseConnected = false;
@@ -767,6 +878,7 @@
                 } else {
                     showNotification('Tidak ada data transaksi', 'info');
                     displayTransactions([]);
+                    updateStatistics([]);
                 }
             }, (error) => {
                 console.error('Error listening to transactions:', error);
@@ -820,6 +932,9 @@
             
             // Tampilkan di tabel
             displayTransactions(transactions);
+            
+            // Update statistik
+            updateStatistics(transactions);
         }
         
         // Display transactions in table
@@ -846,11 +961,10 @@
                     `Rp ${transaction.price.toLocaleString()}` : 'Rp 0';
                 
                 // Format status dengan badge
-                const statusClass = transaction.status_desc === 'Sukses' ? 'success' : 
-                                   transaction.status_desc === 'Gagal' ? 'danger' : 'warning';
+                const statusClass = transaction.status_desc === 'Sukses' ? 'success' : 'danger';
                 
                 // Tentukan class untuk baris berdasarkan status
-                const rowClass = transaction.status_desc === 'Gagal' ? 'failed-transaction' : '';
+                const rowClass = transaction.status_desc === 'Sukses' ? '' : 'failed-transaction';
                 
                 html += `
                     <tr class="${rowClass}">
@@ -888,6 +1002,35 @@
             });
             
             tbody.innerHTML = html;
+        }
+        
+        // Update statistics based on transactions
+        function updateStatistics(transactions) {
+            const totalTransactions = transactions.length;
+            const successTransactions = transactions.filter(t => t.status_desc === 'Sukses').length;
+            const failedTransactions = totalTransactions - successTransactions;
+            
+            // Calculate total amounts
+            const successAmount = transactions
+                .filter(t => t.status_desc === 'Sukses')
+                .reduce((sum, t) => sum + (t.price || 0), 0);
+                
+            const failedAmount = transactions
+                .filter(t => t.status_desc !== 'Sukses')
+                .reduce((sum, t) => sum + (t.price || 0), 0);
+            
+            // Calculate success rate
+            const successRate = totalTransactions > 0 
+                ? ((successTransactions / totalTransactions) * 100).toFixed(1) 
+                : 0;
+            
+            // Update DOM elements
+            document.getElementById('totalTransactions').textContent = totalTransactions.toLocaleString();
+            document.getElementById('successTransactions').textContent = successTransactions.toLocaleString();
+            document.getElementById('failedTransactions').textContent = failedTransactions.toLocaleString();
+            document.getElementById('successAmount').textContent = `Rp ${successAmount.toLocaleString()}`;
+            document.getElementById('failedAmount').textContent = `Rp ${failedAmount.toLocaleString()}`;
+            document.getElementById('successRate').textContent = `${successRate}%`;
         }
         
         // Format nomor telepon
@@ -970,10 +1113,24 @@
                     remark: "Nomor pelanggan tidak valid",
                     timestamp: "2025-10-02 14:30:15",
                     telp: "07891585555"
+                },
+                {
+                    trxid: "652",
+                    clientIp: "91.99.163.28",
+                    memberId: "ASP0010",
+                    trxHeader: "S.08123456789",
+                    status_desc: "Dibatalkan",
+                    price: 10000,
+                    pesan: "#652## S.08123456789 DIBATALKAN. SN/Ref: - @02/10 13:15:22 R# #Transaksi dibatalkan",
+                    sn: "-",
+                    remark: "Transaksi dibatalkan oleh sistem",
+                    timestamp: "2025-10-02 13:15:22",
+                    telp: "+6281232165777"
                 }
             ];
             
             displayTransactions(sampleTransactions);
+            updateStatistics(sampleTransactions);
             showNotification('Menggunakan data sample transaksi', 'info');
         }
         
