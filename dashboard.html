@@ -243,6 +243,16 @@
             box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
         }
         
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
         .card {
             background: white;
             border-radius: 8px;
@@ -274,6 +284,46 @@
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+        }
+        
+        /* Filter Tanggal */
+        .filter-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 10px;
         }
         
         .table-container {
@@ -628,6 +678,16 @@
                 grid-template-columns: repeat(2, 1fr);
                 padding: 15px;
             }
+            
+            .filter-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
         
         @media (max-width: 480px) {
@@ -656,6 +716,14 @@
             .stats-container {
                 grid-template-columns: 1fr;
                 padding: 10px;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .date-input {
+                width: 100%;
             }
         }
     </style>
@@ -763,6 +831,26 @@
                         </div>
                         
                         <div class="card">
+                            <!-- Filter Tanggal -->
+                            <div class="filter-container">
+                                <div class="filter-group">
+                                    <label for="startDate">Dari Tanggal:</label>
+                                    <input type="date" id="startDate" class="date-input">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="endDate">Hingga Tanggal:</label>
+                                    <input type="date" id="endDate" class="date-input">
+                                </div>
+                                <div class="filter-actions">
+                                    <button class="btn btn-primary" onclick="applyDateFilter()">
+                                        <i class="fas fa-filter"></i> Filter
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="resetDateFilter()">
+                                        <i class="fas fa-times"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <!-- Search Box -->
                             <div class="search-container">
                                 <input type="text" id="searchInput" class="search-box" placeholder="Cari TrxID / Kode / Tujuan / Status / SN / Pengirim...">
@@ -904,6 +992,8 @@
         // Global variables
         let currentUser = null;
         let allTransactions = [];
+        let filteredTransactions = [];
+        let currentDateFilter = { start: null, end: null };
         
         // Update Firebase status
         function updateFirebaseStatus(message, status) {
@@ -929,6 +1019,9 @@
                     // Display user info
                     document.getElementById('userName').textContent = user.email;
                     
+                    // Set default date to today
+                    setDefaultDates();
+                    
                     // Load dashboard data
                     loadDashboardData();
                     setupTableResize();
@@ -940,6 +1033,104 @@
                     window.location.href = 'login.html';
                 }
             });
+        }
+        
+        // Set default dates (today and 7 days ago)
+        function setDefaultDates() {
+            const today = new Date();
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(today.getDate() - 7);
+            
+            document.getElementById('startDate').valueAsDate = oneWeekAgo;
+            document.getElementById('endDate').valueAsDate = today;
+            
+            currentDateFilter = {
+                start: formatDateForFilter(oneWeekAgo),
+                end: formatDateForFilter(today)
+            };
+        }
+        
+        // Format date for filter (YYYY-MM-DD)
+        function formatDateForFilter(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // Apply date filter
+        function applyDateFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                showNotification('Harap pilih tanggal mulai dan tanggal akhir', 'error');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showNotification('Tanggal mulai tidak boleh lebih besar dari tanggal akhir', 'error');
+                return;
+            }
+            
+            currentDateFilter = { start: startDate, end: endDate };
+            filterTransactions();
+            showNotification(`Filter diterapkan: ${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`, 'success');
+        }
+        
+        // Reset date filter
+        function resetDateFilter() {
+            setDefaultDates();
+            filterTransactions();
+            showNotification('Filter tanggal direset', 'info');
+        }
+        
+        // Format date for display (DD/MM/YYYY)
+        function formatDisplayDate(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        // Filter transactions based on date and search
+        function filterTransactions() {
+            let results = [...allTransactions];
+            
+            // Apply date filter
+            if (currentDateFilter.start && currentDateFilter.end) {
+                results = results.filter(transaction => {
+                    const transactionDate = new Date(transaction.timestamp);
+                    const startDate = new Date(currentDateFilter.start);
+                    const endDate = new Date(currentDateFilter.end);
+                    endDate.setHours(23, 59, 59, 999); // Set to end of day
+                    
+                    return transactionDate >= startDate && transactionDate <= endDate;
+                });
+            }
+            
+            // Apply search filter
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (searchTerm) {
+                results = results.filter(transaction => {
+                    return (
+                        transaction.trxid.toLowerCase().includes(searchTerm) ||
+                        (transaction.clientIp && transaction.clientIp.toLowerCase().includes(searchTerm)) ||
+                        (transaction.memberId && transaction.memberId.toLowerCase().includes(searchTerm)) ||
+                        (transaction.trxHeader && transaction.trxHeader.toLowerCase().includes(searchTerm)) ||
+                        (transaction.status_desc && transaction.status_desc.toLowerCase().includes(searchTerm)) ||
+                        (transaction.pesan && transaction.pesan.toLowerCase().includes(searchTerm)) ||
+                        (transaction.sn && transaction.sn.toLowerCase().includes(searchTerm)) ||
+                        (transaction.remark && transaction.remark.toLowerCase().includes(searchTerm)) ||
+                        (transaction.telp && transaction.telp.toLowerCase().includes(searchTerm))
+                    );
+                });
+            }
+            
+            filteredTransactions = results;
+            displayTransactions(filteredTransactions);
+            updateStatistics(filteredTransactions);
         }
         
         // Logout function
@@ -1047,11 +1238,8 @@
             // Simpan semua transaksi untuk keperluan lain
             allTransactions = transactions;
             
-            // Tampilkan di tabel
-            displayTransactions(transactions);
-            
-            // Update statistik
-            updateStatistics(transactions);
+            // Terapkan filter yang aktif
+            filterTransactions();
         }
         
         // Display transactions in table
@@ -1063,7 +1251,7 @@
                     <tr>
                         <td colspan="11" style="text-align: center; padding: 40px; color: var(--gray);">
                             <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
-                            <p>Belum ada data transaksi</p>
+                            <p>Tidak ada data transaksi untuk filter yang dipilih</p>
                         </td>
                     </tr>
                 `;
@@ -1221,20 +1409,7 @@
             const searchInput = document.getElementById('searchInput');
             
             searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                const tableRows = document.querySelectorAll('#transactionsBody tr');
-                
-                tableRows.forEach(row => {
-                    // Skip loading row
-                    if (row.classList.contains('loading')) return;
-                    
-                    const rowText = row.textContent.toLowerCase();
-                    if (rowText.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+                filterTransactions();
             });
         }
         
@@ -1282,8 +1457,8 @@
                 }
             ];
             
-            displayTransactions(sampleTransactions);
-            updateStatistics(sampleTransactions);
+            allTransactions = sampleTransactions;
+            filterTransactions();
             showNotification('Menggunakan data sample transaksi', 'info');
         }
         
