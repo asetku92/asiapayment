@@ -561,16 +561,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Login Required Section (Initially Hidden) -->
-        <div id="loginRequired" class="login-required hidden">
-            <i class="fas fa-lock"></i>
-            <h2>Login Diperlukan</h2>
-            <p>Anda harus login terlebih dahulu untuk mengakses halaman admin.</p>
-            <button class="btn btn-primary" onclick="redirectToLogin()">
-                <i class="fas fa-sign-in-alt"></i> Login Sekarang
-            </button>
-        </div>
-
         <!-- Main App Section (Initially Hidden) -->
         <div id="appSection" class="hidden">
             <header>
@@ -801,30 +791,26 @@
                     if (document.getElementById('appSection')) {
                         document.getElementById('appSection').classList.remove('hidden');
                     }
-                    if (document.getElementById('loginRequired')) {
-                        document.getElementById('loginRequired').classList.add('hidden');
-                    }
                     
                     // Load categories
                     loadCategories();
                 } else {
-                    // User is signed out
-                    console.log('No user signed in');
-                    if (document.getElementById('appSection')) {
-                        document.getElementById('appSection').classList.add('hidden');
-                    }
-                    if (document.getElementById('loginRequired')) {
-                        document.getElementById('loginRequired').classList.remove('hidden');
-                    }
+                    // User is signed out - redirect to login page
+                    console.log('No user signed in, redirecting to login');
+                    window.location.href = 'login.html';
                 }
             }, (error) => {
                 console.error('Auth state change error:', error);
                 showNotification('Error memeriksa status login', 'error');
+                // On error, redirect to login
+                window.location.href = 'login.html';
             });
         } else {
             // Firebase not connected
             console.error('Firebase auth not available');
             showNotification('Firebase tidak terhubung', 'error');
+            // Redirect to login if Firebase is not available
+            window.location.href = 'login.html';
         }
         
         // Setup event listeners
@@ -841,11 +827,6 @@
                 saveCategory();
             });
         }
-    }
-    
-    // Redirect to login page
-    function redirectToLogin() {
-        window.location.href = 'login.html';
     }
     
     // Logout function
