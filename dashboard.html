@@ -264,7 +264,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
+            min-width: 1200px;
         }
         
         th {
@@ -310,6 +310,15 @@
         
         tr:hover {
             background: rgba(0, 85, 255, 0.03);
+        }
+        
+        /* Styling untuk transaksi gagal */
+        tr.failed-transaction {
+            background-color: rgba(220, 53, 69, 0.05) !important;
+        }
+        
+        tr.failed-transaction:hover {
+            background-color: rgba(220, 53, 69, 0.1) !important;
         }
         
         footer {
@@ -603,38 +612,44 @@
                             <table id="transactionsTable">
                                 <thead>
                                     <tr>
-                                        <th>TRX ID
+                                        <th>TrxID
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Client IP
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Member ID
+                                        <th>Kode Reseller
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Transaction Header
+                                        <th>Kode & Tujuan
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Status
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Price
+                                        <th>Harga
                                             <div class="resize-handle"></div>
                                         </th>
                                         <th>Pesan
                                             <div class="resize-handle"></div>
                                         </th>
+                                        <th>SN
+                                            <div class="resize-handle"></div>
+                                        </th>
                                         <th>Keterangan
                                             <div class="resize-handle"></div>
                                         </th>
-                                        <th>Timestamp
+                                        <th>Waktu
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Pengirim
                                             <div class="resize-handle"></div>
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody id="transactionsBody">
                                     <tr>
-                                        <td colspan="9" class="loading">
+                                        <td colspan="11" class="loading">
                                             <div class="spinner"></div>
                                             <span>Memuat data transaksi...</span>
                                         </td>
@@ -673,7 +688,7 @@
             firebase.initializeApp(firebaseConfig);
             database = firebase.database();
             firebaseConnected = true;
-            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
+            updateFirebaseStatus('Monitoring Transaksi Live', 'connected');
         } catch (error) {
             console.error('Firebase initialization error:', error);
             firebaseConnected = false;
@@ -788,8 +803,10 @@
                             status_desc: transaction.status_desc || '',
                             price: transaction.price || 0,
                             pesan: transaction.pesan || '',
+                            sn: transaction.sn || '',
                             remark: transaction.remarks || '',
-                            timestamp: transaction.timestamp || ''
+                            timestamp: transaction.timestamp || '',
+                            telp: transaction.telp || ''
                         });
                     }
                 });
@@ -812,7 +829,7 @@
             if (transactions.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--gray);">
+                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--gray);">
                             <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
                             <p>Belum ada data transaksi</p>
                         </td>
@@ -832,8 +849,11 @@
                 const statusClass = transaction.status_desc === 'Sukses' ? 'success' : 
                                    transaction.status_desc === 'Gagal' ? 'danger' : 'warning';
                 
+                // Tentukan class untuk baris berdasarkan status
+                const rowClass = transaction.status_desc === 'Gagal' ? 'failed-transaction' : '';
+                
                 html += `
-                    <tr>
+                    <tr class="${rowClass}">
                         <td><strong>${transaction.trxid}</strong></td>
                         <td>${transaction.clientIp}</td>
                         <td>
@@ -853,15 +873,38 @@
                                 ${transaction.pesan.substring(0, 50)}${transaction.pesan.length > 50 ? '...' : ''}
                             </div>
                         </td>
+                        <td>
+                            <span class="badge badge-primary">${transaction.sn || '-'}</span>
+                        </td>
                         <td>${transaction.remark || '-'}</td>
                         <td>
                             <small>${formatTimestamp(transaction.timestamp)}</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">${formatPhoneNumber(transaction.telp)}</span>
                         </td>
                     </tr>
                 `;
             });
             
             tbody.innerHTML = html;
+        }
+        
+        // Format nomor telepon
+        function formatPhoneNumber(phone) {
+            if (!phone) return '-';
+            
+            // Hilangkan karakter non-digit
+            const cleaned = phone.replace(/\D/g, '');
+            
+            // Format nomor Indonesia
+            if (cleaned.startsWith('62')) {
+                return '+62 ' + cleaned.substring(2).replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (cleaned.startsWith('0')) {
+                return '+62 ' + cleaned.substring(1).replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            }
+            
+            return phone;
         }
         
         // Format timestamp
@@ -903,15 +946,30 @@
         function useSampleTransactions() {
             const sampleTransactions = [
                 {
-                    trxid: "651",
+                    trxid: "654",
                     clientIp: "91.99.163.28",
-                    memberId: "OWNER",
+                    memberId: "ASP0010",
                     trxHeader: "CEKDANA.082151861149",
                     status_desc: "Sukses",
                     price: 6,
-                    pesan: "#651## CEKDANA.082151861149 SUKSES. SN/Ref: WARXX YUSXX. Saldo 938,932-6=938,926 @01/10 16:47:07 R# #Transaksi lancar",
-                    remark: "Transaksi berhasil diproses",
-                    timestamp: "2025-10-01 16:47:08"
+                    pesan: "#654## CEKDANA.082151861149 SUKSES. SN/Ref: WARXX YUSXX. Saldo 559,145-6=559,139 @02/10 14:44:19 R# #Transaksi lancar",
+                    sn: "WARXX YUSXX",
+                    remark: "",
+                    timestamp: "2025-10-02 14:44:19",
+                    telp: "+6281232165777"
+                },
+                {
+                    trxid: "653",
+                    clientIp: "91.99.163.28",
+                    memberId: "OWNER",
+                    trxHeader: "CEKPLN.123456789",
+                    status_desc: "Gagal",
+                    price: 0,
+                    pesan: "#653## CEKPLN.123456789 GAGAL. SN/Ref: - @02/10 14:30:15 R# #Transaksi gagal",
+                    sn: "-",
+                    remark: "Nomor pelanggan tidak valid",
+                    timestamp: "2025-10-02 14:30:15",
+                    telp: "07891585555"
                 }
             ];
             
