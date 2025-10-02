@@ -754,12 +754,12 @@
         auth = firebase.auth();
         database = firebase.database();
         firebaseConnected = true;
-        updateFirebaseStatus('Terhubung', 'connected');
+        updateFirebaseStatus('Terhubung ke Firebase', 'connected');
         console.log('Firebase initialized successfully');
     } catch (error) {
         console.error('Firebase initialization error:', error);
         firebaseConnected = false;
-        updateFirebaseStatus('Tidak terhubung - Menggunakan data simulasi', 'disconnected');
+        updateFirebaseStatus('Tidak terhubung ke Firebase - Menggunakan data simulasi', 'disconnected');
     }
     
     // Global variables
