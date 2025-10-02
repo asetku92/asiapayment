@@ -12,7 +12,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   
   <style>
-    /* CSS tetap sama seperti sebelumnya */
     :root {
       --primary: #0055ff;
       --primary-dark: #0044cc;
@@ -303,20 +302,21 @@
       }
     }
     
-    .firebase-info {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 12px;
-      margin-top: 16px;
-      font-size: 12px;
-      color: var(--muted);
+    .forgot-password {
+      text-align: center;
+      margin-top: 15px;
     }
     
-    .firebase-info code {
-      background: #e9ecef;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
+    .forgot-password a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s ease;
+    }
+    
+    .forgot-password a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -344,6 +344,11 @@
             <i class="fas fa-eye"></i>
           </button>
         </div>
+        
+        <!-- Link Lupa Password -->
+        <div class="forgot-password">
+          <a href="#" id="forgotPasswordLink">Lupa Password?</a>
+        </div>
       </div>
 
       <div class="error" id="errorMsg">
@@ -360,24 +365,15 @@
           <label for="remember">Ingat saya</label>
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button type="button" class="btn btn-ghost" id="btnDemo">
-            <i class="fas fa-magic"></i> Demo
-          </button>
-          <button type="submit" class="btn btn-primary" id="btnLogin">
-            <span id="loginText">Login</span>
-            <div class="loader" id="loginLoader"></div>
-          </button>
-        </div>
+        <button type="submit" class="btn btn-primary" id="btnLogin">
+          <span id="loginText">Login</span>
+          <div class="loader" id="loginLoader"></div>
+        </button>
       </div>
 
       <div class="hint">
         <strong>Email admin:</strong> <code>aspaypulsa@gmail.com</code><br>
         <strong>Password:</strong> <code>123456</code>
-      </div>
-      
-      <div class="firebase-info">
-        <i class="fas fa-database"></i> Terhubung ke Firebase Project: <code>steady-fin-368617</code>
       </div>
 
       <footer>
@@ -389,15 +385,15 @@
   <script>
     // Konfigurasi Firebase - SESUAIKAN DENGAN PROJECT ANDA
     const firebaseConfig = {
-  apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
-  authDomain: "steady-fin-368617.firebaseapp.com",
-  databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
-  projectId: "steady-fin-368617",
-  storageBucket: "steady-fin-368617.firebasestorage.app",
-  messagingSenderId: "626971902484",
-  appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
-  measurementId: "G-70D3LR995Y"
-};
+      apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
+      authDomain: "steady-fin-368617.firebaseapp.com",
+      databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+      projectId: "steady-fin-368617",
+      storageBucket: "steady-fin-368617.firebasestorage.app",
+      messagingSenderId: "626971902484",
+      appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
+      measurementId: "G-70D3LR995Y"
+    };
 
     // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
@@ -413,15 +409,11 @@
     const successMsg = document.getElementById('successMsg');
     const successText = document.getElementById('successText');
     const togglePassword = document.getElementById('togglePassword');
-    const btnDemo = document.getElementById('btnDemo');
     const btnLogin = document.getElementById('btnLogin');
     const loginText = document.getElementById('loginText');
     const loginLoader = document.getElementById('loginLoader');
     const rememberCheckbox = document.getElementById('remember');
-
-    // Kredensial demo
-    const DEMO_EMAIL = 'aspaypulsa@gmail.com';
-    const DEMO_PASSWORD = '123456';
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 
     // Cek status login saat halaman dimuat
     auth.onAuthStateChanged((user) => {
@@ -451,13 +443,6 @@
         icon.classList.add('fa-eye');
         togglePassword.setAttribute('aria-label', 'Tampilkan password');
       }
-    });
-
-    // Tombol demo untuk mengisi form dengan cepat
-    btnDemo.addEventListener('click', () => {
-      emailInput.value = DEMO_EMAIL;
-      passwordInput.value = DEMO_PASSWORD;
-      hideMessages();
     });
 
     // Fungsi untuk menyembunyikan pesan error/success
@@ -492,6 +477,66 @@
         loginLoader.style.display = 'none';
       }
     }
+
+    // Fungsi untuk mengirim reset password
+    async function sendPasswordReset(email) {
+      try {
+        await auth.sendPasswordResetEmail(email);
+        return { success: true, message: 'Email reset password telah dikirim. Silakan periksa inbox atau folder spam Anda.' };
+      } catch (error) {
+        let errorMessage = 'Terjadi kesalahan saat mengirim email reset password.';
+        
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = 'Email tidak terdaftar.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Format email tidak valid.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Terlalu banyak permintaan. Coba lagi nanti.';
+            break;
+          default:
+            errorMessage = `Error: ${error.message}`;
+        }
+        
+        return { success: false, message: errorMessage };
+      }
+    }
+
+    // Event listener untuk link lupa password
+    forgotPasswordLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      // Prompt user untuk memasukkan email
+      const email = prompt('Masukkan email Anda untuk reset password:');
+      
+      if (!email) {
+        return; // User membatalkan
+      }
+      
+      // Validasi email
+      if (!email.includes('@') || !email.includes('.')) {
+        alert('Format email tidak valid. Silakan masukkan email yang benar.');
+        return;
+      }
+      
+      // Tampilkan loading state
+      setLoading(true);
+      
+      // Kirim email reset password
+      const result = await sendPasswordReset(email);
+      
+      // Sembunyikan loading state
+      setLoading(false);
+      
+      // Tampilkan hasil
+      if (result.success) {
+        alert(result.message);
+      } else {
+        alert(result.message);
+      }
+    });
 
     // Fungsi login dengan Firebase Authentication
     loginForm.addEventListener('submit', async function(e) {
