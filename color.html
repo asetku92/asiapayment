@@ -760,7 +760,7 @@
             </div>
             
             <footer>
-                <p>&copy; 2023 ASIA PAYMENT - Console Admin. All rights reserved.</p>
+                <p>&copy; 2025 ASIA PAYMENT - Console Admin. All rights reserved.</p>
             </footer>
         </div>
     </div>
@@ -787,11 +787,11 @@
             auth = firebase.auth();
             database = firebase.database();
             firebaseConnected = true;
-            updateFirebaseStatus('Terhubung ke Firebase', 'connected');
+            updateFirebaseStatus('Terhubung', 'connected');
         } catch (error) {
             console.error('Firebase initialization error:', error);
             firebaseConnected = false;
-            updateFirebaseStatus('Tidak terhubung ke Firebase - Menggunakan data simulasi', 'disconnected');
+            updateFirebaseStatus('Tidak terhubung - Menggunakan data simulasi', 'disconnected');
         }
         
         // Global variables
