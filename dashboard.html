@@ -6,6 +6,7 @@
     <title>Dashboard Transaksi - ASIA PAYMENT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
         :root {
@@ -812,24 +813,25 @@
     </div>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration - SAMA DENGAN LOGIN.HTML
         const firebaseConfig = {
-            apiKey: "AIzaSyD3vHdT3pJxN2Y4t8p2ZvV7wQf2XvL5z8M",
+            apiKey: "AIzaSyB1d5p1Pq4cL9V7Y8q8Z5X7b6JkLmN0oPq", // Ganti dengan API key Anda
             authDomain: "steady-fin-368617.firebaseapp.com",
             databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
             projectId: "steady-fin-368617",
             storageBucket: "steady-fin-368617.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdef123456"
+            messagingSenderId: "123456789", // Ganti dengan sender ID Anda
+            appId: "1:123456789:web:abcdef123456" // Ganti dengan app ID Anda
         };
         
         // Initialize Firebase
-        let database;
+        let auth, database;
         let firebaseConnected = false;
         let transactionsListener = null;
         
         try {
             firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
             database = firebase.database();
             firebaseConnected = true;
             updateFirebaseStatus('Monitoring Transaksi Live', 'connected');
@@ -858,16 +860,23 @@
         
         // Initialize the application
         function initApp() {
-            // Check if user is logged in
-            const loggedInUser = localStorage.getItem('adminUser');
-            if (loggedInUser) {
-                currentUser = JSON.parse(loggedInUser);
-                document.getElementById('userName').textContent = currentUser.username;
-                loadDashboardData();
-                setupTableResize();
-            } else {
-                window.location.href = 'login.html';
-            }
+            // Check if user is logged in using Firebase Auth
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    currentUser = user;
+                    
+                    // Display user info
+                    document.getElementById('userName').textContent = user.email;
+                    
+                    // Load dashboard data
+                    loadDashboardData();
+                    setupTableResize();
+                } else {
+                    // User is signed out, redirect to login
+                    window.location.href = 'login.html';
+                }
+            });
         }
         
         // Logout function
@@ -876,8 +885,20 @@
             if (transactionsListener) {
                 transactionsListener();
             }
-            localStorage.removeItem('adminUser');
-            window.location.href = 'login.html';
+            
+            // Sign out from Firebase
+            auth.signOut().then(() => {
+                // Clear localStorage
+                localStorage.removeItem('firebaseUser');
+                localStorage.removeItem('rememberLogin');
+                
+                // Redirect to login page
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('Logout error:', error);
+                // Force redirect even if there's an error
+                window.location.href = 'login.html';
+            });
         }
         
         // Load dashboard data
