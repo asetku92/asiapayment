@@ -188,7 +188,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
         }
         
         .content {
@@ -243,16 +242,6 @@
             box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
         }
         
-        .btn-secondary {
-            background: var(--light-gray);
-            color: var(--dark);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: #e9ecef;
-        }
-        
         .card {
             background: white;
             border-radius: 8px;
@@ -265,71 +254,10 @@
             overflow: hidden;
         }
         
-        /* Search Box */
-        .search-container {
-            margin-bottom: 15px;
-            flex-shrink: 0;
-        }
-        
-        .search-box {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        
-        .search-box:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
-        }
-        
-        /* Filter Tanggal */
-        .filter-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .filter-group label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .date-input {
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        
-        .date-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 85, 255, 0.1);
-        }
-        
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
         .table-container {
             overflow: auto;
             border-radius: 6px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--border);
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             flex: 1;
         }
@@ -346,7 +274,7 @@
             padding: 12px 15px;
             font-weight: 600;
             color: var(--dark);
-            border: 1px solid #ccc;
+            border-bottom: 2px solid var(--border);
             position: relative;
             user-select: none;
         }
@@ -373,8 +301,12 @@
         
         td {
             padding: 12px 15px;
-            border: 1px solid #ccc;
+            border-bottom: 1px solid var(--border);
             vertical-align: middle;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
         }
         
         tr:hover {
@@ -560,18 +492,13 @@
             border: 1px solid rgba(220, 53, 69, 0.2);
         }
         
-        /* Statistik Cards - STICKY BOTTOM YANG DIPERBAIKI */
+        /* Statistik Cards */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            padding: 15px 20px;
-            background: white;
-            border-top: 1px solid var(--border);
-            position: sticky;
-            bottom: 0;
-            z-index: 100;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            flex-shrink: 0;
         }
         
         .stat-card {
@@ -627,25 +554,17 @@
             color: var(--danger);
         }
         
-        /* Layout baru untuk memastikan statistik tetap di bawah */
-        .dashboard-content {
-            flex: 1;
+        .manual-info {
+            background: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.2);
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .scrollable-content {
-            flex: 1;
-            overflow: auto;
-            padding: 20px;
-        }
-        
-        .fixed-stats {
-            position: sticky;
-            bottom: 0;
-            background: white;
-            z-index: 100;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
         }
         
         @media (max-width: 768px) {
@@ -661,10 +580,6 @@
                 padding: 15px;
             }
             
-            .scrollable-content {
-                padding: 15px;
-            }
-            
             .nav-item {
                 padding: 12px 15px;
                 font-size: 14px;
@@ -676,17 +591,6 @@
             
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
-                padding: 15px;
-            }
-            
-            .filter-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .filter-actions {
-                width: 100%;
-                justify-content: space-between;
             }
         }
         
@@ -715,15 +619,6 @@
             
             .stats-container {
                 grid-template-columns: 1fr;
-                padding: 10px;
-            }
-            
-            .filter-group {
-                width: 100%;
-            }
-            
-            .date-input {
-                width: 100%;
             }
         }
     </style>
@@ -811,143 +706,120 @@
             </div>
             
             <div class="main-content">
-                <div class="dashboard-content">
-                    <div class="scrollable-content">
-                        <!-- Notification -->
-                        <div id="notification" class="notification"></div>
-                        
-                        <!-- Firebase Status -->
-                        <div id="firebaseStatus" class="firebase-status hidden">
-                            <i class="fas fa-circle"></i>
-                            <span id="firebaseStatusText">Status Firebase</span>
-                        </div>
-                        
-                        <!-- Riwayat Transaksi -->
-                        <div class="section-title">
-                            <h2><i class="fas fa-list-alt"></i> Stream Transaksi</h2>
-                            <button class="btn btn-primary" onclick="refreshTransactions()">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                        </div>
-                        
-                        <div class="card">
-                            <!-- Filter Tanggal -->
-                            <div class="filter-container">
-                                <div class="filter-group">
-                                    <label for="startDate">Dari Tanggal:</label>
-                                    <input type="date" id="startDate" class="date-input">
-                                </div>
-                                <div class="filter-group">
-                                    <label for="endDate">Hingga Tanggal:</label>
-                                    <input type="date" id="endDate" class="date-input">
-                                </div>
-                                <div class="filter-actions">
-                                    <button class="btn btn-primary" onclick="applyDateFilter()">
-                                        <i class="fas fa-filter"></i> Filter
-                                    </button>
-                                    <button class="btn btn-secondary" onclick="resetDateFilter()">
-                                        <i class="fas fa-times"></i> Reset
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Search Box -->
-                            <div class="search-container">
-                                <input type="text" id="searchInput" class="search-box" placeholder="Cari TrxID / Kode / Tujuan / Status / SN / Pengirim...">
-                            </div>
-                            
-                            <div class="table-container">
-                                <table id="transactionsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>TrxID
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Client IP
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Kode Reseller
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Kode & Tujuan
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Status
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Harga
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Pesan
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>SN
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Keterangan
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Waktu
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                            <th>Pengirim
-                                                <div class="resize-handle"></div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="transactionsBody">
-                                        <tr>
-                                            <td colspan="11" class="loading">
-                                                <div class="spinner"></div>
-                                                <span>Memuat data transaksi...</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                <div class="content">
+                    <!-- Notification -->
+                    <div id="notification" class="notification"></div>
+                    
+                    <!-- Firebase Status -->
+                    <div id="firebaseStatus" class="firebase-status hidden">
+                        <i class="fas fa-circle"></i>
+                        <span id="firebaseStatusText">Status Firebase</span>
+                    </div>
+                    
+                    <!-- Manual Data Info -->
+                    <div class="manual-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Data diperbarui manual. Klik tombol Refresh untuk memperbarui data.</span>
+                    </div>
+                    
+                    <!-- Riwayat Transaksi -->
+                    <div class="section-title">
+                        <h2><i class="fas fa-list-alt"></i> 10 Transaksi Terbaru</h2>
+                        <button class="btn btn-primary" onclick="refreshTransactions()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="table-container">
+                            <table id="transactionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>TrxID
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Client IP
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Kode Reseller
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Kode & Tujuan
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Status
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Harga
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Pesan
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>SN
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Keterangan
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Waktu
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                        <th>Pengirim
+                                            <div class="resize-handle"></div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsBody">
+                                    <tr>
+                                        <td colspan="11" class="loading">
+                                            <div class="spinner"></div>
+                                            <span>Memuat data transaksi...</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     
-                    <!-- Statistik Transaksi - FIXED BOTTOM -->
-                    <div class="fixed-stats">
-                        <div class="stats-container" id="statsContainer">
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: rgba(0, 85, 255, 0.1); color: var(--primary);">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                                <div class="stat-value" id="totalTransactions">0</div>
-                                <div class="stat-label">Total Transaksi</div>
+                    <!-- Statistik Transaksi -->
+                    <div class="stats-container" id="statsContainer">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(0, 85, 255, 0.1); color: var(--primary);">
+                                <i class="fas fa-shopping-cart"></i>
                             </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--success);">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="stat-value" id="successTransactions">0</div>
-                                <div class="stat-label">Transaksi Sukses</div>
-                                <div class="stat-trend">
-                                    <span id="successAmount">Rp 0</span>
-                                </div>
+                            <div class="stat-value" id="totalTransactions">0</div>
+                            <div class="stat-label">Total Transaksi Hari Ini</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(40, 167, 69, 0.1); color: var(--success);">
+                                <i class="fas fa-check-circle"></i>
                             </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: rgba(220, 53, 69, 0.1); color: var(--danger);">
-                                    <i class="fas fa-times-circle"></i>
-                                </div>
-                                <div class="stat-value" id="failedTransactions">0</div>
-                                <div class="stat-label">Transaksi Gagal</div>
-                                <div class="stat-trend">
-                                    <span id="failedAmount">Rp 0</span>
-                                </div>
+                            <div class="stat-value" id="successTransactions">0</div>
+                            <div class="stat-label">Transaksi Sukses Hari Ini</div>
+                            <div class="stat-trend">
+                                <span id="successAmount">Rp 0</span>
                             </div>
-                            
-                            <div class="stat-card">
-                                <div class="stat-icon" style="background: rgba(111, 66, 193, 0.1); color: #6f42c1;">
-                                    <i class="fas fa-percentage"></i>
-                                </div>
-                                <div class="stat-value" id="successRate">0%</div>
-                                <div class="stat-label">Success Rate</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(220, 53, 69, 0.1); color: var(--danger);">
+                                <i class="fas fa-times-circle"></i>
                             </div>
+                            <div class="stat-value" id="failedTransactions">0</div>
+                            <div class="stat-label">Transaksi Gagal Hari Ini</div>
+                            <div class="stat-trend">
+                                <span id="failedAmount">Rp 0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(111, 66, 193, 0.1); color: #6f42c1;">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-value" id="successRate">0%</div>
+                            <div class="stat-label">Success Rate Hari Ini</div>
                         </div>
                     </div>
                 </div>
@@ -960,29 +832,28 @@
     </div>
 
     <script>
-        // Firebase configuration - SAMA DENGAN LOGIN.HTML
+        // Firebase configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
-  authDomain: "steady-fin-368617.firebaseapp.com",
-  databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
-  projectId: "steady-fin-368617",
-  storageBucket: "steady-fin-368617.firebasestorage.app",
-  messagingSenderId: "626971902484",
-  appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
-  measurementId: "G-70D3LR995Y"
-};
+            apiKey: "AIzaSyDtZxsl5LZp3n1KZJfdVAdqQj22ZBPoQbU",
+            authDomain: "steady-fin-368617.firebaseapp.com",
+            databaseURL: "https://steady-fin-368617-default-rtdb.firebaseio.com",
+            projectId: "steady-fin-368617",
+            storageBucket: "steady-fin-368617.firebasestorage.app",
+            messagingSenderId: "626971902484",
+            appId: "1:626971902484:web:98f7cdbd55c5990dfe9d01",
+            measurementId: "G-70D3LR995Y"
+        };
         
         // Initialize Firebase
         let auth, database;
         let firebaseConnected = false;
-        let transactionsListener = null;
         
         try {
             firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             database = firebase.database();
             firebaseConnected = true;
-            updateFirebaseStatus('Monitoring Transaksi Live', 'connected');
+            updateFirebaseStatus('Terhubung ke Firebase - Mode Manual', 'connected');
         } catch (error) {
             console.error('Firebase initialization error:', error);
             firebaseConnected = false;
@@ -992,8 +863,6 @@
         // Global variables
         let currentUser = null;
         let allTransactions = [];
-        let filteredTransactions = [];
-        let currentDateFilter = { start: null, end: null };
         
         // Update Firebase status
         function updateFirebaseStatus(message, status) {
@@ -1019,15 +888,9 @@
                     // Display user info
                     document.getElementById('userName').textContent = user.email;
                     
-                    // Set default date to today
-                    setDefaultDates();
-                    
                     // Load dashboard data
                     loadDashboardData();
                     setupTableResize();
-                    
-                    // Setup search functionality
-                    setupSearch();
                 } else {
                     // User is signed out, redirect to login
                     window.location.href = 'login.html';
@@ -1035,111 +898,8 @@
             });
         }
         
-        // Set default dates (today and 7 days ago)
-        function setDefaultDates() {
-            const today = new Date();
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(today.getDate() - 7);
-            
-            document.getElementById('startDate').valueAsDate = oneWeekAgo;
-            document.getElementById('endDate').valueAsDate = today;
-            
-            currentDateFilter = {
-                start: formatDateForFilter(oneWeekAgo),
-                end: formatDateForFilter(today)
-            };
-        }
-        
-        // Format date for filter (YYYY-MM-DD)
-        function formatDateForFilter(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-        
-        // Apply date filter
-        function applyDateFilter() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            
-            if (!startDate || !endDate) {
-                showNotification('Harap pilih tanggal mulai dan tanggal akhir', 'error');
-                return;
-            }
-            
-            if (new Date(startDate) > new Date(endDate)) {
-                showNotification('Tanggal mulai tidak boleh lebih besar dari tanggal akhir', 'error');
-                return;
-            }
-            
-            currentDateFilter = { start: startDate, end: endDate };
-            filterTransactions();
-            showNotification(`Filter diterapkan: ${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}`, 'success');
-        }
-        
-        // Reset date filter
-        function resetDateFilter() {
-            setDefaultDates();
-            filterTransactions();
-            showNotification('Filter tanggal direset', 'info');
-        }
-        
-        // Format date for display (DD/MM/YYYY)
-        function formatDisplayDate(dateString) {
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
-        }
-        
-        // Filter transactions based on date and search
-        function filterTransactions() {
-            let results = [...allTransactions];
-            
-            // Apply date filter
-            if (currentDateFilter.start && currentDateFilter.end) {
-                results = results.filter(transaction => {
-                    const transactionDate = new Date(transaction.timestamp);
-                    const startDate = new Date(currentDateFilter.start);
-                    const endDate = new Date(currentDateFilter.end);
-                    endDate.setHours(23, 59, 59, 999); // Set to end of day
-                    
-                    return transactionDate >= startDate && transactionDate <= endDate;
-                });
-            }
-            
-            // Apply search filter
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (searchTerm) {
-                results = results.filter(transaction => {
-                    return (
-                        transaction.trxid.toLowerCase().includes(searchTerm) ||
-                        (transaction.clientIp && transaction.clientIp.toLowerCase().includes(searchTerm)) ||
-                        (transaction.memberId && transaction.memberId.toLowerCase().includes(searchTerm)) ||
-                        (transaction.trxHeader && transaction.trxHeader.toLowerCase().includes(searchTerm)) ||
-                        (transaction.status_desc && transaction.status_desc.toLowerCase().includes(searchTerm)) ||
-                        (transaction.pesan && transaction.pesan.toLowerCase().includes(searchTerm)) ||
-                        (transaction.sn && transaction.sn.toLowerCase().includes(searchTerm)) ||
-                        (transaction.remark && transaction.remark.toLowerCase().includes(searchTerm)) ||
-                        (transaction.telp && transaction.telp.toLowerCase().includes(searchTerm))
-                    );
-                });
-            }
-            
-            filteredTransactions = results;
-            displayTransactions(filteredTransactions);
-            updateStatistics(filteredTransactions);
-        }
-        
         // Logout function
         function logout() {
-            // Hentikan listener Firebase saat logout
-            if (transactionsListener) {
-                transactionsListener();
-            }
-            
             // Sign out from Firebase
             auth.signOut().then(() => {
                 // Clear localStorage
@@ -1158,39 +918,37 @@
         // Load dashboard data
         function loadDashboardData() {
             if (firebaseConnected) {
-                // Setup real-time listener untuk data transaksi
-                setupRealtimeTransactions();
+                // Load data once instead of using real-time listener
+                fetchTransactions();
             } else {
                 // Use sample data if Firebase is not connected
                 useSampleTransactions();
             }
         }
         
-        // Setup real-time listener untuk transaksi
-        function setupRealtimeTransactions() {
+        // Fetch transactions with limit
+        function fetchTransactions() {
             if (!firebaseConnected) return;
             
-            // Hentikan listener sebelumnya jika ada
-            if (transactionsListener) {
-                transactionsListener();
-            }
+            showNotification('Memuat data transaksi...', 'info');
             
-            // Setup listener baru untuk path Notification
+            // Get reference to notifications
             const notificationsRef = database.ref('AsiaPayment/Notification');
             
-            transactionsListener = notificationsRef.on('value', (snapshot) => {
+            // Use once() to get data only once, not real-time
+            notificationsRef.once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     processTransactionsData(data);
-                    showNotification('Data transaksi diperbarui secara real-time', 'success');
+                    showNotification('Data transaksi berhasil dimuat', 'success');
                 } else {
                     showNotification('Tidak ada data transaksi', 'info');
                     displayTransactions([]);
                     updateStatistics([]);
                 }
-            }, (error) => {
-                console.error('Error listening to transactions:', error);
-                showNotification('Gagal memuat data transaksi real-time', 'error');
+            }).catch((error) => {
+                console.error('Error fetching transactions:', error);
+                showNotification('Gagal memuat data transaksi', 'error');
                 useSampleTransactions();
             });
         }
@@ -1235,11 +993,31 @@
             // Urutkan berdasarkan timestamp descending (terbaru di atas)
             transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            // Simpan semua transaksi untuk keperluan lain
+            // Simpan semua transaksi untuk keperluan statistik
             allTransactions = transactions;
             
-            // Terapkan filter yang aktif
-            filterTransactions();
+            // Ambil hanya 10 transaksi terbaru untuk ditampilkan
+            const latestTransactions = transactions.slice(0, 10);
+            
+            // Tampilkan di tabel
+            displayTransactions(latestTransactions);
+            
+            // Update statistik hanya untuk transaksi hari ini
+            updateStatistics(getTodayTransactions(transactions));
+        }
+        
+        // Get transactions for today only
+        function getTodayTransactions(transactions) {
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            
+            return transactions.filter(transaction => {
+                if (!transaction.timestamp) return false;
+                
+                // Extract date part from timestamp (assuming format: YYYY-MM-DD HH:mm:ss)
+                const transactionDate = transaction.timestamp.split(' ')[0];
+                return transactionDate === todayString;
+            });
         }
         
         // Display transactions in table
@@ -1251,7 +1029,7 @@
                     <tr>
                         <td colspan="11" style="text-align: center; padding: 40px; color: var(--gray);">
                             <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
-                            <p>Tidak ada data transaksi untuk filter yang dipilih</p>
+                            <p>Belum ada data transaksi</p>
                         </td>
                     </tr>
                 `;
@@ -1388,29 +1166,10 @@
         function refreshTransactions() {
             showNotification('Memuat ulang data transaksi...', 'info');
             if (firebaseConnected) {
-                // Force reload dengan mengambil data langsung
-                fetch('https://steady-fin-368617-default-rtdb.firebaseio.com/AsiaPayment/Notification.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        processTransactionsData(data);
-                        showNotification('Data transaksi diperbarui', 'success');
-                    })
-                    .catch(error => {
-                        console.error('Error refreshing transactions:', error);
-                        showNotification('Gagal memuat ulang data transaksi', 'error');
-                    });
+                fetchTransactions();
             } else {
                 useSampleTransactions();
             }
-        }
-        
-        // Setup search functionality
-        function setupSearch() {
-            const searchInput = document.getElementById('searchInput');
-            
-            searchInput.addEventListener('input', function() {
-                filterTransactions();
-            });
         }
         
         // Sample data for transactions (fallback)
@@ -1418,7 +1177,7 @@
             const sampleTransactions = [
                 {
                     trxid: "654",
-                    clientIp: "127.0.0.1",
+                    clientIp: "91.99.163.28",
                     memberId: "ASP0010",
                     trxHeader: "CEKDANA.082151861149",
                     status_desc: "Sukses",
@@ -1431,7 +1190,7 @@
                 },
                 {
                     trxid: "653",
-                    clientIp: "127.0.0.1",
+                    clientIp: "91.99.163.28",
                     memberId: "OWNER",
                     trxHeader: "CEKPLN.123456789",
                     status_desc: "Gagal",
@@ -1444,7 +1203,7 @@
                 },
                 {
                     trxid: "652",
-                    clientIp: "127.0.0.1",
+                    clientIp: "91.99.163.28",
                     memberId: "ASP0010",
                     trxHeader: "S.08123456789",
                     status_desc: "Dibatalkan",
@@ -1457,8 +1216,11 @@
                 }
             ];
             
-            allTransactions = sampleTransactions;
-            filterTransactions();
+            // Ambil hanya 10 transaksi terbaru untuk ditampilkan
+            const latestTransactions = sampleTransactions.slice(0, 10);
+            
+            displayTransactions(latestTransactions);
+            updateStatistics(getTodayTransactions(sampleTransactions));
             showNotification('Menggunakan data sample transaksi', 'info');
         }
         
