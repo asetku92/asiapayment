@@ -439,10 +439,9 @@
         /* Date Filter Section */
         .date-filter {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 15px;
             margin-bottom: 20px;
-            align-items: center;
             padding: 15px;
             background: var(--light-gray);
             border-radius: 8px;
@@ -450,9 +449,17 @@
             flex-shrink: 0;
         }
         
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
         .date-filter label {
             font-weight: 600;
             color: var(--dark);
+            white-space: nowrap;
         }
         
         .date-filter input {
@@ -460,6 +467,7 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
+            min-width: 150px;
         }
         
         .period-buttons {
@@ -504,6 +512,16 @@
             .date-filter {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+            
+            .date-filter input {
+                width: 100%;
             }
             
             .period-buttons {
@@ -651,24 +669,37 @@
                     
                     <!-- Date Filter Section -->
                     <div class="date-filter">
-                        <div>
-                            <label for="datePicker">Pilih Tanggal:</label>
-                            <input type="date" id="datePicker">
+                        <div class="filter-row">
+                            <div>
+                                <label for="startDate">Dari Tanggal:</label>
+                                <input type="date" id="startDate">
+                            </div>
+                            
+                            <div>
+                                <label for="endDate">Sampai Tanggal:</label>
+                                <input type="date" id="endDate">
+                            </div>
+                            
+                            <button class="btn btn-primary" id="btnShowRange" onclick="showRangeStats()">
+                                <i class="fas fa-filter"></i> Tampilkan
+                            </button>
                         </div>
                         
-                        <div class="period-buttons">
-                            <button class="btn btn-outline" onclick="showTodayStats()">
-                                <i class="fas fa-calendar-day"></i> Hari Ini
-                            </button>
-                            <button class="btn btn-outline" onclick="showYesterdayStats()">
-                                <i class="fas fa-calendar-minus"></i> Kemarin
-                            </button>
-                            <button class="btn btn-outline" onclick="showLastMonthStats()">
-                                <i class="fas fa-calendar-week"></i> Bulan Lalu
-                            </button>
-                            <button class="btn btn-primary" onclick="refreshData()">
-                                <i class="fas fa-sync-alt"></i> Refresh Data
-                            </button>
+                        <div class="filter-row">
+                            <div class="period-buttons">
+                                <button class="btn btn-outline" onclick="showTodayStats()">
+                                    <i class="fas fa-calendar-day"></i> Hari Ini
+                                </button>
+                                <button class="btn btn-outline" onclick="showYesterdayStats()">
+                                    <i class="fas fa-calendar-minus"></i> Kemarin
+                                </button>
+                                <button class="btn btn-outline" onclick="showLastMonthStats()">
+                                    <i class="fas fa-calendar-week"></i> Bulan Lalu
+                                </button>
+                                <button class="btn btn-primary" onclick="refreshData()">
+                                    <i class="fas fa-sync-alt"></i> Refresh Data
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="period-info" id="periodInfo">
@@ -790,7 +821,8 @@
                     
                     // Set default date to today
                     const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('datePicker').value = today;
+                    document.getElementById('startDate').value = today;
+                    document.getElementById('endDate').value = today;
                     
                     // Load dashboard data
                     loadDashboardData();
@@ -913,10 +945,17 @@
                 filteredTransactions = getLastMonthTransactions(allTransactions);
                 document.getElementById('periodInfo').innerHTML = 'Menampilkan statistik untuk: <strong>Bulan Lalu</strong>';
             } else if (currentPeriod === 'custom') {
-                const selectedDate = document.getElementById('datePicker').value;
+                const selectedDate = document.getElementById('startDate').value;
                 filteredTransactions = getCustomDateTransactions(allTransactions, selectedDate);
                 const formattedDate = formatDateForDisplay(selectedDate);
                 document.getElementById('periodInfo').innerHTML = `Menampilkan statistik untuk: <strong>${formattedDate}</strong>`;
+            } else if (currentPeriod === 'range') {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                filteredTransactions = getDateRangeTransactions(allTransactions, startDate, endDate);
+                const formattedStartDate = formatDateForDisplay(startDate);
+                const formattedEndDate = formatDateForDisplay(endDate);
+                document.getElementById('periodInfo').innerHTML = `Menampilkan statistik dari: <strong>${formattedStartDate}</strong> sampai <strong>${formattedEndDate}</strong>`;
             }
             
             updateStatistics(filteredTransactions);
@@ -977,6 +1016,19 @@
             });
         }
         
+        // Get transactions for date range
+        function getDateRangeTransactions(transactions, startDate, endDate) {
+            return transactions.filter(transaction => {
+                if (!transaction.timestamp) return false;
+                
+                // Extract date part from timestamp
+                const transactionDate = transaction.timestamp.split(' ')[0];
+                
+                // Check if transaction date is within the range (inclusive)
+                return transactionDate >= startDate && transactionDate <= endDate;
+            });
+        }
+        
         // Format date for display
         function formatDateForDisplay(dateString) {
             const date = new Date(dateString);
@@ -992,7 +1044,8 @@
         function showTodayStats() {
             currentPeriod = 'today';
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('datePicker').value = today;
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
             updateStatisticsForPeriod();
         }
         
@@ -1002,7 +1055,8 @@
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             const yesterdayString = yesterday.toISOString().split('T')[0];
-            document.getElementById('datePicker').value = yesterdayString;
+            document.getElementById('startDate').value = yesterdayString;
+            document.getElementById('endDate').value = yesterdayString;
             updateStatisticsForPeriod();
         }
         
@@ -1012,14 +1066,34 @@
             const now = new Date();
             const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
             const lastMonthString = lastMonth.toISOString().split('T')[0];
-            document.getElementById('datePicker').value = lastMonthString;
+            document.getElementById('startDate').value = lastMonthString;
+            document.getElementById('endDate').value = lastMonthString;
+            updateStatisticsForPeriod();
+        }
+        
+        // Show range statistics
+        function showRangeStats() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                showNotification('Pilih tanggal mulai dan tanggal akhir', 'error');
+                return;
+            }
+            
+            if (startDate > endDate) {
+                showNotification('Tanggal mulai tidak boleh lebih besar dari tanggal akhir', 'error');
+                return;
+            }
+            
+            currentPeriod = 'range';
             updateStatisticsForPeriod();
         }
         
         // Refresh data
         function refreshData() {
             currentPeriod = 'custom';
-            const selectedDate = document.getElementById('datePicker').value;
+            const selectedDate = document.getElementById('startDate').value;
             if (!selectedDate) {
                 showTodayStats();
                 return;
