@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Transaksi - ASIA PAYMENT</title>
+    <title>Dashboard Statistik - ASIA PAYMENT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -242,6 +242,16 @@
             box-shadow: 0 5px 15px rgba(0, 85, 255, 0.2);
         }
         
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(0, 85, 255, 0.05);
+        }
+        
         .card {
             background: white;
             border-radius: 8px;
@@ -252,74 +262,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-        }
-        
-        .table-container {
-            overflow: auto;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            flex: 1;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1200px;
-        }
-        
-        th {
-            background: var(--light-gray);
-            text-align: left;
-            padding: 12px 15px;
-            font-weight: 600;
-            color: var(--dark);
-            border-bottom: 2px solid var(--border);
-            position: relative;
-            user-select: none;
-        }
-        
-        .resize-handle {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 5px;
-            height: 100%;
-            background-color: var(--primary);
-            cursor: col-resize;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        th:hover .resize-handle {
-            opacity: 0.5;
-        }
-        
-        th.resizing .resize-handle {
-            opacity: 1;
-        }
-        
-        td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        tr:hover {
-            background: rgba(0, 85, 255, 0.03);
-        }
-        
-        /* Styling untuk transaksi gagal */
-        tr.failed-transaction {
-            background-color: rgba(220, 53, 69, 0.05) !important;
-        }
-        
-        tr.failed-transaction:hover {
-            background-color: rgba(220, 53, 69, 0.1) !important;
         }
         
         footer {
@@ -354,79 +296,6 @@
         
         .hidden {
             display: none;
-        }
-        
-        /* Table Badges */
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .badge-primary {
-            background: rgba(0, 85, 255, 0.1);
-            color: var(--primary);
-        }
-        
-        .badge-success {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success);
-        }
-        
-        .badge-danger {
-            background: rgba(220, 53, 69, 0.1);
-            color: var(--danger);
-        }
-        
-        .badge-warning {
-            background: rgba(255, 193, 7, 0.1);
-            color: var(--warning);
-        }
-        
-        /* Pesan Cell - DIPERBAIKI */
-        .pesan-cell {
-            max-width: 300px;
-            position: relative;
-        }
-        
-        .pesan-content {
-            white-space: normal;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            line-height: 1.4;
-            max-height: 2.8em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .pesan-content.expanded {
-            white-space: normal;
-            -webkit-line-clamp: unset;
-            max-height: none;
-            overflow: visible;
-        }
-        
-        .pesan-content:hover {
-            color: var(--primary);
-        }
-        
-        .expand-icon {
-            position: absolute;
-            right: 5px;
-            bottom: 5px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 3px;
-            padding: 2px 5px;
-            font-size: 10px;
-            color: var(--primary);
-            display: none;
-        }
-        
-        .pesan-cell:hover .expand-icon {
-            display: inline;
         }
         
         /* Loading state */
@@ -567,6 +436,45 @@
             flex-shrink: 0;
         }
         
+        /* Date Filter Section */
+        .date-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            padding: 15px;
+            background: var(--light-gray);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        
+        .date-filter label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .date-filter input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .period-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .period-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--gray);
+            flex-basis: 100%;
+        }
+        
         @media (max-width: 768px) {
             .logo h1 {
                 font-size: 18px;
@@ -591,6 +499,16 @@
             
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .date-filter {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .period-buttons {
+                width: 100%;
+                justify-content: space-between;
             }
         }
         
@@ -619,6 +537,15 @@
             
             .stats-container {
                 grid-template-columns: 1fr;
+            }
+            
+            .period-buttons {
+                flex-direction: column;
+            }
+            
+            .period-buttons .btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -719,77 +646,49 @@
                     <!-- Manual Data Info -->
                     <div class="manual-info">
                         <i class="fas fa-info-circle"></i>
-                        <span>Data diperbarui manual. Klik tombol Refresh untuk memperbarui data.</span>
+                        <span>Data diperbarui manual. Pilih tanggal atau periode untuk melihat statistik.</span>
                     </div>
                     
-                    <!-- Riwayat Transaksi -->
-                    <div class="section-title">
-                        <h2><i class="fas fa-list-alt"></i> 10 Transaksi Terbaru</h2>
-                        <button class="btn btn-primary" onclick="refreshTransactions()">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="table-container">
-                            <table id="transactionsTable">
-                                <thead>
-                                    <tr>
-                                        <th>TrxID
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Client IP
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Kode Reseller
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Kode & Tujuan
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Status
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Harga
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Pesan
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>SN
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Keterangan
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Waktu
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                        <th>Pengirim
-                                            <div class="resize-handle"></div>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody id="transactionsBody">
-                                    <tr>
-                                        <td colspan="11" class="loading">
-                                            <div class="spinner"></div>
-                                            <span>Memuat data transaksi...</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <!-- Date Filter Section -->
+                    <div class="date-filter">
+                        <div>
+                            <label for="datePicker">Pilih Tanggal:</label>
+                            <input type="date" id="datePicker">
+                        </div>
+                        
+                        <div class="period-buttons">
+                            <button class="btn btn-outline" onclick="showTodayStats()">
+                                <i class="fas fa-calendar-day"></i> Hari Ini
+                            </button>
+                            <button class="btn btn-outline" onclick="showYesterdayStats()">
+                                <i class="fas fa-calendar-minus"></i> Kemarin
+                            </button>
+                            <button class="btn btn-outline" onclick="showLastMonthStats()">
+                                <i class="fas fa-calendar-week"></i> Bulan Lalu
+                            </button>
+                            <button class="btn btn-primary" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Refresh Data
+                            </button>
+                        </div>
+                        
+                        <div class="period-info" id="periodInfo">
+                            Menampilkan statistik untuk: <strong>Hari Ini</strong>
                         </div>
                     </div>
                     
                     <!-- Statistik Transaksi -->
+                    <div class="section-title">
+                        <h2><i class="fas fa-chart-bar"></i> Statistik Transaksi</h2>
+                    </div>
+                    
+                    <!-- Statistik Cards -->
                     <div class="stats-container" id="statsContainer">
                         <div class="stat-card">
                             <div class="stat-icon" style="background: rgba(0, 85, 255, 0.1); color: var(--primary);">
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
                             <div class="stat-value" id="totalTransactions">0</div>
-                            <div class="stat-label">Total Transaksi Hari Ini</div>
+                            <div class="stat-label">Total Transaksi</div>
                         </div>
                         
                         <div class="stat-card">
@@ -797,7 +696,7 @@
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <div class="stat-value" id="successTransactions">0</div>
-                            <div class="stat-label">Transaksi Sukses Hari Ini</div>
+                            <div class="stat-label">Transaksi Sukses</div>
                             <div class="stat-trend">
                                 <span id="successAmount">Rp 0</span>
                             </div>
@@ -808,7 +707,7 @@
                                 <i class="fas fa-times-circle"></i>
                             </div>
                             <div class="stat-value" id="failedTransactions">0</div>
-                            <div class="stat-label">Transaksi Gagal Hari Ini</div>
+                            <div class="stat-label">Transaksi Gagal</div>
                             <div class="stat-trend">
                                 <span id="failedAmount">Rp 0</span>
                             </div>
@@ -819,7 +718,7 @@
                                 <i class="fas fa-percentage"></i>
                             </div>
                             <div class="stat-value" id="successRate">0%</div>
-                            <div class="stat-label">Success Rate Hari Ini</div>
+                            <div class="stat-label">Success Rate</div>
                         </div>
                     </div>
                 </div>
@@ -863,6 +762,7 @@
         // Global variables
         let currentUser = null;
         let allTransactions = [];
+        let currentPeriod = 'today';
         
         // Update Firebase status
         function updateFirebaseStatus(message, status) {
@@ -888,9 +788,12 @@
                     // Display user info
                     document.getElementById('userName').textContent = user.email;
                     
+                    // Set default date to today
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('datePicker').value = today;
+                    
                     // Load dashboard data
                     loadDashboardData();
-                    setupTableResize();
                 } else {
                     // User is signed out, redirect to login
                     window.location.href = 'login.html';
@@ -943,7 +846,6 @@
                     showNotification('Data transaksi berhasil dimuat', 'success');
                 } else {
                     showNotification('Tidak ada data transaksi', 'info');
-                    displayTransactions([]);
                     updateStatistics([]);
                 }
             }).catch((error) => {
@@ -990,20 +892,34 @@
                 });
             });
             
-            // Urutkan berdasarkan timestamp descending (terbaru di atas)
-            transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
             // Simpan semua transaksi untuk keperluan statistik
             allTransactions = transactions;
             
-            // Ambil hanya 10 transaksi terbaru untuk ditampilkan
-            const latestTransactions = transactions.slice(0, 10);
+            // Update statistik berdasarkan periode yang dipilih
+            updateStatisticsForPeriod();
+        }
+        
+        // Update statistics based on selected period
+        function updateStatisticsForPeriod() {
+            let filteredTransactions = [];
             
-            // Tampilkan di tabel
-            displayTransactions(latestTransactions);
+            if (currentPeriod === 'today') {
+                filteredTransactions = getTodayTransactions(allTransactions);
+                document.getElementById('periodInfo').innerHTML = 'Menampilkan statistik untuk: <strong>Hari Ini</strong>';
+            } else if (currentPeriod === 'yesterday') {
+                filteredTransactions = getYesterdayTransactions(allTransactions);
+                document.getElementById('periodInfo').innerHTML = 'Menampilkan statistik untuk: <strong>Kemarin</strong>';
+            } else if (currentPeriod === 'lastMonth') {
+                filteredTransactions = getLastMonthTransactions(allTransactions);
+                document.getElementById('periodInfo').innerHTML = 'Menampilkan statistik untuk: <strong>Bulan Lalu</strong>';
+            } else if (currentPeriod === 'custom') {
+                const selectedDate = document.getElementById('datePicker').value;
+                filteredTransactions = getCustomDateTransactions(allTransactions, selectedDate);
+                const formattedDate = formatDateForDisplay(selectedDate);
+                document.getElementById('periodInfo').innerHTML = `Menampilkan statistik untuk: <strong>${formattedDate}</strong>`;
+            }
             
-            // Update statistik hanya untuk transaksi hari ini
-            updateStatistics(getTodayTransactions(transactions));
+            updateStatistics(filteredTransactions);
         }
         
         // Get transactions for today only
@@ -1020,85 +936,95 @@
             });
         }
         
-        // Display transactions in table
-        function displayTransactions(transactions) {
-            const tbody = document.getElementById('transactionsBody');
+        // Get transactions for yesterday
+        function getYesterdayTransactions(transactions) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toISOString().split('T')[0]; // Format: YYYY-MM-DD
             
-            if (transactions.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--gray);">
-                            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
-                            <p>Belum ada data transaksi</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            let html = '';
-            
-            transactions.forEach(transaction => {
-                // Format price to currency
-                const priceFormatted = transaction.price !== undefined ? 
-                    `Rp ${transaction.price.toLocaleString()}` : 'Rp 0';
+            return transactions.filter(transaction => {
+                if (!transaction.timestamp) return false;
                 
-                // Format status dengan badge
-                const statusClass = transaction.status_desc === 'Sukses' ? 'success' : 'danger';
-                
-                // Tentukan class untuk baris berdasarkan status
-                const rowClass = transaction.status_desc === 'Sukses' ? '' : 'failed-transaction';
-                
-                html += `
-                    <tr class="${rowClass}">
-                        <td><strong>${transaction.trxid}</strong></td>
-                        <td>${transaction.clientIp}</td>
-                        <td>
-                            <span class="badge badge-primary">${transaction.memberId}</span>
-                        </td>
-                        <td>
-                            <code>${transaction.trxHeader}</code>
-                        </td>
-                        <td>
-                            <span class="badge badge-${statusClass}">
-                                ${transaction.status_desc}
-                            </span>
-                        </td>
-                        <td><strong>${priceFormatted}</strong></td>
-                        <td class="pesan-cell">
-                            <div class="pesan-content" onclick="togglePesan(this)">
-                                ${transaction.pesan}
-                            </div>
-                            <span class="expand-icon" onclick="togglePesan(this.parentNode.querySelector('.pesan-content'))">
-                                <i class="fas fa-expand-alt"></i>
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge badge-primary">${transaction.sn || '-'}</span>
-                        </td>
-                        <td>${transaction.remark || '-'}</td>
-                        <td>
-                            <small>${formatTimestamp(transaction.timestamp)}</small>
-                        </td>
-                        <td>
-                            <span class="badge badge-primary">${formatPhoneNumber(transaction.telp)}</span>
-                        </td>
-                    </tr>
-                `;
+                // Extract date part from timestamp (assuming format: YYYY-MM-DD HH:mm:ss)
+                const transactionDate = transaction.timestamp.split(' ')[0];
+                return transactionDate === yesterdayString;
             });
-            
-            tbody.innerHTML = html;
         }
         
-        // Toggle tampilan pesan (expand/collapse)
-        function togglePesan(element) {
-            element.classList.toggle('expanded');
-            const icon = element.parentNode.querySelector('.expand-icon i');
-            if (element.classList.contains('expanded')) {
-                icon.className = 'fas fa-compress-alt';
-            } else {
-                icon.className = 'fas fa-expand-alt';
+        // Get transactions for last month
+        function getLastMonthTransactions(transactions) {
+            const now = new Date();
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastMonthString = lastMonth.toISOString().substring(0, 7); // Format: YYYY-MM
+            
+            return transactions.filter(transaction => {
+                if (!transaction.timestamp) return false;
+                
+                // Extract year-month part from timestamp
+                const transactionMonth = transaction.timestamp.substring(0, 7);
+                return transactionMonth === lastMonthString;
+            });
+        }
+        
+        // Get transactions for custom date
+        function getCustomDateTransactions(transactions, dateString) {
+            return transactions.filter(transaction => {
+                if (!transaction.timestamp) return false;
+                
+                // Extract date part from timestamp
+                const transactionDate = transaction.timestamp.split(' ')[0];
+                return transactionDate === dateString;
+            });
+        }
+        
+        // Format date for display
+        function formatDateForDisplay(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        // Show today's statistics
+        function showTodayStats() {
+            currentPeriod = 'today';
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('datePicker').value = today;
+            updateStatisticsForPeriod();
+        }
+        
+        // Show yesterday's statistics
+        function showYesterdayStats() {
+            currentPeriod = 'yesterday';
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toISOString().split('T')[0];
+            document.getElementById('datePicker').value = yesterdayString;
+            updateStatisticsForPeriod();
+        }
+        
+        // Show last month's statistics
+        function showLastMonthStats() {
+            currentPeriod = 'lastMonth';
+            const now = new Date();
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastMonthString = lastMonth.toISOString().split('T')[0];
+            document.getElementById('datePicker').value = lastMonthString;
+            updateStatisticsForPeriod();
+        }
+        
+        // Refresh data
+        function refreshData() {
+            currentPeriod = 'custom';
+            const selectedDate = document.getElementById('datePicker').value;
+            if (!selectedDate) {
+                showTodayStats();
+                return;
             }
+            updateStatisticsForPeriod();
         }
         
         // Update statistics based on transactions
@@ -1130,50 +1056,9 @@
             document.getElementById('successRate').textContent = `${successRate}%`;
         }
         
-        // Format nomor telepon
-        function formatPhoneNumber(phone) {
-            if (!phone) return '-';
-            
-            // Hilangkan karakter non-digit
-            const cleaned = phone.replace(/\D/g, '');
-            
-            // Format nomor Indonesia
-            if (cleaned.startsWith('62')) {
-                return '+62 ' + cleaned.substring(2).replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            } else if (cleaned.startsWith('0')) {
-                return '+62 ' + cleaned.substring(1).replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            }
-            
-            return phone;
-        }
-        
-        // Format timestamp
-        function formatTimestamp(timestamp) {
-            if (!timestamp) return '-';
-            
-            const date = new Date(timestamp);
-            return date.toLocaleString('id-ID', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-        
-        // Refresh transactions manually
-        function refreshTransactions() {
-            showNotification('Memuat ulang data transaksi...', 'info');
-            if (firebaseConnected) {
-                fetchTransactions();
-            } else {
-                useSampleTransactions();
-            }
-        }
-        
         // Sample data for transactions (fallback)
         function useSampleTransactions() {
+            // Generate sample data for demonstration
             const sampleTransactions = [
                 {
                     trxid: "654",
@@ -1181,11 +1066,11 @@
                     memberId: "ASP0010",
                     trxHeader: "CEKDANA.082151861149",
                     status_desc: "Sukses",
-                    price: 6,
+                    price: 65000,
                     pesan: "#654## CEKDANA.082151861149 SUKSES. SN/Ref: WARXX YUSXX. Saldo 559,145-6=559,139 @02/10 14:44:19 R# #Transaksi lancar",
                     sn: "WARXX YUSXX",
                     remark: "",
-                    timestamp: "2025-10-02 14:44:19",
+                    timestamp: new Date().toISOString().split('T')[0] + " 14:44:19",
                     telp: "+6281232165777"
                 },
                 {
@@ -1198,7 +1083,7 @@
                     pesan: "#653## CEKPLN.123456789 GAGAL. SN/Ref: - @02/10 14:30:15 R# #Transaksi gagal",
                     sn: "-",
                     remark: "Nomor pelanggan tidak valid",
-                    timestamp: "2025-10-02 14:30:15",
+                    timestamp: new Date().toISOString().split('T')[0] + " 14:30:15",
                     telp: "07891585555"
                 },
                 {
@@ -1206,21 +1091,40 @@
                     clientIp: "91.99.163.28",
                     memberId: "ASP0010",
                     trxHeader: "S.08123456789",
-                    status_desc: "Dibatalkan",
+                    status_desc: "Sukses",
                     price: 10000,
                     pesan: "#652## S.08123456789 DIBATALKAN. SN/Ref: - @02/10 13:15:22 R# #Transaksi dibatalkan",
                     sn: "-",
                     remark: "Transaksi dibatalkan oleh sistem",
-                    timestamp: "2025-10-02 13:15:22",
+                    timestamp: new Date().toISOString().split('T')[0] + " 13:15:22",
                     telp: "+6281232165777"
                 }
             ];
             
-            // Ambil hanya 10 transaksi terbaru untuk ditampilkan
-            const latestTransactions = sampleTransactions.slice(0, 10);
+            // Add more sample data for different dates
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toISOString().split('T')[0];
             
-            displayTransactions(latestTransactions);
-            updateStatistics(getTodayTransactions(sampleTransactions));
+            sampleTransactions.push({
+                trxid: "651",
+                clientIp: "91.99.163.28",
+                memberId: "ASP0010",
+                trxHeader: "PULSA.08123456789",
+                status_desc: "Sukses",
+                price: 50000,
+                pesan: "#651## PULSA.08123456789 SUKSES. SN/Ref: ABC123 @01/10 10:30:15 R# #Transaksi sukses",
+                sn: "ABC123",
+                remark: "",
+                timestamp: yesterdayString + " 10:30:15",
+                telp: "+6281232165777"
+            });
+            
+            // Simpan semua transaksi untuk keperluan statistik
+            allTransactions = sampleTransactions;
+            
+            // Update statistik berdasarkan periode yang dipilih
+            updateStatisticsForPeriod();
             showNotification('Menggunakan data sample transaksi', 'info');
         }
         
@@ -1234,63 +1138,6 @@
             setTimeout(() => {
                 notification.className = 'notification';
             }, 3000);
-        }
-        
-        // Setup table column resize functionality
-        function setupTableResize() {
-            const table = document.getElementById('transactionsTable');
-            const headers = table.querySelectorAll('th');
-            let isResizing = false;
-            let currentHeader = null;
-            let startX = 0;
-            let startWidth = 0;
-            
-            headers.forEach(header => {
-                const handle = header.querySelector('.resize-handle');
-                
-                handle.addEventListener('mousedown', (e) => {
-                    isResizing = true;
-                    currentHeader = header;
-                    startX = e.pageX;
-                    startWidth = header.offsetWidth;
-                    
-                    header.classList.add('resizing');
-                    document.body.style.cursor = 'col-resize';
-                    document.body.style.userSelect = 'none';
-                    
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-            });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (!isResizing || !currentHeader) return;
-                
-                const width = startWidth + (e.pageX - startX);
-                if (width > 50) { // Minimum width
-                    currentHeader.style.width = `${width}px`;
-                    
-                    // Update semua sel di kolom yang sama
-                    const colIndex = Array.from(headers).indexOf(currentHeader);
-                    const rows = table.querySelectorAll('tr');
-                    rows.forEach(row => {
-                        const cells = row.querySelectorAll('td, th');
-                        if (cells[colIndex]) {
-                            cells[colIndex].style.width = `${width}px`;
-                        }
-                    });
-                }
-            });
-            
-            document.addEventListener('mouseup', () => {
-                if (isResizing && currentHeader) {
-                    currentHeader.classList.remove('resizing');
-                    document.body.style.cursor = '';
-                    document.body.style.userSelect = '';
-                }
-                isResizing = false;
-                currentHeader = null;
-            });
         }
         
         // Initialize the app when the page loads
